@@ -1,0 +1,4 @@
+main: net.forthecrown.royalgrenadier.PluginMain
+version: 1.0-SNAPSHOT
+name: RoyalGrenadier
+load: STARTUP
