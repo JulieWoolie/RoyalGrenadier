@@ -7,7 +7,12 @@ import net.forthecrown.royalgrenadier.types.block.BlockArgumentImpl;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 
+/**
+ * Represents an argument which returns a {@link ParsedBlock}
+ * @see ParsedBlock
+ */
 public interface BlockArgument extends ArgumentType<ParsedBlock> {
+
     static BlockArgument block(){
         return BlockArgumentImpl.INSTANCE;
     }

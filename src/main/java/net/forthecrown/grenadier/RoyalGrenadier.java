@@ -20,6 +20,9 @@ public class RoyalGrenadier {
     private static net.minecraft.server.v1_16_R3.CommandDispatcher serverDispatcher;
     private static final RoyalGrenadier INSTANCE = new RoyalGrenadier();
 
+    /**
+     * Initiation method called on startup, Not API!
+     */
     public static void init(){
         dispatcher = new CommandDispatcher<>();
         serverDispatcher = ((CraftServer) Bukkit.getServer()).getHandle().getServer().getCommandDispatcher();
@@ -27,13 +30,21 @@ public class RoyalGrenadier {
         dispatcher.setConsumer((context, b, i) -> context.getSource().onCommandComplete(context, b, i));
     }
 
+    /**
+     * Gets the dispatcher for the RoyalGrenadier
+     * @return The dispatcher for the RoyalGrenadier
+     */
     public static CommandDispatcher<CommandSource> getDispatcher() {
         return dispatcher;
     }
 
+    /**
+     * Registers the given AbstractCommand, making it useable
+     * @param builder The command
+     */
     public static void register(AbstractCommand builder){
         CommandWrapper wrapper = new CommandWrapper(builder);
-        LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getRoot());
+        LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
 
         LiteralArgumentBuilder<CommandListenerWrapper> wrapped = new WrapperConverter(wrapper, builder, built).finish();
         LiteralCommandNode<CommandListenerWrapper> buildNms = serverDispatcher.a().register(wrapped);
