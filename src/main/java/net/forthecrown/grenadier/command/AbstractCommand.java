@@ -17,6 +17,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Predicate;
 
+/**
+ * The abstract class used to create and register Grenadier commands
+ */
 public abstract class AbstractCommand implements Predicate<CommandSource> {
 
     private final String name;
@@ -31,9 +34,9 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
     private boolean registered = false;
 
     /**
-     *
-     * @param name
-     * @param plugin
+     * Constructs the command with the given label for the given plugin
+     * @param name The name and label of the command
+     * @param plugin The plugin creating the command
      */
     protected AbstractCommand(@NotNull String name, @NotNull Plugin plugin){
         this.name = name;
