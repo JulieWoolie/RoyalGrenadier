@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 /**
  * Converts commands from the CommandSource dispatcher to NMS commands.
  * <p>Honestly, if there was some other way I could get the chat to display arguments in the correct color in chat, I would use it</p>
+ * <p>I don't wanna resort to using the default command system as a base, as much as that would help the pain I'm in lmao</p>
  */
 public class WrapperConverter {
 
@@ -34,7 +35,7 @@ public class WrapperConverter {
         this.abstractCommand = command;
         this.wrapper = wrapper;
         this.regged = toConvert;
-        this.command = command.getRoot();
+        this.command = command.getCommand();
         nms = literal(command.getName());
 
         start();
@@ -100,6 +101,7 @@ public class WrapperConverter {
 
         if(node.getRequirement() != null) result.requires(convertTest(node));
 
+        //Here's that hacky af useage of that getSuggestions method in CommandWrapper
         if(node.getCustomSuggestions() != null) result.suggests((c, b) -> wrapper.getSuggestions(c, b, node));
         else if(!RoyalArgumentRegistry.shouldUseVanillaSuggestions(node.getType())) result.suggests((c, b) -> node.getType().listSuggestions(c, b));
 

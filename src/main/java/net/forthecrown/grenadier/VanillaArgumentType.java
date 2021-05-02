@@ -5,6 +5,21 @@ import net.minecraft.server.v1_16_R3.ArgumentRegistry;
 
 import java.util.function.Supplier;
 
+/**
+ * @see RoyalArguments#register(Class, VanillaArgumentType)
+ * As completely custom argument types cannot exist in Minecraft, we must map any
+ * custom ones to already existing vanilla ones.
+ *
+ * <p>Attempting to use custom types in vanilla will either cause all players to
+ * be disconnected due to, what I think, is a mismatch between the server's
+ * ArgumentRegistry and the client's, or will cause the arguments to show up as
+ * invalid or "unkown" in chat</p>
+ * <p>
+ * The constants are functioning argument types, using the
+ * {@link VanillaArgumentType#custom(Supplier)} method can be dangerous if you
+ * don't know what you're doing.
+ * </p>
+ */
 public class VanillaArgumentType {
     public static final VanillaArgumentType STRING = new VanillaArgumentType(StringArgumentType::string);
     public static final VanillaArgumentType GREEDY_STRING = new VanillaArgumentType(StringArgumentType::greedyString);

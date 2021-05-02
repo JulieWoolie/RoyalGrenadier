@@ -24,6 +24,7 @@ public class GrenadierUtils {
         return ((CommandSourceImpl) source).getHandle();
     }
 
+    //Bukkit's getListener in VanillaCommandWrapper didn't have enough functionality to be as applicable
     public static CommandListenerWrapper senderToWrapper(CommandSender sender){
         if(sender instanceof Entity) return ((CraftEntity) sender).getHandle().getCommandListener();
         else if(sender instanceof BlockCommandSender) return ((CraftBlockCommandSender) sender).getWrapper();
@@ -33,6 +34,7 @@ public class GrenadierUtils {
         else return null;
     }
 
+    //Converts a list from one type to another using the given function
     public static <T, F> List<T> convertList(Iterable<F> from, Function<F, T> function){
         List<T> res = new ArrayList<>();
         for (F f: from) res.add(function.apply(f));
@@ -40,10 +42,12 @@ public class GrenadierUtils {
         return res;
     }
 
+    //Does the same thing as the above method but with an array
     public static <T, F> List<T> convertArray(F[] from, Function<F, T> function){
         return convertList(Arrays.asList(from), function);
     }
 
+    //Suggests a specific MinecraftKey collection
     public static CompletableFuture<Suggestions> suggestResource(Iterable<MinecraftKey> resources, SuggestionsBuilder builder){
         return ICompletionProvider.a(resources, builder);
     }

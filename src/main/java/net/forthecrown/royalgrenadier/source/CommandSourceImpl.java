@@ -120,9 +120,14 @@ public class CommandSourceImpl implements CommandSource {
 
         for (Player p: Bukkit.getOnlinePlayers()){
             if(!current.testPermissionSilent(p)) continue;
+
+            //Don't send to self
             if(p.getName().equalsIgnoreCase(name)) continue;
+
             p.sendMessage(message);
         }
+
+        //Let console know as well
         Bukkit.getConsoleSender().sendMessage(message);
     }
 
@@ -148,6 +153,8 @@ public class CommandSourceImpl implements CommandSource {
 
     @Override
     public void onCommandComplete(CommandContext<CommandSource> context, boolean success, int result) {
+        //Remove this source from the registry thing and set the current command to null
         CommandSources.remove(source);
+        this.current = null;
     }
 }

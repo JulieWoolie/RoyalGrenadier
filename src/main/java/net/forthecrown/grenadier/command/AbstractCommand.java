@@ -10,6 +10,7 @@ import net.forthecrown.grenadier.RoyalGrenadier;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,14 +30,26 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
 
     private boolean registered = false;
 
+    /**
+     *
+     * @param name
+     * @param plugin
+     */
     protected AbstractCommand(@NotNull String name, @NotNull Plugin plugin){
         this.name = name;
         this.root = new BrigadierCommand(name, this);
         this.plugin = plugin;
     }
 
+    /**
+     *
+     * @param command
+     */
     protected abstract void createCommand(BrigadierCommand command);
 
+    /**
+     * Registers the command and makes it useable ingame
+     */
     public final void register(){
         if(registered) return;
         createCommand(root);
@@ -45,22 +58,48 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
         registered = true;
     }
 
-    public boolean isRegistered(){
+    /**
+     * Gets whether the command has been registered
+     * @return If the command is registered or not
+     */
+    public final boolean isRegistered(){
         return registered;
     }
 
-    protected LiteralArgumentBuilder<CommandSource> argument(String name){
+    /**
+     * Utility method for creating a literal argument
+     * @param name The literal string
+     * @return A Literal argument
+     */
+    protected LiteralArgumentBuilder<CommandSource> literal(String name){
         return LiteralArgumentBuilder.literal(name);
     }
 
+    /**
+     * Utility method for creating a required argument
+     * @param name The name of the argument
+     * @param type The ArgumentType for the type
+     * @param <T> The type
+     * @return A required argument for the type
+     */
     protected <T> RequiredArgumentBuilder<CommandSource, T> argument(String name, ArgumentType<T> type){
         return RequiredArgumentBuilder.argument(name, type);
     }
 
+    /**
+     * Utility method for creating custom suggestions quickly
+     * @param strings The string to suggest
+     * @return The suggestion provider of the inputted strings
+     */
     protected SuggestionProvider<CommandSource> suggestMatching(String... strings){
         return suggestMatching(Arrays.asList(strings));
     }
 
+    /**
+     * Utility method for creating custom suggestions
+     * @param strings The strings to suggest
+     * @return The SuggestionProvider of the inputted string collection
+     */
     protected SuggestionProvider<CommandSource> suggestMatching(Collection<String> strings){
         return (c, b) -> {
             String token = b.getRemaining().toLowerCase();
@@ -73,6 +112,11 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
         };
     }
 
+    /**
+     * Utility method for creating suggestions with tooltips
+     * @param suggestions The map of suggestions
+     * @return The suggestion provider for the inputted map
+     */
     protected SuggestionProvider<CommandSource> suggestMatching(Map<String, Message> suggestions){
         return (c, b) -> {
             String token = b.getRemaining().toLowerCase();
@@ -85,37 +129,73 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
         };
     }
 
+    /**
+     * Tests if the specified source is allowed to
+     * use the command
+     * @param source The source to check
+     * @return Whether they are allowed to use the command
+     */
     @Override
     public boolean test(CommandSource source) {
         return testPermissionSilent(source.asBukkit());
     }
 
+    /**
+     * Tests if the specified sender has the permission to use this command
+     * @param source The sender to check
+     * @return Whether they have permission for this command
+     */
     public boolean testPermissionSilent(CommandSender source){
         if(getPermission() == null || getPermission().isBlank()) return true;
         return source.hasPermission(getPermission());
     }
 
+    /**
+     * Returns the plugin that created this command
+     * @return Plugin that created the command
+     */
     public Plugin getPlugin() {
         return plugin;
     }
 
-    public String[] getAliases() {
+    /**
+     * Gets all the aliases for the command
+     * @return The command's aliases
+     */
+    public @Nullable String[] getAliases() {
         return aliases;
     }
 
+    /**
+     * Sets the command's aliases
+     * @param aliases Aliases
+     */
     public void setAliases(String... aliases) {
         this.aliases = aliases;
     }
 
-    public String getPermission() {
+    /**
+     * Gets the permission needed to use this command
+     * @return The command's permission
+     */
+    public @Nullable String getPermission() {
         return permission;
     }
 
+    /**
+     * Sets the command's permission
+     * @param permission Permission needed to use the command
+     */
     public void setPermission(String permission) {
         this.permission = permission;
     }
 
-    public String getPermissionMessage() {
+    /**
+     * Gets the message the command will show to senders who
+     * don't have permission for this command
+     * @return The permission message
+     */
+    public @Nullable String getPermissionMessage() {
         return permissionMessage;
     }
 
@@ -123,19 +203,35 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
         this.permissionMessage = permissionMessage;
     }
 
+    /**
+     * Gets the name of the command
+     * @return The command's name and label
+     */
     public String getName() {
         return name;
     }
 
-    public String getDescription() {
+    /**
+     * Gets the description of the command
+     * @return The command's description
+     */
+    public @Nullable String getDescription() {
         return description;
     }
 
+    /**
+     * Sets the description for the command
+     * @param description The command's new description
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public BrigadierCommand getRoot() {
+    /**
+     * Gets the argument builder for this command
+     * @return The command's argument builder
+     */
+    public BrigadierCommand getCommand() {
         return root;
     }
 }

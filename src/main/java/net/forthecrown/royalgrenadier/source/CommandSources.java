@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommandSources {
+    //I believe this is better than creating a new instance of the command sender everytime you execute a command
+    //Or get suggestions
     private static final Map<CommandListenerWrapper, CommandSource> map = new HashMap<>();
 
     public static CommandSource getOrCreate(CommandListenerWrapper wrapper, AbstractCommand builder){

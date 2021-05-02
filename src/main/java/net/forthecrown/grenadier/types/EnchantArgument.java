@@ -6,8 +6,10 @@ import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.royalgrenadier.types.EnchantArgumentImpl;
 import org.bukkit.enchantments.Enchantment;
 
+/**
+ * Represents an argument type which will be parsed into an {@link Enchantment}
+ */
 public interface EnchantArgument extends ArgumentType<Enchantment> {
-
     static EnchantArgument enchantment(){
         return EnchantArgumentImpl.INSTANCE;
     }
@@ -15,5 +17,4 @@ public interface EnchantArgument extends ArgumentType<Enchantment> {
     static Enchantment getEnchantment(CommandContext<CommandSource> c, String argument){
         return c.getArgument(argument, Enchantment.class);
     }
-
 }

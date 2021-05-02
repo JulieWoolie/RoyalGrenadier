@@ -5,6 +5,11 @@ import net.forthecrown.royalgrenadier.types.ArrayArgumentImpl;
 
 import java.util.Collection;
 
+/**
+ * Represents an argument which takes in an comma separated array of items
+ * and parses them into the specified type
+ * @param <V> The type of items the argument will parse
+ */
 public interface ArrayArgument<V> extends ArgumentType<Collection<V>> {
     ArgumentType<V> getType();
 

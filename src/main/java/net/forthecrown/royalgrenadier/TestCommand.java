@@ -26,6 +26,7 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.Collection;
 
+//Test command because I don't know how to write unit tests
 public class TestCommand extends AbstractCommand {
     public TestCommand(Plugin plugin) {
         super("grenadiertest", plugin);
@@ -38,7 +39,7 @@ public class TestCommand extends AbstractCommand {
     @Override
     protected void createCommand(BrigadierCommand command) {
         command
-                .then(argument("pos")
+                .then(literal("pos")
                         .then(argument("loc", PositionArgument.position())
                                 .executes(c -> {
                                     CommandSource source = c.getSource();
@@ -49,7 +50,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("world")
+                .then(literal("world")
                         .then(argument("level", WorldArgument.world())
                                 .executes(c -> {
                                     CommandSource source = c.getSource();
@@ -60,7 +61,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("team")
+                .then(literal("team")
                         .then(argument("t", TeamArgument.team())
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("t", Team.class).getName());
@@ -68,7 +69,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("objective")
+                .then(literal("objective")
                         .then(argument("o", ObjectiveArgument.objective())
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("o", Objective.class).getName());
@@ -76,7 +77,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("selector")
+                .then(literal("selector")
                         .then(argument("targets", EntityArgument.multipleEntities())
                                 .executes(c -> {
                                     CommandSource source = c.getSource();
@@ -87,7 +88,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("enchantment")
+                .then(literal("enchantment")
                         .then(argument("e", EnchantArgument.enchantment())
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("e", Enchantment.class).displayName(0));
@@ -95,7 +96,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("item")
+                .then(literal("item")
                         .then(argument("i", ItemArgument.itemStack())
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("i", ParsedItemStack.class).singular(true).toString());
@@ -103,7 +104,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("chatColor")
+                .then(literal("chatColor")
                         .then(argument("color", EnumArgument.of(Particle.class))
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("color", Particle.class).toString());
@@ -111,7 +112,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("particle")
+                .then(literal("particle")
                         .then(argument("part", ParticleArgument.particle())
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("part", Particle.class).name());
@@ -119,7 +120,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("block")
+                .then(literal("block")
                         .then(argument("b", BlockArgument.block())
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("b", ParsedBlock.class).getData().toString());
@@ -127,7 +128,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("customSuggest")
+                .then(literal("customSuggest")
                         .then(argument("str", StringArgumentType.string())
                                 .suggests(suggestMatching("1", "2", "asd", "DaftFuck", "3"))
 
@@ -137,7 +138,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("array")
+                .then(literal("array")
                         .then(argument("arr", blocks)
                                 .executes(c -> {
                                     Collection<ParsedBlock> parsedBlocks = c.getArgument("arr", Collection.class);
@@ -147,7 +148,7 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(argument("component")
+                .then(literal("component")
                         .then(argument("msg", ComponentArgument.component())
 
                                 .executes(c -> {

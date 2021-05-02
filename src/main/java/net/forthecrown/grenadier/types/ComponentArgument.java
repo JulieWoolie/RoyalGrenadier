@@ -6,6 +6,9 @@ import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.royalgrenadier.types.ComponentArgumentImpl;
 import net.kyori.adventure.text.Component;
 
+/**
+ * Represents an argument type which will be parsed into a {@link Component}
+ */
 public interface ComponentArgument extends ArgumentType<Component> {
     static ComponentArgument component(){
         return ComponentArgumentImpl.INSTANCE;
