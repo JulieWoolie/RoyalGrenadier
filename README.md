@@ -8,7 +8,7 @@ Unfortunately there isn't currently a maven repository for this project.
 To use the RoyalGrenadier, you'll have to download the jar and add it as a dependency
 
 ## Usage
-To create a command with the RoyalGrenadier you'll need to create a command class, which extends [AbstractCommand](https://github.com/BotulToxin/RoyalGrenadier/blob/main/src/main/java/net/forthecrown/grenadier/command/AbstractCommand.java). This class' constructor should specify what the name of the command is and what plugin is creating the command.
+First you'll need to create a command class, which extends [AbstractCommand](https://github.com/BotulToxin/RoyalGrenadier/blob/main/src/main/java/net/forthecrown/grenadier/command/AbstractCommand.java). This class' constructor should specify what the name of the command is and what plugin is creating the command.
 
 Once you've specified any extra info like the command's permission or aliases, you'll need to call the register() method to finalize creating the command.
 
