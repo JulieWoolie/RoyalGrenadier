@@ -60,7 +60,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
             reader.skip();
         }
 
-        //This shit is dumb, but I'm glad I finally got the fucker working
+        //This is dumb, but I'm glad I finally got it working
         ParseResults<CommandSource> parseResults = RoyalGrenadier.getDispatcher().parse(reader, CommandSources.getOrCreate(context.getSource(), this.builder));
 
         //Hacky af approach to getting the suggestions to work, just list the suggestions of the given node
@@ -73,7 +73,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
         return node.listSuggestions(fuckThisShit, builder1);
 
         //Long story short, tried everything else to get the suggestions working, did not work, had to adapt this
-        //Hacky approach
+        //hacky approach
     }
 
     @Override
