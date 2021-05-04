@@ -14,6 +14,7 @@ Once you've specified any extra info like the command's permission or aliases, y
 
 The result should look similar to this:
 ````
+
 public class ExampleCommand extends AbstractCommand {
 	public ExampleCommand(String name, Plugin plugin){
 		super(name, plugin);
