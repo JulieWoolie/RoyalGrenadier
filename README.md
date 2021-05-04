@@ -15,7 +15,7 @@ First you'll need to create a command class, which extends [AbstractCommand](htt
 Once you've specified any extra info like the command's permission or aliases, you'll need to call the register() method to finalize creating the command.
 
 The result should look similar to this:
-````
+````java
 
 public class ExampleCommand extends AbstractCommand {
 	public ExampleCommand(String name, Plugin plugin){
