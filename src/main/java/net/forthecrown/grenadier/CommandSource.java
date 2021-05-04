@@ -12,10 +12,11 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.ServerOperator;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface CommandSource extends ResultConsumer<CommandSource> {
+public interface CommandSource extends ResultConsumer<CommandSource>, ServerOperator {
 
     /**
      * Checks if the sender is of the type
@@ -111,6 +112,12 @@ public interface CommandSource extends ResultConsumer<CommandSource> {
      * @return Whether the sender has both
      */
     default boolean hasPermission(String perm, int level){ return hasPermission(perm) && hasPermission(level); }
+
+    /**
+     * Checks if the sender is opped
+     * @return Whether the sender is opped or not
+     */
+    boolean isOp();
 
     /**
      * Sends a message to the sender

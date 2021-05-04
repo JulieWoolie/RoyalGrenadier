@@ -2,8 +2,8 @@ package net.forthecrown.royalgrenadier.types.selector;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.minecraft.server.v1_16_R3.ArgumentParserSelector;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import org.bukkit.entity.Entity;
@@ -36,14 +36,12 @@ public class EntitySelectorImpl implements EntitySelector {
     @Override
     public List<Entity> getEntities(CommandSource source) throws CommandSyntaxException {
         List<? extends net.minecraft.server.v1_16_R3.Entity> nmsList = nms.getEntities(GrenadierUtils.sourceToNms(source));
-
         return GrenadierUtils.convertList(nmsList, net.minecraft.server.v1_16_R3.Entity::getBukkitEntity);
     }
 
     @Override
     public List<Player> getPlayers(CommandSource source) throws CommandSyntaxException {
         List<EntityPlayer> nmsList = nms.d(GrenadierUtils.sourceToNms(source));
-
         return GrenadierUtils.convertList(nmsList, EntityPlayer::getBukkitEntity);
     }
 

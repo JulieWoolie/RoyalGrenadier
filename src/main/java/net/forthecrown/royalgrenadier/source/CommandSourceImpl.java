@@ -13,7 +13,10 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -91,6 +94,16 @@ public class CommandSourceImpl implements CommandSource {
     @Override
     public boolean hasPermission(int level) {
         return source.hasPermission(level);
+    }
+
+    @Override
+    public boolean isOp() {
+        return source.getBukkitSender().isOp();
+    }
+
+    @Override
+    public void setOp(boolean b) {
+        source.getBukkitSender().setOp(b);
     }
 
     @Override

@@ -25,6 +25,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
     private final AbstractCommand builder;
     private final SimpleCommandExceptionType noPermission;
     private static final SimpleCommandExceptionType NOT_ALLOWED_TO_USE_COMMAND = new SimpleCommandExceptionType(() -> "You aren't allowed to use this command at the moment");
+    private static final SimpleCommandExceptionType EXCEPTION_OCCURRED = new SimpleCommandExceptionType(() -> "An internal error occurred while trying to execute command (Check console)");
 
     public CommandWrapper(AbstractCommand builder){
         this.builder = builder;
@@ -45,7 +46,12 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
             throw NOT_ALLOWED_TO_USE_COMMAND.create();
         }
 
-        return RoyalGrenadier.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), this.builder));
+        try {
+            return RoyalGrenadier.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), this.builder));
+        } catch (RuntimeException e){
+            e.printStackTrace();
+            throw EXCEPTION_OCCURRED.create();
+        }
     }
 
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandListenerWrapper> context, SuggestionsBuilder builder, ArgumentCommandNode<CommandSource, ?> node) throws CommandSyntaxException {

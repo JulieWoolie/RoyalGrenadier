@@ -102,8 +102,8 @@ public class WrapperConverter {
         if(node.getRequirement() != null) result.requires(convertTest(node));
 
         //Here's that hacky af useage of that getSuggestions method in CommandWrapper
-        if(node.getCustomSuggestions() != null) result.suggests((c, b) -> wrapper.getSuggestions(c, b, node));
-        else if(!RoyalArgumentRegistry.shouldUseVanillaSuggestions(node.getType())) result.suggests((c, b) -> node.getType().listSuggestions(c, b));
+        result.suggests((c, b) -> wrapper.getSuggestions(c, b, node));
+        if(RoyalArgumentRegistry.shouldUseVanillaSuggestions(node.getType())) result.suggests(null);
 
         if(node.getChildren() != null && node.getChildren().size() > 0){
             convertNodes(node.getChildren(), result);

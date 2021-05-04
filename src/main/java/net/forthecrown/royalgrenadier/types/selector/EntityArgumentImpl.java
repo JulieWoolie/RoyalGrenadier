@@ -6,11 +6,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
-import net.minecraft.server.v1_16_R3.ArgumentEntity;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.minecraft.server.v1_16_R3.ArgumentParserSelector;
 import net.minecraft.server.v1_16_R3.ChatMessage;
+import net.minecraft.server.v1_16_R3.ICompletionProvider;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -47,13 +51,13 @@ public class EntityArgumentImpl implements EntityArgument {
         ArgumentParserSelector parser = new ArgumentParserSelector(reader);
         EntitySelector selector = new EntitySelectorImpl(parser, overridePerms);
 
-        if(!allowEntities && !selector.includesEntities()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(reader);
+        if(!allowEntities && selector.includesEntities()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(reader);
         if(!multiple && selector.getMaxResults() > 1){
             if(allowEntities) throw TOO_MANY_ENTITIES.createWithContext(reader);
             else throw TOO_MANY_PLAYERS.createWithContext(reader);
         }
 
-        if(selector.getMaxResults() < 1){
+        if(selector.getMaxResults() < 1) {
             if(allowEntities) throw NO_ENTITIES_FOUND.createWithContext(reader);
             else throw PLAYER_NOT_FOUND.createWithContext(reader);
         }
@@ -63,7 +67,23 @@ public class EntityArgumentImpl implements EntityArgument {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ArgumentEntity.multipleEntities().listSuggestions(context, builder);
+        if(context.getSource() instanceof CommandSource){
+            StringReader reader = new StringReader(builder.getInput());
+            reader.setCursor(builder.getStart());
+
+            CommandSource source = (CommandSource) context.getSource();
+            ArgumentParserSelector parser = new ArgumentParserSelector(reader, source.hasPermission("minecraft.command.selector"));
+
+            try {
+                parser.parse();
+            } catch (CommandSyntaxException ignored) {}
+
+            return parser.a(builder, b -> {
+                Collection<String> collection = GrenadierUtils.convertList(Bukkit.getOnlinePlayers(), Player::getName);
+                ICompletionProvider.b(collection, b);
+            });
+
+        } else return Suggestions.empty();
     }
 
     @Override
