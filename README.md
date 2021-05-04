@@ -9,6 +9,8 @@ All classes in net.forthecrown.grenadier are considered API. While classes in ne
 Unfortunately there isn't currently a maven repository for this project.
 To use the RoyalGrenadier, you'll have to download the jar and add it as a dependency
 
+To get Brigadier itself, head over to the [Brigadier repo](https://github.com/Mojang/brigadier) and get the dependency from there.
+
 ## Usage
 First you'll need to create a command class, which extends [AbstractCommand](https://github.com/BotulToxin/RoyalGrenadier/blob/main/src/main/java/net/forthecrown/grenadier/command/AbstractCommand.java). This class' constructor should specify what the name of the command is and what plugin is creating the command.
 
