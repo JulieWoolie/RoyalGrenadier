@@ -1,6 +1,8 @@
 # Royal Grenadier
 Implementation of Mojang's Brigadier for PaperMC
+
 **Requires Java 11+ and Paper**
+
 All classes in net.forthecrown.grenadier are considered API. While classes in net.forthecrown.royalgrenadier are considered internal and shouldn't be used unless neccessary.
 
 ## Using the RoyalGrenadier in a project
