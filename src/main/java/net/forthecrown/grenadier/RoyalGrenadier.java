@@ -39,7 +39,7 @@ public class RoyalGrenadier {
     }
 
     /**
-     * Registers the given AbstractCommand, making it useable
+     * Registers the given AbstractCommand, making it useable. Not needed in most cases, as AbstractCommand's register() method calls this.
      * @param builder The command
      */
     public static void register(AbstractCommand builder){

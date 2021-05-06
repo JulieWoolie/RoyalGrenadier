@@ -48,10 +48,14 @@ public class EntityArgumentImpl implements EntityArgument {
 
     @Override
     public EntitySelector parse(StringReader reader, boolean overridePerms) throws CommandSyntaxException {
-        ArgumentParserSelector parser = new ArgumentParserSelector(reader);
+        int cursor = reader.getCursor();
+        ArgumentParserSelector parser = new ArgumentParserSelector(reader); //NMS parser
         EntitySelector selector = new EntitySelectorImpl(parser, overridePerms);
+        int cursor2 = reader.getCursor();
 
-        if(!allowEntities && selector.includesEntities()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(reader);
+        //If an exception is thrown, then cursor should be in the right place
+        reader.setCursor(cursor);
+        if(!allowEntities && selector.includesEntities() && !selector.isSelfSelector()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(reader);
         if(!multiple && selector.getMaxResults() > 1){
             if(allowEntities) throw TOO_MANY_ENTITIES.createWithContext(reader);
             else throw TOO_MANY_PLAYERS.createWithContext(reader);
@@ -62,6 +66,8 @@ public class EntityArgumentImpl implements EntityArgument {
             else throw PLAYER_NOT_FOUND.createWithContext(reader);
         }
 
+        //Set cursor to be back in the right place
+        reader.setCursor(cursor2);
         return selector;
     }
 

@@ -43,6 +43,10 @@ public class RoyalArgumentRegistry {
         return wrapperAndNms.get(wrapped.getClass()).getSecond();
     }
 
+    public static boolean isVanillaType(ArgumentType<?> type){
+        return ArgumentRegistry.a(type);
+    }
+
     //Checks if registered lol
     public static <T extends ArgumentType<V>, V> boolean isRegistered(Class<T> type){
         return wrapperAndNms.containsKey(type);
@@ -50,7 +54,7 @@ public class RoyalArgumentRegistry {
 
     //Registers the type and allows you to specify if the type should default to NMS for suggestions
     private static <T extends ArgumentType<V>, V> void register(Class<T> type, Supplier<ArgumentType<?>> nmsSupplier, boolean nmsSuggests){
-        if(!ArgumentRegistry.a(nmsSupplier.get())) throw new IllegalArgumentException("ArgumentType supplier must supply a vanilla ArgumentType");
+        if(!isVanillaType(nmsSupplier.get())) throw new IllegalArgumentException("ArgumentType supplier must supply a vanilla ArgumentType");
         wrapperAndNms.put(type, new Pair<>(nmsSupplier, nmsSuggests));
     }
 

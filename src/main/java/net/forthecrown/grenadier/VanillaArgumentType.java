@@ -1,7 +1,7 @@
 package net.forthecrown.grenadier;
 
 import com.mojang.brigadier.arguments.*;
-import net.minecraft.server.v1_16_R3.ArgumentRegistry;
+import net.forthecrown.royalgrenadier.RoyalArgumentRegistry;
 
 import java.util.function.Supplier;
 
@@ -36,7 +36,7 @@ public class VanillaArgumentType {
     }
 
     public static VanillaArgumentType custom(Supplier<ArgumentType<?>> supplier){
-        if(!ArgumentRegistry.a(supplier.get())) throw new IllegalStateException("Cannot use non vanilla argument type :\\");
+        if(!RoyalArgumentRegistry.isVanillaType(supplier.get())) throw new IllegalStateException("Cannot use non vanilla argument type");
         return new VanillaArgumentType(supplier);
     }
 
