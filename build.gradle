@@ -18,10 +18,6 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
-    maven {
-        name = 'github'
-        url = 'https://github.com/BotulToxin/RoyalGrenadier/raw/'
-    }
 
     maven {
         url "https://libraries.minecraft.net"
@@ -30,8 +26,6 @@ repositories {
 
 dependencies {
     compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 
     compile files("C:/Users/ander/Desktop/ThePitOfTrash/Paper/Paper-Server/target/paper-1.16.5.jar")
     compile 'com.mojang:brigadier:1.0.17'
