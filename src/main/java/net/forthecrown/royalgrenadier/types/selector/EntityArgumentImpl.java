@@ -1,5 +1,6 @@
 package net.forthecrown.royalgrenadier.types.selector;
 
+import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -51,23 +52,20 @@ public class EntityArgumentImpl implements EntityArgument {
         int cursor = reader.getCursor();
         ArgumentParserSelector parser = new ArgumentParserSelector(reader); //NMS parser
         EntitySelector selector = new EntitySelectorImpl(parser, overridePerms);
-        int cursor2 = reader.getCursor();
 
         //If an exception is thrown, then cursor should be in the right place
-        reader.setCursor(cursor);
-        if(!allowEntities && selector.includesEntities() && !selector.isSelfSelector()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(reader);
+        ImmutableStringReader correctCursor = GrenadierUtils.correctCursorReader(reader, cursor);
+        if(!allowEntities && selector.includesEntities() && !selector.isSelfSelector()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(correctCursor);
         if(!multiple && selector.getMaxResults() > 1){
-            if(allowEntities) throw TOO_MANY_ENTITIES.createWithContext(reader);
-            else throw TOO_MANY_PLAYERS.createWithContext(reader);
+            if(allowEntities) throw TOO_MANY_ENTITIES.createWithContext(correctCursor);
+            else throw TOO_MANY_PLAYERS.createWithContext(correctCursor);
         }
 
         if(selector.getMaxResults() < 1) {
-            if(allowEntities) throw NO_ENTITIES_FOUND.createWithContext(reader);
-            else throw PLAYER_NOT_FOUND.createWithContext(reader);
+            if(allowEntities) throw NO_ENTITIES_FOUND.createWithContext(correctCursor);
+            else throw PLAYER_NOT_FOUND.createWithContext(correctCursor);
         }
 
-        //Set cursor to be back in the right place
-        reader.setCursor(cursor2);
         return selector;
     }
 

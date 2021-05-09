@@ -24,10 +24,7 @@ public class TeamArgumentImpl implements TeamArgument {
         String name = reader.readUnquotedString();
 
         Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(name);
-        if(team == null){
-            reader.setCursor(cursor);
-            throw UNKNOWN_TEAM.createWithContext(reader, name);
-        }
+        if(team == null) throw UNKNOWN_TEAM.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), name);
 
         return team;
     }

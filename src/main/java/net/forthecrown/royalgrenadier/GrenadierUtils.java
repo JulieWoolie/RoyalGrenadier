@@ -1,5 +1,7 @@
 package net.forthecrown.royalgrenadier;
 
+import com.mojang.brigadier.ImmutableStringReader;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CommandSource;
@@ -40,6 +42,12 @@ public class GrenadierUtils {
         for (F f: from) res.add(function.apply(f));
 
         return res;
+    }
+
+    public static ImmutableStringReader correctCursorReader(StringReader reader, int cursor){
+        StringReader reader1 = new StringReader(reader.getString());
+        reader1.setCursor(cursor);
+        return reader1;
     }
 
     //Does the same thing as the above method but with an array

@@ -24,10 +24,7 @@ public class ObjectiveArgumentImpl implements ObjectiveArgument {
         String name = reader.readUnquotedString();
 
         Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().getObjective(name);
-        if(objective == null){
-            reader.setCursor(cursor);
-            throw UNKNOWN_OBJECTIVE.createWithContext(reader, name);
-        }
+        if(objective == null) throw UNKNOWN_OBJECTIVE.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), name);
 
         return objective;
     }

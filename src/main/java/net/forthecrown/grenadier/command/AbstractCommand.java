@@ -44,10 +44,6 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
         this.plugin = plugin;
     }
 
-    /**
-     *
-     * @param command
-     */
     protected abstract void createCommand(BrigadierCommand command);
 
     /**

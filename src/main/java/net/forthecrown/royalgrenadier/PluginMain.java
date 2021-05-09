@@ -17,6 +17,6 @@ public class PluginMain extends JavaPlugin {
         RoyalGrenadier.init();
         RoyalArgumentRegistry.init();
 
-        new TestCommand(this);
+        //new TestCommand(this);
     }
 }

@@ -25,15 +25,25 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 //Test command because I don't know how to write unit tests
 public class TestCommand extends AbstractCommand {
     public TestCommand(Plugin plugin) {
         super("grenadiertest", plugin);
 
+        mapArgTest = new HashMap<>();
+        mapArgTest.put("key1", 1);
+        mapArgTest.put("key2", 11);
+        mapArgTest.put("key3", 111);
+        mapArgTest.put("key4", 1111);
+        mapArgTest.put("key5", 11111);
+
         register();
     }
 
+    private final Map<String, Integer> mapArgTest;
     ArrayArgument<ParsedBlock> blocks = ArrayArgument.of(BlockArgument.block());
 
     @Override
@@ -92,6 +102,14 @@ public class TestCommand extends AbstractCommand {
                         .then(argument("e", EnchantArgument.enchantment())
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("e", Enchantment.class).displayName(0));
+                                    return 0;
+                                })
+                        )
+                )
+                .then(literal("map")
+                        .then(argument("m", MapArgument.of(mapArgTest))
+                                .executes(c -> {
+                                    c.getSource().sendMessage(c.getArgument("m", Integer.class) + "");
                                     return 0;
                                 })
                         )

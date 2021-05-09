@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.ArrayArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +41,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V> {
             try {
                 result.add(type.parse(new StringReader(s)));
             } catch (CommandSyntaxException e){
-                reader.setCursor(reader.getString().indexOf(s));
-                throw PARSING_ERROR.createWithContext(reader, e.getRawMessage().getString());
+                throw PARSING_ERROR.createWithContext(GrenadierUtils.correctCursorReader(reader, reader.getString().indexOf(s)), e.getRawMessage().getString());
             }
         }
 

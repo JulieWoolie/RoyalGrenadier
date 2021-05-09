@@ -30,8 +30,7 @@ public class EnumArgumentImpl<E extends Enum<E>> implements EnumArgument<E> {
         try {
             return Enum.valueOf(clazz, name.toUpperCase());
         } catch (IllegalArgumentException e){
-            reader.setCursor(cursor);
-            throw unknownEnum.createWithContext(reader, name);
+            throw unknownEnum.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), name);
         }
     }
 
