@@ -131,7 +131,7 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      */
     default void sendMessage(String... s){
         for (String ss: s){
-            sendMessage(s);
+            sendMessage(ss);
         }
     }
 
