@@ -33,6 +33,16 @@ public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
     }
 
     /**
+     * Sets the command's permission message
+     * @param permissionMessage The command's permission message
+     * @return Self
+     */
+    public BrigadierCommand withPermissionMessage(String permissionMessage){
+        command.setPermissionMessage(permissionMessage);
+        return this;
+    }
+
+    /**
      * Sets the command's description
      * @param description The command's description
      * @return Self

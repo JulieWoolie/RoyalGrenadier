@@ -10,8 +10,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.grenadier.RoyalGrenadier;
 import net.forthecrown.grenadier.command.AbstractCommand;
+import net.forthecrown.royalgrenadier.PluginMain;
 import net.forthecrown.royalgrenadier.source.CommandSources;
 import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 import org.bukkit.Bukkit;
@@ -47,7 +47,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
         }
 
         try {
-            return RoyalGrenadier.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), this.builder));
+            return PluginMain.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), this.builder));
         } catch (RuntimeException e){
             e.printStackTrace();
             throw EXCEPTION_OCCURRED.create();
@@ -61,7 +61,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
         }
 
         //This is dumb, but I'm glad I finally got it working
-        ParseResults<CommandSource> parseResults = RoyalGrenadier.getDispatcher().parse(reader, CommandSources.getOrCreate(context.getSource(), this.builder));
+        ParseResults<CommandSource> parseResults = PluginMain.getDispatcher().parse(reader, CommandSources.getOrCreate(context.getSource(), this.builder));
 
         //Hacky af approach to getting the suggestions to work, just list the suggestions of the given node
         SuggestionsBuilder builder1 = new SuggestionsBuilder(builder.getInput(), builder.getStart());

@@ -24,7 +24,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
+import java.time.Instant;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -162,6 +164,18 @@ public class TestCommand extends AbstractCommand {
                                     Collection<ParsedBlock> parsedBlocks = c.getArgument("arr", Collection.class);
                                     c.getSource().sendAdmin(parsedBlocks.toString());
 
+                                    return 0;
+                                })
+                        )
+                )
+                .then(literal("time")
+                        .then(argument("time_actual", TimeArgument.time())
+                                .executes(c -> {
+                                    long ticks = c.getArgument("time_actual", Long.class);
+                                    Date date = Date.from(Instant.ofEpochMilli(ticks * 50));
+                                    c.getSource().sendMessage(ticks + "");
+                                    c.getSource().sendMessage((ticks*50) + "");
+                                    c.getSource().sendMessage(date.toString());
                                     return 0;
                                 })
                         )

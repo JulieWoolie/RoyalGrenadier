@@ -1,7 +1,7 @@
 package net.forthecrown.grenadier;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.forthecrown.royalgrenadier.RoyalArgumentRegistry;
+import net.forthecrown.royalgrenadier.RoyalArgumentsImpl;
 
 public interface RoyalArguments {
 
@@ -16,7 +16,7 @@ public interface RoyalArguments {
      * @param <V>
      */
     static <T extends ArgumentType<V>, V> void register(Class<T> type, VanillaArgumentType vanillaType){
-        RoyalArgumentRegistry.register(type, vanillaType.getSupplier());
+        RoyalArgumentsImpl.register(type, vanillaType.getSupplier());
     }
 
     /**
@@ -27,6 +27,6 @@ public interface RoyalArguments {
      * @return
      */
     static <T extends ArgumentType<V>, V> boolean isRegistered(Class<T> clazz){
-        return RoyalArgumentRegistry.isRegistered(clazz);
+        return RoyalArgumentsImpl.isRegistered(clazz);
     }
 }

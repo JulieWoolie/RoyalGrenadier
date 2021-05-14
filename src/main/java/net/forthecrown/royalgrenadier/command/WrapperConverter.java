@@ -3,14 +3,13 @@ package net.forthecrown.royalgrenadier.command;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
-import net.forthecrown.royalgrenadier.RoyalArgumentRegistry;
+import net.forthecrown.royalgrenadier.RoyalArgumentsImpl;
 import net.forthecrown.royalgrenadier.source.CommandSources;
 import net.minecraft.server.v1_16_R3.ArgumentRegistry;
 import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
@@ -73,8 +72,8 @@ public class WrapperConverter {
         return LiteralArgumentBuilder.literal(name);
     }
 
-    private RequiredArgumentBuilder<CommandListenerWrapper, ?> required(String name, ArgumentType<?> type){
-        return RequiredArgumentBuilder.argument(name, type);
+    private GrenadierArgBuilder<CommandListenerWrapper, ?, ?> required(String name, ArgumentType<?> type, ArgumentType<?> grenadierType){
+        return GrenadierArgBuilder.argument(name, type, grenadierType);
     }
 
     LiteralArgumentBuilder<CommandListenerWrapper> convertNode(LiteralCommandNode<CommandSource> node){
@@ -90,20 +89,20 @@ public class WrapperConverter {
         return result;
     }
 
-    RequiredArgumentBuilder<CommandListenerWrapper, ?> convertNode(ArgumentCommandNode<CommandSource, ?> node){
+    GrenadierArgBuilder<CommandListenerWrapper, ?, ?> convertNode(ArgumentCommandNode<CommandSource, ?> node){
         ArgumentType<?> type = node.getType();
 
         //If it's not a vanilla argument type
         if(!ArgumentRegistry.a(type)) type = convertUnknownType(type);
 
-        RequiredArgumentBuilder<CommandListenerWrapper, ?> result = required(node.getName(), type);
+        GrenadierArgBuilder<CommandListenerWrapper, ?, ?> result = required(node.getName(), type, node.getType());
         if(node.getCommand() != null) result.executes(wrapper);
 
         if(node.getRequirement() != null) result.requires(convertTest(node));
 
         //Here's that hacky af useage of that getSuggestions method in CommandWrapper
         result.suggests((c, b) -> wrapper.getSuggestions(c, b, node));
-        if(RoyalArgumentRegistry.shouldUseVanillaSuggestions(node.getType())) result.suggests(null);
+        if(RoyalArgumentsImpl.shouldUseVanillaSuggestions(node.getType())) result.suggests(null);
 
         if(node.getChildren() != null && node.getChildren().size() > 0){
             convertNodes(node.getChildren(), result);
@@ -113,6 +112,6 @@ public class WrapperConverter {
     }
 
     ArgumentType<?> convertUnknownType(ArgumentType<?> type){
-        return RoyalArgumentRegistry.getNMS(type);
+        return RoyalArgumentsImpl.getNMS(type);
     }
 }

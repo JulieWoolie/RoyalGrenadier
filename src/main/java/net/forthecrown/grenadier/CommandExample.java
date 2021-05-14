@@ -34,7 +34,7 @@ public class CommandExample extends AbstractCommand {
                 .withPermission("so.can.permissions")
                 .withDescription("And descriptions")
 
-                //Entity Selector argument, example: @e[distance..200,type=minecraft:player]
+                //Entity Selector argument, example: @e[distance=..200,type=minecraft:player]
                 .then(argument("entities", EntityArgument.multipleEntities())
 
                         //Message argument, they can enter string, if they don't, the executes clause below this one

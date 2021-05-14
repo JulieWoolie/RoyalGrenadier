@@ -6,9 +6,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.grenadier.RoyalGrenadier;
+import net.forthecrown.royalgrenadier.PluginMain;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +30,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
     private final Plugin plugin;
 
     protected String[] aliases;
-    protected String permission;
+    protected Permission permission;
     protected String permissionMessage;
     protected String description;
 
@@ -51,9 +54,10 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      */
     public final void register(){
         if(registered) return;
+        root.requires(this);
         createCommand(root);
 
-        RoyalGrenadier.register(this);
+        PluginMain.register(this);
         registered = true;
     }
 
@@ -145,7 +149,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @return Whether they have permission for this command
      */
     public boolean testPermissionSilent(CommandSender source){
-        if(getPermission() == null || getPermission().isBlank()) return true;
+        if(getPermission() == null) return true;
         return source.hasPermission(getPermission());
     }
 
@@ -177,7 +181,15 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * Gets the permission needed to use this command
      * @return The command's permission
      */
-    public @Nullable String getPermission() {
+    public @Nullable String getPerm() {
+        return permission.getName();
+    }
+
+    /**
+     * Gets the permission needed to use this command
+     * @return The command's permission
+     */
+    public Permission getPermission(){
         return permission;
     }
 
@@ -186,6 +198,21 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @param permission Permission needed to use the command
      */
     public void setPermission(String permission) {
+        if(permission == null || permission.isBlank()){
+            this.permission = null;
+            return;
+        }
+
+        PluginManager pm = Bukkit.getPluginManager();
+        if(pm.getPermission(permission) == null) pm.addPermission(this.permission = new Permission(permission));
+        else this.permission = pm.getPermission(permission);
+    }
+
+    /**
+     * Sets the command's permission
+     * @param permission Permission needed to use the command
+     */
+    public void setPermission(Permission permission) {
         this.permission = permission;
     }
 

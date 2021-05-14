@@ -52,7 +52,7 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * @return The player for this source
      * @throws CommandSyntaxException If the source is not a player
      */
-    default Player asPlayer() throws CommandSyntaxException{ return as(Player.class); }
+    default Player asPlayer() throws CommandSyntaxException { return as(Player.class); }
 
     /**
      * Gets the display name of this source

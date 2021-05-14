@@ -28,7 +28,7 @@ dependencies {
     compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
 
     implementation files("C:/Users/ander/Desktop/ThePitOfTrash/Paper/Paper-Server/target/paper-1.16.5.jar")
-    compile 'com.mojang:brigadier:1.0.17'
+    implementation 'com.mojang:brigadier:1.0.17'
 }
 
 processResources {
