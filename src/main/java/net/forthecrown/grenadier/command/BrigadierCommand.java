@@ -2,6 +2,7 @@ package net.forthecrown.grenadier.command;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.forthecrown.grenadier.CommandSource;
+import org.bukkit.permissions.Permission;
 
 public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
 
@@ -28,6 +29,16 @@ public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
      * @return Self
      */
     public BrigadierCommand withPermission(String permission){
+        command.setPermission(permission);
+        return this;
+    }
+
+    /**
+     * Sets the permission the command will use
+     * @param permission The command's permission
+     * @return Self
+     */
+    public BrigadierCommand withPermission(Permission permission){
         command.setPermission(permission);
         return this;
     }

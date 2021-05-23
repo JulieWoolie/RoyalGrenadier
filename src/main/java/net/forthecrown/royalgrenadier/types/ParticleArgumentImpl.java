@@ -5,13 +5,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.ParticleArgument;
 import net.minecraft.server.v1_16_R3.ArgumentParticle;
-import net.minecraft.server.v1_16_R3.IRegistry;
 import org.bukkit.Particle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class ParticleArgumentImpl implements ParticleArgument {
@@ -26,6 +26,11 @@ public class ParticleArgumentImpl implements ParticleArgument {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(IRegistry.PARTICLE_TYPE.keySet(), builder);
+        return CompletionProvider.suggestParticles(builder);
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return ArgumentParticle.a().getExamples();
     }
 }

@@ -44,15 +44,18 @@ public class GrenadierUtils {
         return res;
     }
 
+    //Does the same thing as the above method but with an array
+    public static <T, F> List<T> convertArray(F[] from, Function<F, T> function){
+        return convertList(Arrays.asList(from), function);
+    }
+
+    //Returns a reader with the cursor at the correct position
+    //Normally reading and then throwing exceptions causes the cursor to be placed at the wrong position
+    //So we must correct it, but also do so with a new reader so the reader in the parse method moves forward
     public static ImmutableStringReader correctCursorReader(StringReader reader, int cursor){
         StringReader reader1 = new StringReader(reader.getString());
         reader1.setCursor(cursor);
         return reader1;
-    }
-
-    //Does the same thing as the above method but with an array
-    public static <T, F> List<T> convertArray(F[] from, Function<F, T> function){
-        return convertList(Arrays.asList(from), function);
     }
 
     //Suggests a specific MinecraftKey collection

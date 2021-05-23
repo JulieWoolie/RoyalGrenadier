@@ -5,12 +5,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.block.BlockArgument;
 import net.forthecrown.grenadier.types.block.ParsedBlock;
 import net.minecraft.server.v1_16_R3.ArgumentTile;
-import net.minecraft.server.v1_16_R3.IRegistry;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class BlockArgumentImpl implements BlockArgument {
@@ -24,6 +24,11 @@ public class BlockArgumentImpl implements BlockArgument {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(IRegistry.BLOCK.keySet(), builder);
+        return CompletionProvider.suggestBlocks(builder);
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return ArgumentTile.a().getExamples();
     }
 }

@@ -6,9 +6,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.WorldArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
@@ -35,7 +35,7 @@ public class WorldArgumentImpl implements WorldArgument {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(builder, GrenadierUtils.convertList(Bukkit.getWorlds(), World::getName));
+        return CompletionProvider.suggestWorlds(builder);
     }
 
     @Override

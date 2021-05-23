@@ -20,6 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
@@ -45,12 +46,37 @@ public class TestCommand extends AbstractCommand {
         register();
     }
 
+    @Override
+    public boolean test(CommandSource source) {
+        return source.isOp();
+    }
+
     private final Map<String, Integer> mapArgTest;
     ArrayArgument<ParsedBlock> blocks = ArrayArgument.of(BlockArgument.block());
 
     @Override
     protected void createCommand(BrigadierCommand command) {
         command
+                .then(literal("multiArgInOne")
+                        .then(argument("pos", PositionArgument.position())
+                                .executes(c -> {
+                                    Location location = c.getArgument("pos", Position.class).getLocation(c.getSource());
+
+                                    c.getSource().sendMessage(location.toString());
+                                    return 0;
+                                })
+                        )
+
+                        .then(argument("selector", EntityArgument.entity())
+                                .executes(c -> {
+                                    Entity entity = c.getArgument("selector", EntitySelector.class).getEntity(c.getSource());
+
+                                    c.getSource().sendMessage(entity.toString());
+                                    return 0;
+                                })
+                        )
+                )
+
                 .then(literal("pos")
                         .then(argument("loc", PositionArgument.position())
                                 .executes(c -> {

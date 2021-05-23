@@ -6,10 +6,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.EnumArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class EnumArgumentImpl<E extends Enum<E>> implements EnumArgument<E> {
@@ -39,7 +40,13 @@ public class EnumArgumentImpl<E extends Enum<E>> implements EnumArgument<E> {
         return listSuggestions(context, builder, true);
     }
 
+    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder, boolean lowerCase){
-        return CommandSource.suggestMatching(builder, GrenadierUtils.convertArray(clazz.getEnumConstants(), e -> lowerCase ? e.name().toLowerCase() : e.name()));
+        return CompletionProvider.suggestMatching(builder, GrenadierUtils.convertArray(clazz.getEnumConstants(), e -> lowerCase ? e.name().toLowerCase() : e.name()));
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return GrenadierUtils.convertArray(clazz.getEnumConstants(), e -> e.name().toLowerCase());
     }
 }

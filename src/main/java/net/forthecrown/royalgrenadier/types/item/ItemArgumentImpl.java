@@ -11,6 +11,7 @@ import net.minecraft.server.v1_16_R3.ArgumentItemStack;
 import net.minecraft.server.v1_16_R3.ArgumentParserItemStack;
 import net.minecraft.server.v1_16_R3.ArgumentPredicateItemStack;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class ItemArgumentImpl implements ItemArgument {
@@ -26,5 +27,10 @@ public class ItemArgumentImpl implements ItemArgument {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return ArgumentItemStack.a().listSuggestions(context, builder);
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return ArgumentItemStack.a().getExamples();
     }
 }

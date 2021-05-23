@@ -48,8 +48,8 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
 
         try {
             return PluginMain.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), this.builder));
-        } catch (RuntimeException e){
-            e.printStackTrace();
+        } catch (RuntimeException e){ //Catch runtime exceptions but have NMS to deal with CommandSyntaxExceptions
+            e.printStackTrace(); //If we didn't catch this and print it, stack traces would never appear because NMS suppresses them
             throw EXCEPTION_OCCURRED.create();
         }
     }

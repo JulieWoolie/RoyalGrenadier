@@ -11,6 +11,7 @@ import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.minecraft.server.v1_16_R3.ArgumentEntity;
 import net.minecraft.server.v1_16_R3.ArgumentParserSelector;
 import net.minecraft.server.v1_16_R3.ChatMessage;
 import net.minecraft.server.v1_16_R3.ICompletionProvider;
@@ -92,6 +93,6 @@ public class EntityArgumentImpl implements EntityArgument {
 
     @Override
     public Collection<String> getExamples() {
-        return null;
+        return ArgumentEntity.a().getExamples();
     }
 }

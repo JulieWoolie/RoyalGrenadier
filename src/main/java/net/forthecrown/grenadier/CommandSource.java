@@ -180,14 +180,13 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
 
     /**
      * Suggest matching strings for the specified SuggestionsBuilder
+     * @deprecated Use {@link CompletionProvider#suggestMatching(SuggestionsBuilder, Iterable)}
      * @param b The builder
      * @param suggestions The suggestions to suggest
      * @return The suggestions of the given strings
      */
+    @Deprecated
     static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Iterable<String> suggestions){
-        String token = b.getRemaining().toLowerCase();
-        for (String s: suggestions) if(s.toLowerCase().startsWith(token)) b.suggest(s);
-
-        return b.buildFuture();
+        return CompletionProvider.suggestMatching(b, suggestions);
     }
 }

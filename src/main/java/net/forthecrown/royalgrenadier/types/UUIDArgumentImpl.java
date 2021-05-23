@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.forthecrown.grenadier.types.UUIDArgument;
 import net.minecraft.server.v1_16_R3.ArgumentUUID;
 
+import java.util.Collection;
 import java.util.UUID;
 
 public class UUIDArgumentImpl implements UUIDArgument {
@@ -14,5 +15,10 @@ public class UUIDArgumentImpl implements UUIDArgument {
     @Override
     public UUID parse(StringReader reader) throws CommandSyntaxException {
         return ArgumentUUID.a().parse(reader);
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return ArgumentUUID.a().getExamples();
     }
 }

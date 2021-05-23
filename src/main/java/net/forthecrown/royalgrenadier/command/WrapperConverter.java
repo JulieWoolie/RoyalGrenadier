@@ -3,6 +3,7 @@ package net.forthecrown.royalgrenadier.command;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -72,8 +73,8 @@ public class WrapperConverter {
         return LiteralArgumentBuilder.literal(name);
     }
 
-    private GrenadierArgBuilder<CommandListenerWrapper, ?, ?> required(String name, ArgumentType<?> type, ArgumentType<?> grenadierType){
-        return GrenadierArgBuilder.argument(name, type, grenadierType);
+    private RequiredArgumentBuilder<CommandListenerWrapper, ?> required(String name, ArgumentType<?> type){
+        return RequiredArgumentBuilder.argument(name, type);
     }
 
     LiteralArgumentBuilder<CommandListenerWrapper> convertNode(LiteralCommandNode<CommandSource> node){
@@ -89,13 +90,13 @@ public class WrapperConverter {
         return result;
     }
 
-    GrenadierArgBuilder<CommandListenerWrapper, ?, ?> convertNode(ArgumentCommandNode<CommandSource, ?> node){
+    RequiredArgumentBuilder<CommandListenerWrapper, ?> convertNode(ArgumentCommandNode<CommandSource, ?> node){
         ArgumentType<?> type = node.getType();
 
         //If it's not a vanilla argument type
         if(!ArgumentRegistry.a(type)) type = convertUnknownType(type);
 
-        GrenadierArgBuilder<CommandListenerWrapper, ?, ?> result = required(node.getName(), type, node.getType());
+        RequiredArgumentBuilder<CommandListenerWrapper, ?> result = required(node.getName(), type);
         if(node.getCommand() != null) result.executes(wrapper);
 
         if(node.getRequirement() != null) result.requires(convertTest(node));

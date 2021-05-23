@@ -6,12 +6,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.forthecrown.grenadier.CommandSource;
+import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.scoreboard.TeamArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Team;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class TeamArgumentImpl implements TeamArgument {
@@ -31,6 +32,11 @@ public class TeamArgumentImpl implements TeamArgument {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(builder, GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getTeams(), Team::getName));
+        return CompletionProvider.suggestTeams(builder);
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getTeams(), Team::getName);
     }
 }

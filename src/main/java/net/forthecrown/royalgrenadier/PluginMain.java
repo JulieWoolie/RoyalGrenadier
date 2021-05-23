@@ -66,6 +66,6 @@ public class PluginMain extends JavaPlugin {
 
         RoyalArgumentsImpl.init();
 
-        new TestCommand(this);
+        //new TestCommand(this);
     }
 }

@@ -6,10 +6,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.forthecrown.grenadier.CommandSource;
+import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.MapArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class MapArgumentImpl<T> implements MapArgument<T> {
@@ -33,6 +34,11 @@ public class MapArgumentImpl<T> implements MapArgument<T> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(builder, mapSupplier.get().keySet());
+        return CompletionProvider.suggestMatching(builder, mapSupplier.get().keySet());
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return mapSupplier.get().keySet();
     }
 }
