@@ -43,12 +43,12 @@ public interface EntitySelector {
 
     /**
      * Returns if the selector is pointing to the sender
-     * @return Whether the selector is '@a'
+     * @return Whether the selector is '@s'
      */
     boolean isSelfSelector();
 
     /**
-     * Returns whether the selector is world limit or not
+     * Returns whether the selector is world limited or not
      * @return Whether the selector is limited to a world
      */
     boolean isWorldLimited();
@@ -61,7 +61,7 @@ public interface EntitySelector {
 
     /**
      * Gets the max amount of results
-     * @return
+     * @return Max amount of selected entities or players
      */
     int getMaxResults();
 }
