@@ -19,15 +19,16 @@ public class RoyalArgumentsImpl {
 
     //Registers the default arguments into the registry
     public static void init(){
-        register(PositionArgumentImpl.class, ArgumentVec3::a, true);
-        register(ComponentArgumentImpl.class, ArgumentChatComponent::a, true);
-        register(WorldArgumentImpl.class, ArgumentDimension::a, false);
-        register(EnchantArgumentImpl.class, ArgumentEnchantment::a, false);
-        register(ItemArgumentImpl.class, ArgumentItemStack::a, true);
-        register(ParticleArgumentImpl.class, ArgumentParticle::a, true);
-        register(EntityArgumentImpl.class, ArgumentEntity::multipleEntities, true);
-        register(UUIDArgumentImpl.class, ArgumentUUID::a, true);
-        register(TimeArgumentImpl.class, StringArgumentType::word, false);
+        register(PositionArgumentImpl.class,    ArgumentVec3::a,                    true);
+        register(ComponentArgumentImpl.class,   ArgumentChatComponent::a,           true);
+        register(WorldArgumentImpl.class,       ArgumentDimension::a,               false);
+        register(EnchantArgumentImpl.class,     ArgumentEnchantment::a,             false);
+        register(ItemArgumentImpl.class,        ArgumentItemStack::a,               true);
+        register(ParticleArgumentImpl.class,    ArgumentParticle::a,                true);
+        register(EntityArgumentImpl.class,      ArgumentEntity::multipleEntities,   true);
+        register(UUIDArgumentImpl.class,        ArgumentUUID::a,                    true);
+        register(TimeArgumentImpl.class,        StringArgumentType::word,           false);
+        register(GameModeArgumentImpl.class,    StringArgumentType::word,           false);
     }
 
     //Gets the NMS equivalent to a registered argument type
@@ -55,7 +56,7 @@ public class RoyalArgumentsImpl {
     }
 
     //Registers the type and allows you to specify if the type should default to NMS for suggestions
-    private static <T extends ArgumentType<V>, V> void register(Class<T> type, Supplier<ArgumentType<?>> nmsSupplier, boolean nmsSuggests){
+    public static <T extends ArgumentType<V>, V> void register(Class<T> type, Supplier<ArgumentType<?>> nmsSupplier, boolean nmsSuggests){
         if(!isVanillaType(nmsSupplier.get())) throw new IllegalArgumentException("ArgumentType supplier must supply a vanilla ArgumentType");
         wrapperAndNms.put(type, new Pair<>(nmsSupplier, nmsSuggests));
     }

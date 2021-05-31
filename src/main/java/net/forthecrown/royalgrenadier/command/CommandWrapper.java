@@ -11,8 +11,10 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.forthecrown.royalgrenadier.PluginMain;
+import net.forthecrown.grenadier.exceptions.RoyalCommandException;
+import net.forthecrown.royalgrenadier.Main;
 import net.forthecrown.royalgrenadier.source.CommandSources;
+import net.minecraft.server.v1_16_R3.ChatMessage;
 import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 import org.bukkit.Bukkit;
 
@@ -25,7 +27,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
     private final AbstractCommand builder;
     private final SimpleCommandExceptionType noPermission;
     private static final SimpleCommandExceptionType NOT_ALLOWED_TO_USE_COMMAND = new SimpleCommandExceptionType(() -> "You aren't allowed to use this command at the moment");
-    private static final SimpleCommandExceptionType EXCEPTION_OCCURRED = new SimpleCommandExceptionType(() -> "An internal error occurred while trying to execute command (Check console)");
+    private static final SimpleCommandExceptionType EXCEPTION_OCCURRED = new SimpleCommandExceptionType(new ChatMessage("commands.generic.exception"));
 
     public CommandWrapper(AbstractCommand builder){
         this.builder = builder;
@@ -47,33 +49,34 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
         }
 
         try {
-            return PluginMain.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), this.builder));
+            return Main.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), builder));
         } catch (RuntimeException e){ //Catch runtime exceptions but have NMS to deal with CommandSyntaxExceptions
             e.printStackTrace(); //If we didn't catch this and print it, stack traces would never appear because NMS suppresses them
             throw EXCEPTION_OCCURRED.create();
+        } catch (RoyalCommandException exception){ //Adventure component exceptions
+            context.getSource().getBukkitSender().sendMessage(exception.formattedText());
+
+            //Paper's Adventure to Vanilla component conversion sucks, so we don't use it
+            //Instead we throw our own exceptions that we format manually
+            //Plus, this supports TranslatableComponents with custom translations
+
+            return 1;
         }
     }
 
+    //TODO This doesn't work with multiple argument types that rely on Grenadier, and not vanilla, for suggestions
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandListenerWrapper> context, SuggestionsBuilder builder, ArgumentCommandNode<CommandSource, ?> node) throws CommandSyntaxException {
         StringReader reader = new StringReader(builder.getInput());
         if (reader.canRead() && reader.peek() == '/') {
             reader.skip();
         }
 
-        //This is dumb, but I'm glad I finally got it working
-        ParseResults<CommandSource> parseResults = PluginMain.getDispatcher().parse(reader, CommandSources.getOrCreate(context.getSource(), this.builder));
+        ParseResults<CommandSource> parseResults = Main.getDispatcher().parse(reader, CommandSources.getOrCreate(context.getSource(), this.builder));
 
-        //Hacky af approach to getting the suggestions to work, just list the suggestions of the given node
         SuggestionsBuilder builder1 = new SuggestionsBuilder(builder.getInput(), builder.getStart());
         CommandContext<CommandSource> fuckThisShit = parseResults.getContext().build(builder.getInput());
-        //... with some haphazard commandcontext and suggestionsbuilder lmao
 
-
-        //end me
         return node.listSuggestions(fuckThisShit, builder1);
-
-        //Long story short, tried everything else to get the suggestions working, did not work, had to adapt this
-        //hacky approach
     }
 
     @Override

@@ -1,5 +1,5 @@
-main: net.forthecrown.royalgrenadier.PluginMain
-version: 1.0-SNAPSHOT
+main: net.forthecrown.royalgrenadier.Main
+version: 1.0.4-SNAPSHOT
 name: RoyalGrenadier
 load: STARTUP
 author: BotulToxin

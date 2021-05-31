@@ -7,9 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.pos.Position;
 import net.forthecrown.grenadier.types.pos.PositionArgument;
-import net.minecraft.server.v1_16_R3.ArgumentVec3;
-import net.minecraft.server.v1_16_R3.CommandDispatcher;
-import net.minecraft.server.v1_16_R3.ICompletionProvider;
+import net.minecraft.server.v1_16_R3.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,12 +15,17 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 public class PositionArgumentImpl implements PositionArgument {
-    protected PositionArgumentImpl() {}
-    public static final PositionArgumentImpl INSTANCE = new PositionArgumentImpl();
+    public static final PositionArgumentImpl INSTANCE = new PositionArgumentImpl(false);
+
+    private final boolean isBlockPos;
+
+    protected PositionArgumentImpl(boolean isBlockPos){
+        this.isBlockPos = isBlockPos;
+    }
 
     @Override
     public Position parse(StringReader reader) throws CommandSyntaxException {
-        return new PositionImpl(ArgumentVec3.a().parse(reader));
+        return new PositionImpl(isBlockPos ? ArgumentPosition.a().parse(reader) : ArgumentVec3.a().parse(reader));
     }
 
     @Override

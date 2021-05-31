@@ -4,16 +4,15 @@ import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CommandSource;
+import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.minecraft.server.v1_16_R3.ArgumentEntity;
 import net.minecraft.server.v1_16_R3.ArgumentParserSelector;
-import net.minecraft.server.v1_16_R3.ChatMessage;
 import net.minecraft.server.v1_16_R3.ICompletionProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -23,12 +22,12 @@ import java.util.concurrent.CompletableFuture;
 
 public class EntityArgumentImpl implements EntityArgument {
 
-    public static final SimpleCommandExceptionType TOO_MANY_ENTITIES = new SimpleCommandExceptionType(new ChatMessage("argument.entity.toomany"));
-    public static final SimpleCommandExceptionType TOO_MANY_PLAYERS = new SimpleCommandExceptionType(new ChatMessage("argument.player.toomany"));
-    public static final SimpleCommandExceptionType ENTITIES_WHEN_NOT_ALLOWED = new SimpleCommandExceptionType(new ChatMessage("argument.player.entities"));
-    public static final SimpleCommandExceptionType NO_ENTITIES_FOUND = new SimpleCommandExceptionType(new ChatMessage("argument.entity.notfound.entity"));
-    public static final SimpleCommandExceptionType PLAYER_NOT_FOUND = new SimpleCommandExceptionType(new ChatMessage("argument.entity.notfound.player"));
-    public static final SimpleCommandExceptionType SELECTOR_NOT_ALLOWED = new SimpleCommandExceptionType(new ChatMessage("argument.entity.selector.not_allowed"));
+    public static final TranslatableExceptionType TOO_MANY_ENTITIES = new TranslatableExceptionType("argument.entity.toomany");
+    public static final TranslatableExceptionType TOO_MANY_PLAYERS = new TranslatableExceptionType("argument.player.toomany");
+    public static final TranslatableExceptionType ENTITIES_WHEN_NOT_ALLOWED = new TranslatableExceptionType("argument.player.entities");
+    public static final TranslatableExceptionType NO_ENTITIES_FOUND = new TranslatableExceptionType("argument.entity.notfound.entity");
+    public static final TranslatableExceptionType PLAYER_NOT_FOUND = new TranslatableExceptionType("argument.entity.notfound.player");
+    public static final TranslatableExceptionType SELECTOR_NOT_ALLOWED = new TranslatableExceptionType("argument.entity.selector.not_allowed");
 
     private final boolean multiple;
     private final boolean allowEntities;
@@ -49,13 +48,23 @@ public class EntityArgumentImpl implements EntityArgument {
     }
 
     @Override
+    public boolean allowsMultiple() {
+        return multiple;
+    }
+
+    @Override
+    public boolean allowsEntities() {
+        return allowEntities;
+    }
+
+    @Override
     public EntitySelector parse(StringReader reader, boolean overridePerms) throws CommandSyntaxException {
         int cursor = reader.getCursor();
         ArgumentParserSelector parser = new ArgumentParserSelector(reader); //NMS parser
         EntitySelector selector = new EntitySelectorImpl(parser, overridePerms);
 
-        //If an exception is thrown, then cursor should be in the right place
         ImmutableStringReader correctCursor = GrenadierUtils.correctCursorReader(reader, cursor);
+
         if(!allowEntities && selector.includesEntities() && !selector.isSelfSelector()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(correctCursor);
         if(!multiple && selector.getMaxResults() > 1){
             if(allowEntities) throw TOO_MANY_ENTITIES.createWithContext(correctCursor);

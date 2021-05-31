@@ -6,7 +6,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.royalgrenadier.PluginMain;
+import net.forthecrown.grenadier.CompletionProvider;
+import net.forthecrown.royalgrenadier.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
@@ -57,7 +58,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
         root.requires(this);
         createCommand(root);
 
-        PluginMain.register(this);
+        Main.register(this);
         registered = true;
     }
 
@@ -104,15 +105,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @return The SuggestionProvider of the inputted string collection
      */
     protected SuggestionProvider<CommandSource> suggestMatching(Collection<String> strings){
-        return (c, b) -> {
-            String token = b.getRemaining().toLowerCase();
-
-            for (String s: strings){
-                if(s.toLowerCase().startsWith(token)) b.suggest(s);
-            }
-
-            return b.buildFuture();
-        };
+        return (c, b) -> CompletionProvider.suggestMatching(b, strings);
     }
 
     /**
@@ -121,15 +114,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @return The suggestion provider for the inputted map
      */
     protected SuggestionProvider<CommandSource> suggestMatching(Map<String, Message> suggestions){
-        return (c, b) -> {
-            String token = b.getRemaining().toLowerCase();
-
-            for (Map.Entry<String, Message> entry: suggestions.entrySet()){
-                if(entry.getKey().toLowerCase().startsWith(token)) b.suggest(entry.getKey(), entry.getValue());
-            }
-
-            return b.buildFuture();
-        };
+        return (c, b) -> CompletionProvider.suggestMatching(b, suggestions);
     }
 
     /**
@@ -174,6 +159,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @param aliases Aliases
      */
     public void setAliases(String... aliases) {
+        if(registered) return;
         this.aliases = aliases;
     }
 
@@ -198,6 +184,8 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @param permission Permission needed to use the command
      */
     public void setPermission(String permission) {
+        if(registered) return;
+
         if(permission == null || permission.isBlank()){
             this.permission = null;
             return;
@@ -213,6 +201,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @param permission Permission needed to use the command
      */
     public void setPermission(Permission permission) {
+        if(registered) return;
         this.permission = permission;
     }
 
@@ -226,6 +215,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
     }
 
     public void setPermissionMessage(String permissionMessage) {
+        if(registered) return;
         this.permissionMessage = permissionMessage;
     }
 
@@ -250,6 +240,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @param description The command's new description
      */
     public void setDescription(String description) {
+        if(registered) return;
         this.description = description;
     }
 

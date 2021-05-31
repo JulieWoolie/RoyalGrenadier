@@ -45,6 +45,10 @@ public interface EntityArgument extends ArgumentType<EntitySelector> {
         return c.getArgument(argument, EntitySelector.class).getEntities(c.getSource());
     }
 
+    boolean allowsMultiple();
+
+    boolean allowsEntities();
+
     EntitySelector parse(StringReader reader, boolean overridePerms) throws CommandSyntaxException;
 
     @Override

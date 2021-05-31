@@ -3,7 +3,9 @@ package net.forthecrown.grenadier.types.item;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.bukkit.inventory.ItemStack;
 
-public interface ParsedItemStack {
+import java.util.function.Predicate;
+
+public interface ParsedItemStack extends Predicate<ItemStack> {
     ItemStack create(int amount, boolean nbt) throws CommandSyntaxException;
 
     default ItemStack singular(boolean nbt) throws CommandSyntaxException {

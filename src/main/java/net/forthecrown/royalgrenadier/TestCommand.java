@@ -15,7 +15,9 @@ import net.forthecrown.grenadier.types.scoreboard.ObjectiveArgument;
 import net.forthecrown.grenadier.types.scoreboard.TeamArgument;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
+import net.forthecrown.royalgrenadier.types.selector.EntityArgumentImpl;
 import net.kyori.adventure.text.Component;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -57,6 +59,12 @@ public class TestCommand extends AbstractCommand {
     @Override
     protected void createCommand(BrigadierCommand command) {
         command
+                .then(literal("exception_test")
+                        .executes(c -> {
+                            throw EntityArgumentImpl.TOO_MANY_PLAYERS.create();
+                        })
+                )
+
                 .then(literal("multiArgInOne")
                         .then(argument("pos", PositionArgument.position())
                                 .executes(c -> {
@@ -72,6 +80,15 @@ public class TestCommand extends AbstractCommand {
                                     Entity entity = c.getArgument("selector", EntitySelector.class).getEntity(c.getSource());
 
                                     c.getSource().sendMessage(entity.toString());
+                                    return 0;
+                                })
+                        )
+
+                        .then(argument("gameMode", GameModeArgument.gameMode())
+                                .executes(c -> {
+                                    GameMode gameMode = c.getArgument("gameMode", GameMode.class);
+
+                                    c.getSource().sendMessage(gameMode.name().toLowerCase());
                                     return 0;
                                 })
                         )

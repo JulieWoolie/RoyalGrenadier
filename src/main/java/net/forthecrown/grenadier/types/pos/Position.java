@@ -2,6 +2,7 @@ package net.forthecrown.grenadier.types.pos;
 
 import net.forthecrown.grenadier.CommandSource;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 
 public interface Position {
 
@@ -11,6 +12,12 @@ public interface Position {
      * @return The parsed location
      */
     Location getLocation(CommandSource source);
+
+    Location getBlockLocation(CommandSource source);
+
+    Location getCenteredLocation(CommandSource source);
+
+    Block getBlock(CommandSource source);
 
     /**
      * Returns whether the x cord is relative

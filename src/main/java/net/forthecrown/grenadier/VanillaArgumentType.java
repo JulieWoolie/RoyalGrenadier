@@ -6,7 +6,6 @@ import net.forthecrown.royalgrenadier.RoyalArgumentsImpl;
 import java.util.function.Supplier;
 
 /**
- * @see RoyalArguments#register(Class, VanillaArgumentType)
  * As completely custom argument types cannot exist in Minecraft, we must map any
  * custom ones to already existing vanilla ones.
  *
@@ -19,6 +18,7 @@ import java.util.function.Supplier;
  * {@link VanillaArgumentType#custom(Supplier)} method can be dangerous if you
  * don't know what you're doing.
  * </p>
+ * @see RoyalArguments#register(Class, VanillaArgumentType)
  */
 public class VanillaArgumentType {
     public static final VanillaArgumentType STRING = new VanillaArgumentType(StringArgumentType::string);
@@ -35,11 +35,21 @@ public class VanillaArgumentType {
         this.supplier = supplier;
     }
 
+    /**
+     * Creates a custom VanillaArgumentType
+     * @param supplier The Supplier of the argument type, used for converting Grenadier nodes into Vanilla ones
+     * @throws IllegalStateException if the given argument type is not registered in the vanilla argument registry
+     * @return The created argument type
+     */
     public static VanillaArgumentType custom(Supplier<ArgumentType<?>> supplier){
         if(!RoyalArgumentsImpl.isVanillaType(supplier.get())) throw new IllegalStateException("Cannot use non vanilla argument type");
         return new VanillaArgumentType(supplier);
     }
 
+    /**
+     * Gets the argument type supplier
+     * @return The argument type supplier
+     */
     public Supplier<ArgumentType<?>> getSupplier() {
         return supplier;
     }

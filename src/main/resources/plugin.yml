@@ -1,4 +1,4 @@
-main: net.forthecrown.royalgrenadier.PluginMain
+main: net.forthecrown.royalgrenadier.Main
 version: @version@
 name: RoyalGrenadier
 load: STARTUP
