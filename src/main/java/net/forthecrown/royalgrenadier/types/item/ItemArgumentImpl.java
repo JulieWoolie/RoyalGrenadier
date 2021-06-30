@@ -7,9 +7,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.item.ItemArgument;
 import net.forthecrown.grenadier.types.item.ParsedItemStack;
-import net.minecraft.server.v1_16_R3.ArgumentItemStack;
-import net.minecraft.server.v1_16_R3.ArgumentParserItemStack;
-import net.minecraft.server.v1_16_R3.ArgumentPredicateItemStack;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -17,20 +14,20 @@ import java.util.concurrent.CompletableFuture;
 public class ItemArgumentImpl implements ItemArgument {
     protected ItemArgumentImpl() {}
     public static final ItemArgumentImpl INSTANCE = new ItemArgumentImpl();
+    private final net.minecraft.commands.arguments.item.ItemArgument handle = net.minecraft.commands.arguments.item.ItemArgument.item();
 
     @Override
     public ParsedItemStack parse(StringReader reader) throws CommandSyntaxException {
-        ArgumentParserItemStack parser = new ArgumentParserItemStack(reader, false).h();
-        return new ParsedItemImpl(new ArgumentPredicateItemStack(parser.b(), parser.c()));
+        return new ParsedItemImpl(handle.parse(reader));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ArgumentItemStack.a().listSuggestions(context, builder);
+        return handle.listSuggestions(context, builder);
     }
 
     @Override
     public Collection<String> getExamples() {
-        return ArgumentItemStack.a().getExamples();
+        return handle.getExamples();
     }
 }

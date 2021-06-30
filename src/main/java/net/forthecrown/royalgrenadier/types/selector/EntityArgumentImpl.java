@@ -11,16 +11,17 @@ import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
-import net.minecraft.server.v1_16_R3.ArgumentEntity;
-import net.minecraft.server.v1_16_R3.ArgumentParserSelector;
-import net.minecraft.server.v1_16_R3.ICompletionProvider;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class EntityArgumentImpl implements EntityArgument {
+    private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "@e", "@e[type=foo]", "dd12be42-52a9-4a91-a8a1-11c01849e498");
 
     public static final TranslatableExceptionType TOO_MANY_ENTITIES = new TranslatableExceptionType("argument.entity.toomany");
     public static final TranslatableExceptionType TOO_MANY_PLAYERS = new TranslatableExceptionType("argument.player.toomany");
@@ -60,7 +61,7 @@ public class EntityArgumentImpl implements EntityArgument {
     @Override
     public EntitySelector parse(StringReader reader, boolean overridePerms) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        ArgumentParserSelector parser = new ArgumentParserSelector(reader); //NMS parser
+        EntitySelectorParser parser = new EntitySelectorParser(reader); //NMS parser
         EntitySelector selector = new EntitySelectorImpl(parser, overridePerms);
 
         ImmutableStringReader correctCursor = GrenadierUtils.correctCursorReader(reader, cursor);
@@ -86,15 +87,15 @@ public class EntityArgumentImpl implements EntityArgument {
             reader.setCursor(builder.getStart());
 
             CommandSource source = (CommandSource) context.getSource();
-            ArgumentParserSelector parser = new ArgumentParserSelector(reader, source.hasPermission("minecraft.command.selector"));
+            EntitySelectorParser parser = new EntitySelectorParser(reader, source.hasPermission("minecraft.command.selector"));
 
             try {
                 parser.parse();
             } catch (CommandSyntaxException ignored) {}
 
-            return parser.a(builder, b -> {
+            return parser.fillSuggestions(builder, b -> {
                 Collection<String> collection = GrenadierUtils.convertList(Bukkit.getOnlinePlayers(), Player::getName);
-                ICompletionProvider.b(collection, b);
+                SharedSuggestionProvider.suggest(collection, b);
             });
 
         } else return Suggestions.empty();
@@ -102,6 +103,6 @@ public class EntityArgumentImpl implements EntityArgument {
 
     @Override
     public Collection<String> getExamples() {
-        return ArgumentEntity.a().getExamples();
+        return EXAMPLES;
     }
 }

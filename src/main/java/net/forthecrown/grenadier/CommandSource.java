@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.ServerOperator;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -65,6 +66,14 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * @return The string display name
      */
     String textName();
+
+    /**
+     * Gets the sender as the specified type, or null if sender isn't of the given type
+     * @param clazz The class of the type, must extend {@link CommandSender}
+     * @param <T> The type
+     * @return The sender as the given type, or null if sender isn't of the given type
+     */
+    @Nullable <T extends CommandSender> T asOrNull(Class<T> clazz);
 
     /**
      * Gets the sender's location
@@ -158,7 +167,14 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * Sends an admin message to this sender and everyone else with permission for the current command
      * @param s The message
      */
-    void sendAdmin(String s);
+    default void sendAdmin(String s) { sendAdmin(s, true); }
+
+    /**
+     * Sends an admin message to this sender and everyone else with permission for the current command
+     * @param s The message
+     * @param sendToSelf Whether the sender should also receive the message
+     */
+    void sendAdmin(String s, boolean sendToSelf);
 
     /**
      * Gets the current command the sender is using, null if no command is currently in use
@@ -176,7 +192,7 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * Gets if the sender should broadcast admin messages
      * @return Whether this sender should be broadcasting admin messages
      */
-    boolean shouldBroadcastCommand();
+    boolean shouldInformAdmins();
 
     /**
      * Suggest matching strings for the specified SuggestionsBuilder

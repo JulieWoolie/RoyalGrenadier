@@ -25,25 +25,13 @@ public class GameModeArgumentImpl implements GameModeArgument {
         int cursor = reader.getCursor();
         String label = reader.readUnquotedString();
 
-        switch (label.toLowerCase()){
-            case "survival":
-            case "0":
-                return GameMode.SURVIVAL;
-
-            case "creative":
-            case "1":
-                return GameMode.CREATIVE;
-
-            case "spectator":
-            case "3":
-                return GameMode.SPECTATOR;
-
-            case "adventure":
-            case "4":
-                return GameMode.ADVENTURE;
-
-            default: throw UNKNOWN_GAMEMODE.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), label);
-        }
+        return switch (label.toLowerCase()) {
+            case "survival", "s", "0" -> GameMode.SURVIVAL;
+            case "creative", "c", "1" -> GameMode.CREATIVE;
+            case "spectator", "3" -> GameMode.SPECTATOR;
+            case "adventure", "a", "4" -> GameMode.ADVENTURE;
+            default -> throw UNKNOWN_GAMEMODE.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), label);
+        };
     }
 
     @Override

@@ -1,13 +1,18 @@
 package net.forthecrown.royalgrenadier.types.pos;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.pos.Position;
 import net.forthecrown.grenadier.types.pos.PositionArgument;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,28 +20,29 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 public class PositionArgumentImpl implements PositionArgument {
-    public static final PositionArgumentImpl INSTANCE = new PositionArgumentImpl(false);
+    public static final PositionArgumentImpl VECTOR_INSTANCE = new PositionArgumentImpl(false);
+    public static final PositionArgumentImpl BLOCK_INSTANCE = new PositionArgumentImpl(true);
 
-    private final boolean isBlockPos;
+    private final ArgumentType<Coordinates> handle;
 
     protected PositionArgumentImpl(boolean isBlockPos){
-        this.isBlockPos = isBlockPos;
+        handle = isBlockPos ? BlockPosArgument.blockPos() : Vec3Argument.vec3();
     }
 
     @Override
     public Position parse(StringReader reader) throws CommandSyntaxException {
-        return new PositionImpl(isBlockPos ? ArgumentPosition.a().parse(reader) : ArgumentVec3.a().parse(reader));
+        return new PositionImpl(handle.parse(reader));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         String token = builder.getRemaining();
-        Collection<ICompletionProvider.a> suggestions;
+        Collection<SharedSuggestionProvider.TextCoordinates> suggestions;
 
-        if (!token.isEmpty() && token.charAt(0) == '^') suggestions = Collections.singleton(net.minecraft.server.v1_16_R3.ICompletionProvider.a.a);
-        else suggestions = Collections.singleton(ICompletionProvider.a.b);
+        if (!token.isEmpty() && token.charAt(0) == '^') suggestions = Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_LOCAL);
+        else suggestions = Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_GLOBAL);
 
-        return ICompletionProvider.a(token, suggestions, builder, CommandDispatcher.a(this::parse));
+        return SharedSuggestionProvider.suggestCoordinates(token, suggestions, builder, Commands.createValidator(this::parse));
     }
 
     @Override

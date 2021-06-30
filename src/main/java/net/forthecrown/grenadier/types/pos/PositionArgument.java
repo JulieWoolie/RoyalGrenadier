@@ -8,7 +8,11 @@ import org.bukkit.Location;
 
 public interface PositionArgument extends ArgumentType<Position> {
     static PositionArgument position(){
-        return PositionArgumentImpl.INSTANCE;
+        return PositionArgumentImpl.VECTOR_INSTANCE;
+    }
+
+    static PositionArgument blockPos(){
+        return PositionArgumentImpl.BLOCK_INSTANCE;
     }
 
     static Location getLocation(CommandContext<CommandSource> c, String argument){

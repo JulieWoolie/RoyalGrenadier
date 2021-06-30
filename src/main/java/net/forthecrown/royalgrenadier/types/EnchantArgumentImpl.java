@@ -8,13 +8,11 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.EnchantArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.v1_16_R3.ArgumentEnchantment;
-import net.minecraft.server.v1_16_R3.MinecraftKey;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class EnchantArgumentImpl implements EnchantArgument {
@@ -25,11 +23,10 @@ public class EnchantArgumentImpl implements EnchantArgument {
 
     @Override
     public Enchantment parse(StringReader reader) throws CommandSyntaxException {
-        //ResourceLocation#read(StringReader reader)
-        MinecraftKey key = MinecraftKey.a(reader);
+        NamespacedKey key = GrenadierUtils.readKey(reader, NamespacedKey.MINECRAFT);
 
         //Get the enchantment from the key
-        Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(key.getKey()));
+        Enchantment enchantment = Enchantment.getByKey(key);
         if(enchantment == null) throw UNKNOWN_ENCHANTMENT.createWithContext(reader, Component.text(key.toString()));
 
         return enchantment;
@@ -38,10 +35,5 @@ public class EnchantArgumentImpl implements EnchantArgument {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return CompletionProvider.suggestEnchantments(builder);
-    }
-
-    @Override
-    public Collection<String> getExamples() {
-        return ArgumentEnchantment.a().getExamples();
     }
 }

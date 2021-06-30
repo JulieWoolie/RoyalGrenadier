@@ -12,14 +12,21 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class CommandSourceImpl implements CommandSource {
 
@@ -27,14 +34,15 @@ public class CommandSourceImpl implements CommandSource {
     public static final DynamicCommandExceptionType INVALID_SENDER_TYPE =
             new DynamicCommandExceptionType(obj -> new LiteralMessage("Only " + obj.toString() + "s may execute this command"));
 
-    private final CommandListenerWrapper source;
+    private final CommandSourceStack source;
     private AbstractCommand current;
-    public CommandSourceImpl(CommandListenerWrapper source, AbstractCommand currentCommand){
+
+    CommandSourceImpl(CommandSourceStack source, AbstractCommand currentCommand){
         this.source = source;
         this.current = currentCommand;
     }
 
-    public CommandListenerWrapper getHandle(){
+    public CommandSourceStack getHandle(){
         return source;
     }
 
@@ -50,25 +58,36 @@ public class CommandSourceImpl implements CommandSource {
 
     @Override
     public <T extends CommandSender> T as(Class<T> clazz) throws CommandSyntaxException {
-        CommandSender sender = asBukkit();
+        return senderOptional(clazz).orElseThrow(() -> INVALID_SENDER_TYPE.create(clazz.getSimpleName()));
+    }
 
-        if(is(clazz)) return (T) sender;
-        throw INVALID_SENDER_TYPE.create(clazz.getSimpleName());
+    @Override
+    @Nullable
+    public <T extends CommandSender> T asOrNull(Class<T> clazz){
+        return senderOptional(clazz).orElse(null);
+    }
+
+    private <T extends CommandSender> Optional<T> senderOptional(Class<T> clazz){
+        return Optional.ofNullable(is(clazz) ? (T) asBukkit() : null);
     }
 
     @Override
     public Location getLocation() {
-        return source.getBukkitLocation();
+        World world = getWorld();
+        Vec3 pos = source.getPosition();
+        Vec2 rot = source.getRotation();
+
+        return new Location(world, pos.x, pos.y, pos.z, rot.y, rot.x);
     }
 
     @Override
     public Component displayName() {
-        return PaperAdventure.asAdventure(source.getScoreboardDisplayName());
+        return PaperAdventure.asAdventure(source.getDisplayName());
     }
 
     @Override
     public String textName() {
-        return source.getName();
+        return source.getTextName();
     }
 
     @Override
@@ -113,13 +132,13 @@ public class CommandSourceImpl implements CommandSource {
 
     @Override
     public void sendMessage(Component component) {
-        source.base.sendMessage(PaperAdventure.asVanilla(component), null);
+        source.source.sendMessage(PaperAdventure.asVanilla(component), Util.NIL_UUID);
     }
 
     @Override
     public void sendAdmin(Component component, boolean sendToSelf) {
         if(sendToSelf) sendMessage(component);
-        if(!shouldBroadcastCommand()) return;
+        if(!shouldInformAdmins()) return;
 
         String name = textName();
         Component message = Component.text()
@@ -141,12 +160,12 @@ public class CommandSourceImpl implements CommandSource {
         }
 
         //Let console know as well
-        Bukkit.getConsoleSender().sendMessage(message);
+        if(!is(ConsoleCommandSender.class)) Bukkit.getConsoleSender().sendMessage(message);
     }
 
     @Override
-    public void sendAdmin(String s) {
-        sendAdmin(lSerializer.deserialize(s));
+    public void sendAdmin(String s, boolean sendToSelf) {
+        sendAdmin(lSerializer.deserialize(s), sendToSelf);
     }
 
     @Override
@@ -160,8 +179,8 @@ public class CommandSourceImpl implements CommandSource {
     }
 
     @Override
-    public boolean shouldBroadcastCommand() {
-        return source.base.shouldBroadcastCommands();
+    public boolean shouldInformAdmins() {
+        return source.source.shouldInformAdmins();
     }
 
     @Override

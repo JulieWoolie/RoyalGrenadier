@@ -1,9 +1,9 @@
 package net.forthecrown.royalgrenadier.source;
 
 import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;
@@ -12,9 +12,9 @@ import java.util.Map;
 public class CommandSources {
     //I believe this is better than creating a new instance of the command sender everytime you execute a command
     //Or get suggestions
-    private static final Map<CommandListenerWrapper, CommandSource> map = new HashMap<>();
+    private static final Map<CommandSourceStack, CommandSource> map = new HashMap<>();
 
-    public static CommandSource getOrCreate(CommandListenerWrapper wrapper, AbstractCommand builder){
+    public static CommandSource getOrCreate(CommandSourceStack wrapper, AbstractCommand builder){
         if(map.containsKey(wrapper)){
             CommandSource source = map.get(wrapper);
             source.setCurrentCommand(builder);
@@ -30,7 +30,7 @@ public class CommandSources {
         return getOrCreate(GrenadierUtils.senderToWrapper(sender), builder);
     }
 
-    public static void remove(CommandListenerWrapper wrapper){
+    public static void remove(CommandSourceStack wrapper){
         map.remove(wrapper);
     }
 

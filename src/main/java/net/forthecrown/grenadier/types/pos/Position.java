@@ -13,10 +13,26 @@ public interface Position {
      */
     Location getLocation(CommandSource source);
 
+    /**
+     * Gets the location specified, requires Sender for any relative coordinates
+     * @param source The sender that used this command
+     * @return The parsed location
+     */
     Location getBlockLocation(CommandSource source);
 
+    /**
+     * Gets the location specified, requires Sender for any relative coordinates
+     * <p>Centered to x .5 and z .5</p>
+     * @param source The sender that used this command
+     * @return The parsed location
+     */
     Location getCenteredLocation(CommandSource source);
 
+    /**
+     * Gets the block at the specified position
+     * @param source The sender that used this command
+     * @return The block at the parsed location
+     */
     Block getBlock(CommandSource source);
 
     /**

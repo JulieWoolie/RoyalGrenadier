@@ -2,16 +2,17 @@ package net.forthecrown.royalgrenadier;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.royalgrenadier.command.CommandWrapper;
 import net.forthecrown.royalgrenadier.command.WrapperConverter;
-import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.dedicated.DedicatedServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
-import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_16_R3.command.VanillaCommandWrapper;
+import org.bukkit.craftbukkit.v1_17_R1.command.VanillaCommandWrapper;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
@@ -20,8 +21,7 @@ import java.util.logging.Logger;
 public class Main extends JavaPlugin {
     public static Logger LOGGER;
     private static CommandDispatcher<CommandSource> dispatcher;
-    private static net.minecraft.server.v1_16_R3.CommandDispatcher serverDispatcher;
-
+    private static net.minecraft.commands.Commands serverCommands;
 
     /**
      * Gets the dispatcher for the RoyalGrenadier
@@ -39,13 +39,18 @@ public class Main extends JavaPlugin {
         CommandWrapper wrapper = new CommandWrapper(builder);
         LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
 
-        LiteralArgumentBuilder<CommandListenerWrapper> wrapped = new WrapperConverter(wrapper, builder, built).finish();
-        LiteralCommandNode<CommandListenerWrapper> builtNms = serverDispatcher.a().register(wrapped);
+        LiteralArgumentBuilder<CommandSourceStack> wrapped = new WrapperConverter(wrapper, builder, built).finish();
+        LiteralCommandNode<CommandSourceStack> builtNms = serverCommands.getDispatcher().register(wrapped);
 
-        VanillaCommandWrapper bukkitWrapper = new VanillaCommandWrapper(serverDispatcher, builtNms);
+        VanillaCommandWrapper bukkitWrapper = new VanillaCommandWrapper(serverCommands, builtNms);
         if(builder.getAliases() != null) bukkitWrapper.setAliases(Arrays.asList(builder.getAliases()));
+
         if(builder.getDescription() != null) bukkitWrapper.setDescription(builder.getDescription());
+        else bukkitWrapper.setDescription("");
+
         if(builder.getPermission() != null) bukkitWrapper.setPermission(builder.getPermission().getName());
+        else bukkitWrapper.setPermission(null);
+
         bukkitWrapper.setPermissionMessage(builder.getPermissionMessage());
 
         CommandMap map = Bukkit.getCommandMap();
@@ -60,11 +65,12 @@ public class Main extends JavaPlugin {
         LOGGER = getLogger();
 
         dispatcher = new CommandDispatcher<>();
-        serverDispatcher = ((CraftServer) getServer()).getHandle().getServer().getCommandDispatcher();
+        serverCommands = DedicatedServer.getServer().vanillaCommandDispatcher;
 
         dispatcher.setConsumer((context, b, i) -> context.getSource().onCommandComplete(context, b, i));
 
         RoyalArgumentsImpl.init();
+        CommandSyntaxException.ENABLE_COMMAND_STACK_TRACES = true;
 
         new TestCommand(this);
     }

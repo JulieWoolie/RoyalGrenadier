@@ -12,8 +12,8 @@ import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
 import net.forthecrown.royalgrenadier.RoyalArgumentsImpl;
 import net.forthecrown.royalgrenadier.source.CommandSources;
-import net.minecraft.server.v1_16_R3.ArgumentRegistry;
-import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.synchronization.ArgumentTypes;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -28,7 +28,7 @@ public class WrapperConverter {
     private final CommandWrapper wrapper;
     private final BrigadierCommand command;
     private final AbstractCommand abstractCommand;
-    private final LiteralArgumentBuilder<CommandListenerWrapper> nms;
+    private final LiteralArgumentBuilder<CommandSourceStack> nms;
     private final LiteralCommandNode<CommandSource> regged;
 
     public WrapperConverter(CommandWrapper wrapper, AbstractCommand command, LiteralCommandNode<CommandSource> toConvert){
@@ -41,7 +41,7 @@ public class WrapperConverter {
         start();
     }
 
-    public LiteralArgumentBuilder<CommandListenerWrapper> finish(){
+    public LiteralArgumentBuilder<CommandSourceStack> finish(){
         return nms;
     }
 
@@ -53,11 +53,11 @@ public class WrapperConverter {
         }
     }
 
-    Predicate<CommandListenerWrapper> convertTest(CommandNode<CommandSource> node){
+    Predicate<CommandSourceStack> convertTest(CommandNode<CommandSource> node){
         return lis -> node.getRequirement().test(CommandSources.getOrCreate(lis, abstractCommand));
     }
 
-    void convertNodes(Collection<CommandNode<CommandSource>> nodes, ArgumentBuilder<CommandListenerWrapper, ?> to){
+    void convertNodes(Collection<CommandNode<CommandSource>> nodes, ArgumentBuilder<CommandSourceStack, ?> to){
         for (CommandNode<CommandSource> n: nodes){
 
             if(n instanceof LiteralCommandNode){
@@ -69,16 +69,16 @@ public class WrapperConverter {
         }
     }
 
-    private LiteralArgumentBuilder<CommandListenerWrapper> literal(String name){
+    private LiteralArgumentBuilder<CommandSourceStack> literal(String name){
         return LiteralArgumentBuilder.literal(name);
     }
 
-    private RequiredArgumentBuilder<CommandListenerWrapper, ?> required(String name, ArgumentType<?> type){
+    private RequiredArgumentBuilder<CommandSourceStack, ?> required(String name, ArgumentType<?> type, ArgumentType<?> grenadierType){
         return RequiredArgumentBuilder.argument(name, type);
     }
 
-    LiteralArgumentBuilder<CommandListenerWrapper> convertNode(LiteralCommandNode<CommandSource> node){
-        LiteralArgumentBuilder<CommandListenerWrapper> result = literal(node.getLiteral());
+    LiteralArgumentBuilder<CommandSourceStack> convertNode(LiteralCommandNode<CommandSource> node){
+        LiteralArgumentBuilder<CommandSourceStack> result = literal(node.getLiteral());
 
         if(node.getCommand() != null) result.executes(wrapper);
         if(node.getRequirement() != null) result.requires(convertTest(node));
@@ -90,13 +90,13 @@ public class WrapperConverter {
         return result;
     }
 
-    RequiredArgumentBuilder<CommandListenerWrapper, ?> convertNode(ArgumentCommandNode<CommandSource, ?> node){
+    RequiredArgumentBuilder<CommandSourceStack, ?> convertNode(ArgumentCommandNode<CommandSource, ?> node){
         ArgumentType<?> type = node.getType();
 
         //If it's not a vanilla argument type
-        if(!ArgumentRegistry.a(type)) type = convertUnknownType(type);
+        if(!ArgumentTypes.isTypeRegistered(type)) type = convertUnknownType(type);
 
-        RequiredArgumentBuilder<CommandListenerWrapper, ?> result = required(node.getName(), type);
+        RequiredArgumentBuilder<CommandSourceStack, ?> result = required(node.getName(), type, node.getType());
         if(node.getCommand() != null) result.executes(wrapper);
 
         if(node.getRequirement() != null) result.requires(convertTest(node));

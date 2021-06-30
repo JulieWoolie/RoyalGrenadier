@@ -4,8 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
-import net.minecraft.server.v1_16_R3.ArgumentParserSelector;
-import net.minecraft.server.v1_16_R3.EntityPlayer;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -13,55 +13,55 @@ import java.util.List;
 
 public class EntitySelectorImpl implements EntitySelector {
 
-    private final net.minecraft.server.v1_16_R3.EntitySelector nms;
+    private final net.minecraft.commands.arguments.selector.EntitySelector nms;
 
-    EntitySelectorImpl(ArgumentParserSelector parserSelector, boolean overridePerms) throws CommandSyntaxException {
+    EntitySelectorImpl(EntitySelectorParser parserSelector, boolean overridePerms) throws CommandSyntaxException {
         this.nms = parserSelector.parse(overridePerms);
     }
 
-    public net.minecraft.server.v1_16_R3.EntitySelector getNms() {
+    public net.minecraft.commands.arguments.selector.EntitySelector getNms() {
         return nms;
     }
 
     @Override
     public Player getPlayer(CommandSource source) throws CommandSyntaxException {
-        return nms.c(GrenadierUtils.sourceToNms(source)).getBukkitEntity();
+        return nms.findSinglePlayer(GrenadierUtils.sourceToNms(source)).getBukkitEntity();
     }
 
     @Override
     public Entity getEntity(CommandSource source) throws CommandSyntaxException {
-        return nms.a(GrenadierUtils.sourceToNms(source)).getBukkitEntity();
+        return nms.findSingleEntity(GrenadierUtils.sourceToNms(source)).getBukkitEntity();
     }
 
     @Override
     public List<Entity> getEntities(CommandSource source) throws CommandSyntaxException {
-        List<? extends net.minecraft.server.v1_16_R3.Entity> nmsList = nms.getEntities(GrenadierUtils.sourceToNms(source));
-        return GrenadierUtils.convertList(nmsList, net.minecraft.server.v1_16_R3.Entity::getBukkitEntity);
+        List<? extends net.minecraft.world.entity.Entity> nmsList = nms.findEntities(GrenadierUtils.sourceToNms(source));
+        return GrenadierUtils.convertList(nmsList, net.minecraft.world.entity.Entity::getBukkitEntity);
     }
 
     @Override
     public List<Player> getPlayers(CommandSource source) throws CommandSyntaxException {
-        List<EntityPlayer> nmsList = nms.d(GrenadierUtils.sourceToNms(source));
-        return GrenadierUtils.convertList(nmsList, EntityPlayer::getBukkitEntity);
+        List<ServerPlayer> nmsList = nms.findPlayers(GrenadierUtils.sourceToNms(source));
+        return GrenadierUtils.convertList(nmsList, ServerPlayer::getBukkitEntity);
     }
 
     @Override
     public boolean isSelfSelector(){
-        return nms.c();
+        return nms.isSelfSelector();
     }
 
     @Override
     public boolean isWorldLimited(){
-        return nms.d();
+        return nms.isWorldLimited();
     }
 
     @Override
     public boolean includesEntities(){
-        return nms.b();
+        return nms.includesEntities();
     }
 
     @Override
     public int getMaxResults(){
-        return nms.a();
+        return nms.getMaxResults();
     }
 }

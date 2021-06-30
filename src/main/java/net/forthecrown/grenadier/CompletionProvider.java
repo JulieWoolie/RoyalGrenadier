@@ -5,7 +5,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.key.Key;
-import net.minecraft.server.v1_16_R3.IRegistry;
+import net.minecraft.core.Registry;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -115,7 +115,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestSounds(SuggestionsBuilder builder){
-        return GrenadierUtils.suggestResource(IRegistry.SOUND_EVENT.keySet(), builder);
+        return GrenadierUtils.suggestResource(Registry.SOUND_EVENT.keySet(), builder);
     }
 
     /**
@@ -124,7 +124,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestParticles(SuggestionsBuilder builder){
-        return GrenadierUtils.suggestResource(IRegistry.PARTICLE_TYPE.keySet(), builder);
+        return GrenadierUtils.suggestResource(Registry.PARTICLE_TYPE.keySet(), builder);
     }
 
     /**
@@ -133,7 +133,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestEnchantments(SuggestionsBuilder builder){
-        return GrenadierUtils.suggestResource(IRegistry.ENCHANTMENT.keySet(), builder);
+        return GrenadierUtils.suggestResource(Registry.ENCHANTMENT.keySet(), builder);
     }
 
     /**
@@ -142,7 +142,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestEntities(SuggestionsBuilder builder){
-        return GrenadierUtils.suggestResource(IRegistry.ENTITY_TYPE.keySet(), builder);
+        return GrenadierUtils.suggestResource(Registry.ENTITY_TYPE.keySet(), builder);
     }
 
     /**
@@ -169,7 +169,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestBlocks(SuggestionsBuilder builder){
-        return GrenadierUtils.suggestResource(IRegistry.BLOCK.keySet(), builder);
+        return GrenadierUtils.suggestResource(Registry.BLOCK.keySet(), builder);
     }
 
     /**
@@ -178,7 +178,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestPotionEffects(SuggestionsBuilder builder){
-        return GrenadierUtils.suggestResource(IRegistry.POTION.keySet(), builder);
+        return GrenadierUtils.suggestResource(Registry.POTION.keySet(), builder);
     }
 
     /**
@@ -187,7 +187,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestEffects(SuggestionsBuilder builder){
-        return GrenadierUtils.suggestResource(IRegistry.MOB_EFFECT.keySet(), builder);
+        return GrenadierUtils.suggestResource(Registry.MOB_EFFECT.keySet(), builder);
     }
 
     /**
@@ -197,5 +197,14 @@ public interface CompletionProvider {
      */
     static CompletableFuture<Suggestions> suggestPlayerNames(SuggestionsBuilder builder){
         return suggestMatching(builder, GrenadierUtils.convertList(Bukkit.getOnlinePlayers(), Player::getName));
+    }
+
+    /**
+     * Suggests entity types, eg: minecraft:cow
+     * @param builder The builder to suggest to
+     * @return The built suggestions
+     */
+    static CompletableFuture<Suggestions> suggestEntityTypes(SuggestionsBuilder builder){
+        return GrenadierUtils.suggestResource(Registry.ENTITY_TYPE.keySet(), builder);
     }
 }

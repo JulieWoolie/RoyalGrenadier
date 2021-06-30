@@ -14,20 +14,20 @@ import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
 import net.forthecrown.royalgrenadier.Main;
 import net.forthecrown.royalgrenadier.source.CommandSources;
-import net.minecraft.server.v1_16_R3.ChatMessage;
-import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 //Class for wrapping Grenadier's commands into NMS ones
-public class CommandWrapper implements Command<CommandListenerWrapper>, Predicate<CommandListenerWrapper> {
+public class CommandWrapper implements Command<CommandSourceStack>, Predicate<CommandSourceStack> {
 
     private final AbstractCommand builder;
     private final SimpleCommandExceptionType noPermission;
     private static final SimpleCommandExceptionType NOT_ALLOWED_TO_USE_COMMAND = new SimpleCommandExceptionType(() -> "You aren't allowed to use this command at the moment");
-    private static final SimpleCommandExceptionType EXCEPTION_OCCURRED = new SimpleCommandExceptionType(new ChatMessage("commands.generic.exception"));
+    private static final SimpleCommandExceptionType EXCEPTION_OCCURRED = new SimpleCommandExceptionType(new TranslatableComponent("commands.generic.exception"));
 
     public CommandWrapper(AbstractCommand builder){
         this.builder = builder;
@@ -37,7 +37,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
     }
 
     @Override
-    public int run(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException {
+    public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         //Takes the vanilla command source and turns it's input into
         //Grenadier's sender and executes command with it
 
@@ -50,9 +50,6 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
 
         try {
             return Main.getDispatcher().execute(context.getInput(), CommandSources.getOrCreate(context.getSource(), builder));
-        } catch (RuntimeException e){ //Catch runtime exceptions but have NMS to deal with CommandSyntaxExceptions
-            e.printStackTrace(); //If we didn't catch this and print it, stack traces would never appear because NMS suppresses them
-            throw EXCEPTION_OCCURRED.create();
         } catch (RoyalCommandException exception){ //Adventure component exceptions
             context.getSource().getBukkitSender().sendMessage(exception.formattedText());
 
@@ -61,11 +58,14 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
             //Plus, this supports TranslatableComponents with custom translations
 
             return 1;
+        } catch (RuntimeException e){
+            e.printStackTrace();
+            throw EXCEPTION_OCCURRED.create();
         }
     }
 
     //TODO This doesn't work with multiple argument types that rely on Grenadier, and not vanilla, for suggestions
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandListenerWrapper> context, SuggestionsBuilder builder, ArgumentCommandNode<CommandSource, ?> node) throws CommandSyntaxException {
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, ArgumentCommandNode<CommandSource, ?> node) throws CommandSyntaxException {
         StringReader reader = new StringReader(builder.getInput());
         if (reader.canRead() && reader.peek() == '/') {
             reader.skip();
@@ -80,7 +80,7 @@ public class CommandWrapper implements Command<CommandListenerWrapper>, Predicat
     }
 
     @Override
-    public boolean test(CommandListenerWrapper wrapper) {
+    public boolean test(CommandSourceStack wrapper) {
         return builder.test(CommandSources.getOrCreate(wrapper, builder));
     }
 }

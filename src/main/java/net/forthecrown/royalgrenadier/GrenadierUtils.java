@@ -6,12 +6,16 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.royalgrenadier.source.CommandSourceImpl;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.resources.ResourceLocation;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.*;
-import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_16_R3.command.CraftBlockCommandSender;
-import org.bukkit.craftbukkit.v1_16_R3.command.ProxiedNativeCommandSender;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_17_R1.command.CraftBlockCommandSender;
+import org.bukkit.craftbukkit.v1_17_R1.command.ProxiedNativeCommandSender;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 
 import java.util.ArrayList;
@@ -22,16 +26,15 @@ import java.util.function.Function;
 
 public class GrenadierUtils {
 
-    public static CommandListenerWrapper sourceToNms(CommandSource source){
+    public static CommandSourceStack sourceToNms(CommandSource source){
         return ((CommandSourceImpl) source).getHandle();
     }
 
     //Bukkit's getListener in VanillaCommandWrapper didn't have enough functionality to be as applicable
-    public static CommandListenerWrapper senderToWrapper(CommandSender sender){
-        if(sender instanceof Entity) return ((CraftEntity) sender).getHandle().getCommandListener();
+    public static CommandSourceStack senderToWrapper(CommandSender sender){
+        if(sender instanceof Entity) return ((CraftEntity) sender).getHandle().createCommandSourceStack();
         else if(sender instanceof BlockCommandSender) return ((CraftBlockCommandSender) sender).getWrapper();
-        else if(sender instanceof RemoteConsoleCommandSender) return ((DedicatedServer) MinecraftServer.getServer()).remoteControlCommandListener.getWrapper();
-        else if(sender instanceof ConsoleCommandSender) return ((CraftServer)sender.getServer()).getServer().getServerCommandListener();
+        else if(sender instanceof RemoteConsoleCommandSender || sender instanceof ConsoleCommandSender) return ((CraftServer) Bukkit.getServer()).getServer().createCommandSourceStack();
         else if(sender instanceof ProxiedCommandSender) return ((ProxiedNativeCommandSender)sender).getHandle();
         else return null;
     }
@@ -59,7 +62,19 @@ public class GrenadierUtils {
     }
 
     //Suggests a specific MinecraftKey collection
-    public static CompletableFuture<Suggestions> suggestResource(Iterable<MinecraftKey> resources, SuggestionsBuilder builder){
-        return ICompletionProvider.a(resources, builder);
+    public static CompletableFuture<Suggestions> suggestResource(Iterable<ResourceLocation> resources, SuggestionsBuilder builder){
+        return SharedSuggestionProvider.suggestResource(resources, builder);
+    }
+
+    public static NamespacedKey readKey(StringReader reader, String defaultNamespace) {
+        String initial = reader.readUnquotedString();
+        if(reader.canRead() && reader.peek() == ':'){
+            reader.skip();
+            String key = reader.readUnquotedString();
+
+            return new NamespacedKey(initial, key);
+        }
+
+        return new NamespacedKey(defaultNamespace, initial);
     }
 }

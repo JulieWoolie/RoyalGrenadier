@@ -7,7 +7,10 @@ import net.forthecrown.royalgrenadier.types.*;
 import net.forthecrown.royalgrenadier.types.item.ItemArgumentImpl;
 import net.forthecrown.royalgrenadier.types.pos.PositionArgumentImpl;
 import net.forthecrown.royalgrenadier.types.selector.EntityArgumentImpl;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.commands.arguments.*;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.synchronization.ArgumentTypes;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -19,16 +22,16 @@ public class RoyalArgumentsImpl {
 
     //Registers the default arguments into the registry
     public static void init(){
-        register(PositionArgumentImpl.class,    ArgumentVec3::a,                    true);
-        register(ComponentArgumentImpl.class,   ArgumentChatComponent::a,           true);
-        register(WorldArgumentImpl.class,       ArgumentDimension::a,               false);
-        register(EnchantArgumentImpl.class,     ArgumentEnchantment::a,             false);
-        register(ItemArgumentImpl.class,        ArgumentItemStack::a,               true);
-        register(ParticleArgumentImpl.class,    ArgumentParticle::a,                true);
-        register(EntityArgumentImpl.class,      ArgumentEntity::multipleEntities,   true);
-        register(UUIDArgumentImpl.class,        ArgumentUUID::a,                    true);
-        register(TimeArgumentImpl.class,        StringArgumentType::word,           false);
-        register(GameModeArgumentImpl.class,    StringArgumentType::word,           false);
+        register(PositionArgumentImpl.class,    Vec3Argument::vec3,                     true);
+        register(ComponentArgumentImpl.class,   ComponentArgument::textComponent,       true);
+        register(WorldArgumentImpl.class,       DimensionArgument::dimension,           false);
+        register(EnchantArgumentImpl.class,     ItemEnchantmentArgument::enchantment,   false);
+        register(ItemArgumentImpl.class,        ItemArgument::item,                     true);
+        register(ParticleArgumentImpl.class,    ParticleArgument::particle,             true);
+        register(EntityArgumentImpl.class,      EntityArgument::entities,               true);
+        register(UUIDArgumentImpl.class,        UuidArgument::uuid,                     true);
+        register(TimeArgumentImpl.class,        StringArgumentType::word,               false);
+        register(GameModeArgumentImpl.class,    StringArgumentType::word,               false);
     }
 
     //Gets the NMS equivalent to a registered argument type
@@ -37,7 +40,7 @@ public class RoyalArgumentsImpl {
 
         //ArgumentScoreholder seems to be a works-for-all kind of thing, except not really
         //Wish there was a string type that allowed symbols and isn't GREEDY_STRING
-        return ArgumentScoreholder.b();
+        return ScoreHolderArgument.scoreHolders();
     }
 
     //Checks if the given ArgumentType should use vanilla suggestions
@@ -47,7 +50,7 @@ public class RoyalArgumentsImpl {
     }
 
     public static boolean isVanillaType(ArgumentType<?> type){
-        return ArgumentRegistry.a(type);
+        return ArgumentTypes.isTypeRegistered(type);
     }
 
     //Checks if registered lol
