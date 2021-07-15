@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
+import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
@@ -24,9 +25,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class CommandSourceImpl implements CommandSource {
 
@@ -131,8 +135,8 @@ public class CommandSourceImpl implements CommandSource {
     }
 
     @Override
-    public void sendMessage(Component component) {
-        source.source.sendMessage(PaperAdventure.asVanilla(component), Util.NIL_UUID);
+    public void sendMessage(Component message, @Nullable UUID id){
+        source.source.sendMessage(PaperAdventure.asVanilla(message), id == null ? Util.NIL_UUID : id);
     }
 
     @Override
@@ -181,6 +185,16 @@ public class CommandSourceImpl implements CommandSource {
     @Override
     public boolean shouldInformAdmins() {
         return source.source.shouldInformAdmins();
+    }
+
+    @Override
+    public CoordinateSuggestion getCoordinateSuggestion() {
+        Location loc = getLocation();
+        RayTraceResult result = getWorld().rayTraceBlocks(loc, loc.getDirection(), 5);
+        if(result == null) return null;
+
+        Vector hitPos = result.getHitPosition();
+        return new CoordinateSuggestion(hitPos.getX(), hitPos.getY(), hitPos.getZ());
     }
 
     @Override

@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'net.forthecrown'
-version '1.1.0-SNAPSHOT-mojang-mapped'
+version '1.1.1-SNAPSHOT-mojang-mapped'
 
 repositories {
     mavenCentral()

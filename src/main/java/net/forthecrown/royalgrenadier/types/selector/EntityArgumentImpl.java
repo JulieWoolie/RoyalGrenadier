@@ -64,7 +64,7 @@ public class EntityArgumentImpl implements EntityArgument {
         EntitySelectorParser parser = new EntitySelectorParser(reader); //NMS parser
         EntitySelector selector = new EntitySelectorImpl(parser, overridePerms);
 
-        ImmutableStringReader correctCursor = GrenadierUtils.correctCursorReader(reader, cursor);
+        ImmutableStringReader correctCursor = GrenadierUtils.correctReader(reader, cursor);
 
         if(!allowEntities && selector.includesEntities() && !selector.isSelfSelector()) throw ENTITIES_WHEN_NOT_ALLOWED.createWithContext(correctCursor);
         if(!multiple && selector.getMaxResults() > 1){
@@ -104,5 +104,15 @@ public class EntityArgumentImpl implements EntityArgument {
     @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
+    }
+
+    public net.minecraft.commands.arguments.EntityArgument getHandle(){
+        if(allowEntities){
+            if(multiple) return net.minecraft.commands.arguments.EntityArgument.entities();
+            else return net.minecraft.commands.arguments.EntityArgument.entity();
+        } else {
+            if(multiple) return net.minecraft.commands.arguments.EntityArgument.players();
+            else return net.minecraft.commands.arguments.EntityArgument.player();
+        }
     }
 }

@@ -3,16 +3,23 @@ package net.forthecrown.grenadier;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.Registry;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
+import net.minecraft.world.level.storage.loot.LootTables;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -30,7 +37,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, Iterable<String> suggestions){
-        String token = builder.getRemaining().toLowerCase();
+        String token = builder.getRemainingLowerCase();
         for (String s: suggestions) if(s.toLowerCase().startsWith(token)) builder.suggest(s);
 
         return builder.buildFuture();
@@ -53,7 +60,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, Stream<String> suggestions){
-        String token = builder.getRemaining().toLowerCase();
+        String token = builder.getRemainingLowerCase();
 
         suggestions
                 .filter(s -> s.toLowerCase().startsWith(token))
@@ -69,7 +76,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Map<String, Message> suggestions){
-        String token = b.getRemaining().toLowerCase();
+        String token = b.getRemainingLowerCase();
 
         for (Map.Entry<String, Message> entry: suggestions.entrySet()){
             if(entry.getKey().toLowerCase().startsWith(token)) b.suggest(entry.getKey(), entry.getValue());
@@ -85,19 +92,36 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestKeys(SuggestionsBuilder builder, Iterable<Key> suggestions){
-        String token = builder.getRemaining().toLowerCase();
-        int index = token.indexOf(':');
-        if(index == -1) index = 0;
-
-        if(index != 0) token = token.substring(index);
+        String token = builder.getRemainingLowerCase();
 
         for (Key k: suggestions){
-            if(!k.value().startsWith(token)) continue;
-
-            builder.suggest(k.asString());
+            if(k.asString().startsWith(token)
+                    || k.value().startsWith(token)
+                    || k.namespace().startsWith(token)
+            ) {
+                builder.suggest(k.asString());
+            }
         }
 
         return builder.buildFuture();
+    }
+
+    /**
+     * Suggest coordinates
+     * @param builder The builder to suggest to
+     * @param source The source to get the cords of for suggestions
+     * @param noDecimals Whether the suggestions should allow decimal places
+     * @return The built suggestions
+     */
+    static CompletableFuture<Suggestions> suggestCords(SuggestionsBuilder builder, @Nullable CommandSource source, boolean noDecimals){
+        List<String> suggestions = new ArrayList<>(GrenadierUtils.createSuggestions(CoordinateSuggestion.DEFAULT, noDecimals));
+
+        if(source != null){
+            CoordinateSuggestion cords = source.getCoordinateSuggestion();
+            if(cords != null) suggestions.addAll(GrenadierUtils.createSuggestions(cords, noDecimals));
+        }
+
+        return suggestMatching(builder, suggestions);
     }
 
     /**
@@ -206,5 +230,17 @@ public interface CompletionProvider {
      */
     static CompletableFuture<Suggestions> suggestEntityTypes(SuggestionsBuilder builder){
         return GrenadierUtils.suggestResource(Registry.ENTITY_TYPE.keySet(), builder);
+    }
+
+    static CompletableFuture<Suggestions> suggestLootTables(SuggestionsBuilder builder) {
+        try { //this is dumb af, obfuscation is horrible, am in pain
+            MinecraftServer server = MinecraftServer.getServer();
+            ServerResources manager = server.resources;
+            LootTables lootTables = (LootTables) manager.getClass().getDeclaredMethod("getLootTables").invoke(manager);
+
+            return GrenadierUtils.suggestResource(lootTables.getIds(), builder);
+        } catch (Exception e) {
+            return Suggestions.empty();
+        }
     }
 }

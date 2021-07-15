@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
+import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
 import net.forthecrown.royalgrenadier.command.CommandWrapper;
 import net.forthecrown.royalgrenadier.command.WrapperConverter;
 import net.minecraft.commands.CommandSourceStack;

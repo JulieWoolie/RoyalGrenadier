@@ -27,7 +27,7 @@ public class MapArgumentImpl<T> implements MapArgument<T> {
         String name = reader.readUnquotedString();
 
         T result = mapSupplier.get().get(name);
-        if(result == null) throw UNKNOWN_KEY.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), name);
+        if(result == null) throw UNKNOWN_KEY.createWithContext(GrenadierUtils.correctReader(reader, cursor), name);
 
         return result;
     }

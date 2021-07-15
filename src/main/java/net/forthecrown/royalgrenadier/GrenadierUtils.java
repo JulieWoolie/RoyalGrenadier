@@ -5,12 +5,12 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CommandSource;
+import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
 import net.forthecrown.royalgrenadier.source.CommandSourceImpl;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.*;
 import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_17_R1.command.CraftBlockCommandSender;
@@ -55,7 +55,7 @@ public class GrenadierUtils {
     //Returns a reader with the cursor at the correct position
     //Normally reading and then throwing exceptions causes the cursor to be placed at the wrong position
     //So we must correct it, but also do so with a new reader so the reader in the parse method moves forward
-    public static ImmutableStringReader correctCursorReader(StringReader reader, int cursor){
+    public static ImmutableStringReader correctReader(ImmutableStringReader reader, int cursor){
         StringReader reader1 = new StringReader(reader.getString());
         reader1.setCursor(cursor);
         return reader1;
@@ -66,15 +66,31 @@ public class GrenadierUtils {
         return SharedSuggestionProvider.suggestResource(resources, builder);
     }
 
-    public static NamespacedKey readKey(StringReader reader, String defaultNamespace) {
-        String initial = reader.readUnquotedString();
-        if(reader.canRead() && reader.peek() == ':'){
-            reader.skip();
-            String key = reader.readUnquotedString();
+    //Creates suggestions for a cord suggestion
+    public static List<String> createSuggestions(CoordinateSuggestion s, boolean allowDecimals){
+        List<String> suggestions = new ArrayList<>();
 
-            return new NamespacedKey(initial, key);
-        }
+        suggestions.add(decimal(s.getX(), allowDecimals));
+        suggestions.add(decimal(s.getX(), allowDecimals) + ' ' + decimal(s.getY(), allowDecimals));
+        suggestions.add(decimal(s.getX(), allowDecimals) + ' ' + decimal(s.getY(), allowDecimals) + ' ' + decimal(s.getZ(), allowDecimals));
 
-        return new NamespacedKey(defaultNamespace, initial);
+        return suggestions;
+    }
+
+    public static List<String> create2DSuggestions(CoordinateSuggestion s, boolean allowDecimals){
+        List<String> suggestions = new ArrayList<>();
+
+        suggestions.add(decimal(s.getX(), allowDecimals));
+        suggestions.add(decimal(s.getX(), allowDecimals) + ' ' + decimal(s.getZ(), allowDecimals));
+
+        return suggestions;
+    }
+
+    //Removes the decimal point from a string, if needed
+    private static String decimal(String check, boolean allowDecimals){
+        if(allowDecimals) return check;
+
+        int index = check.indexOf('.');
+        return index == -1 ? check : check.substring(0, index);
     }
 }

@@ -52,4 +52,8 @@ public class BlockArgumentImpl implements BlockArgument {
     public Collection<String> getExamples() {
         return handle.getExamples();
     }
+
+    public BlockStateArgument getHandle() {
+        return handle;
+    }
 }

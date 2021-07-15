@@ -30,7 +30,7 @@ public class GameModeArgumentImpl implements GameModeArgument {
             case "creative", "c", "1" -> GameMode.CREATIVE;
             case "spectator", "3" -> GameMode.SPECTATOR;
             case "adventure", "a", "4" -> GameMode.ADVENTURE;
-            default -> throw UNKNOWN_GAMEMODE.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), label);
+            default -> throw UNKNOWN_GAMEMODE.createWithContext(GrenadierUtils.correctReader(reader, cursor), label);
         };
     }
 

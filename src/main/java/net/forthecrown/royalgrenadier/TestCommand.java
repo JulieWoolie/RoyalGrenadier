@@ -16,6 +16,7 @@ import net.forthecrown.grenadier.types.scoreboard.TeamArgument;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
 import net.forthecrown.royalgrenadier.types.selector.EntityArgumentImpl;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -23,6 +24,7 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
+import org.bukkit.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
@@ -94,7 +96,42 @@ public class TestCommand extends AbstractCommand {
                         )
                 )
 
-                .then(literal("pos")
+                .then(literal("key")
+                        .then(argument("key_test", KeyArgument.minecraft())
+                                .executes(c -> {
+                                    Key key = c.getArgument("key_test", Key.class);
+
+                                    c.getSource().sendMessage(key.asString());
+                                    return 0;
+                                })
+                        )
+                )
+
+                .then(literal("lootTable")
+                        .then(argument("lootTable_test", LootTableArgument.lootTable())
+                                .executes(c -> {
+                                    LootTable lootTable = c.getArgument("lootTable_test", LootTable.class);
+
+                                    c.getSource().sendMessage(lootTable.getKey().asString());
+                                    c.getSource().sendMessage(lootTable.toString());
+
+                                    return 0;
+                                })
+                        )
+                )
+
+                .then(literal("pos_block")
+                        .then(argument("loc", PositionArgument.blockPos())
+                                .executes(c -> {
+                                    CommandSource source = c.getSource();
+                                    Location l = c.getArgument("loc", Position.class).getBlockLocation(source);
+
+                                    source.sendMessage(l.toString());
+                                    return 0;
+                                })
+                        )
+                )
+                .then(literal("pos_vec")
                         .then(argument("loc", PositionArgument.position())
                                 .executes(c -> {
                                     CommandSource source = c.getSource();
@@ -132,8 +169,19 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
-                .then(literal("selector")
+                .then(literal("selector_multi")
                         .then(argument("targets", EntityArgument.multipleEntities())
+                                .executes(c -> {
+                                    CommandSource source = c.getSource();
+                                    EntitySelector selector = c.getArgument("targets", EntitySelector.class);
+
+                                    source.sendMessage(selector.getEntities(source).toString());
+                                    return 0;
+                                })
+                        )
+                )
+                .then(literal("selector_single")
+                        .then(argument("targets", EntityArgument.entity())
                                 .executes(c -> {
                                     CommandSource source = c.getSource();
                                     EntitySelector selector = c.getArgument("targets", EntitySelector.class);

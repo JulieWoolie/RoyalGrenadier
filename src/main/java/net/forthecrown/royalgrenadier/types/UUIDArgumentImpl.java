@@ -22,4 +22,8 @@ public class UUIDArgumentImpl implements UUIDArgument {
     public Collection<String> getExamples() {
         return idArg.getExamples();
     }
+
+    public UuidArgument getHandle() {
+        return idArg;
+    }
 }

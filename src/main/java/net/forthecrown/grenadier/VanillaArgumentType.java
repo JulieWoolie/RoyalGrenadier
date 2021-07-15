@@ -1,7 +1,7 @@
 package net.forthecrown.grenadier;
 
 import com.mojang.brigadier.arguments.*;
-import net.forthecrown.royalgrenadier.RoyalArgumentsImpl;
+import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
 
 import java.util.function.Supplier;
 

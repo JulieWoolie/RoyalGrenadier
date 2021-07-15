@@ -31,7 +31,7 @@ public class PositionArgumentImpl implements PositionArgument {
 
     @Override
     public Position parse(StringReader reader) throws CommandSyntaxException {
-        return new PositionImpl(handle.parse(reader));
+        return new CoordinateParser(reader).parse();
     }
 
     @Override
@@ -48,5 +48,9 @@ public class PositionArgumentImpl implements PositionArgument {
     @Override
     public Collection<String> getExamples() {
         return Arrays.asList("0 0 0", "~ ~ ~", "^ ^ ^", "^1 ^ ^-5", "0.1 -0.5 .9", "~0.5 ~1 ~-5");
+    }
+
+    public ArgumentType<Coordinates> getHandle() {
+        return handle;
     }
 }

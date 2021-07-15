@@ -2,65 +2,72 @@ package net.forthecrown.royalgrenadier.types.pos;
 
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.pos.Position;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.coordinates.Coordinates;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 
 public class PositionImpl implements Position {
 
-    private final Coordinates pos;
-    PositionImpl(Coordinates vecPos){
-        this.pos = vecPos;
-    }
+    private final boolean xRelative;
+    private final boolean yRelative;
+    private final boolean zRelative;
 
-    public Coordinates getPos() {
-        return pos;
+    private final double x;
+    private final double y;
+    private final double z;
+
+    private Location result;
+    public PositionImpl(boolean xRelative, boolean yRelative, boolean zRelative, double x,  double y, double z) {
+        this.xRelative = xRelative;
+        this.yRelative = yRelative;
+        this.zRelative = zRelative;
+
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     @Override
     public Location getLocation(CommandSource source){
-        CommandSourceStack stack = GrenadierUtils.sourceToNms(source);
+        if(result != null) return result;
 
-        float yaw = stack.getRotation().y;
-        float pitch = stack.getRotation().x;
+        Location sourceLoc = source.getLocation();
 
-        Vec3 pos = this.pos.getPosition(stack);
-        return new Location(source.getWorld(), pos.x, pos.y, pos.z, yaw, pitch);
-    }
+        return result = new Location(sourceLoc.getWorld(),
+                isXRelative() ? sourceLoc.getX() + x : x,
+                isYRelative() ? sourceLoc.getY() + y : y,
+                isZRelative() ? sourceLoc.getZ() + z : z,
 
-    @Override
-    public Location getBlockLocation(CommandSource source){
-        CommandSourceStack stack = GrenadierUtils.sourceToNms(source);
-        BlockPos blockPos = pos.getBlockPos(stack);
-        return new Location(source.getWorld(), blockPos.getX(), blockPos.getY(), blockPos.getZ());
-    }
-
-    @Override
-    public Location getCenteredLocation(CommandSource source){
-        return getLocation(source).toCenterLocation();
-    }
-
-    @Override
-    public Block getBlock(CommandSource source){
-        return getBlockLocation(source).getBlock();
+                sourceLoc.getYaw(),
+                sourceLoc.getPitch()
+        );
     }
 
     @Override
     public boolean isXRelative(){
-        return pos.isXRelative();
+        return xRelative;
     }
 
     @Override
     public boolean isYRelative(){
-        return pos.isYRelative();
+        return yRelative;
     }
 
     @Override
     public boolean isZRelative(){
-        return pos.isZRelative();
+        return zRelative;
+    }
+
+    @Override
+    public double getX() {
+        return x;
+    }
+
+    @Override
+    public double getY() {
+        return y;
+    }
+
+    @Override
+    public double getZ() {
+        return z;
     }
 }

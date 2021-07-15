@@ -28,7 +28,7 @@ public class WorldArgumentImpl implements WorldArgument {
         String name = reader.readUnquotedString();
 
         World result = Bukkit.getWorld(name);
-        if(result == null) throw UNKOWN_WORLD.createWithContext(GrenadierUtils.correctCursorReader(reader, cursor), name);
+        if(result == null) throw UNKOWN_WORLD.createWithContext(GrenadierUtils.correctReader(reader, cursor), name);
 
         return result;
     }

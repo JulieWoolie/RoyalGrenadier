@@ -34,4 +34,8 @@ public class ParticleArgumentImpl implements ParticleArgument {
     public Collection<String> getExamples() {
         return particleArg.getExamples();
     }
+
+    public net.minecraft.commands.arguments.ParticleArgument getHandle() {
+        return particleArg;
+    }
 }

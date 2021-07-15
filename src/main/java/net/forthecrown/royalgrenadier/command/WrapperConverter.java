@@ -10,7 +10,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
-import net.forthecrown.royalgrenadier.RoyalArgumentsImpl;
+import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
 import net.forthecrown.royalgrenadier.source.CommandSources;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypes;
@@ -73,7 +73,7 @@ public class WrapperConverter {
         return LiteralArgumentBuilder.literal(name);
     }
 
-    private RequiredArgumentBuilder<CommandSourceStack, ?> required(String name, ArgumentType<?> type, ArgumentType<?> grenadierType){
+    private RequiredArgumentBuilder<CommandSourceStack, ?> required(String name, ArgumentType<?> type){
         return RequiredArgumentBuilder.argument(name, type);
     }
 
@@ -96,7 +96,7 @@ public class WrapperConverter {
         //If it's not a vanilla argument type
         if(!ArgumentTypes.isTypeRegistered(type)) type = convertUnknownType(type);
 
-        RequiredArgumentBuilder<CommandSourceStack, ?> result = required(node.getName(), type, node.getType());
+        RequiredArgumentBuilder<CommandSourceStack, ?> result = required(node.getName(), type);
         if(node.getCommand() != null) result.executes(wrapper);
 
         if(node.getRequirement() != null) result.requires(convertTest(node));

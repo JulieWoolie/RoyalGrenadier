@@ -30,4 +30,8 @@ public class ItemArgumentImpl implements ItemArgument {
     public Collection<String> getExamples() {
         return handle.getExamples();
     }
+
+    public net.minecraft.commands.arguments.item.ItemArgument getHandle() {
+        return handle;
+    }
 }

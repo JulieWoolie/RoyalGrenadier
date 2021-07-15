@@ -41,7 +41,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V> {
             try {
                 result.add(type.parse(new StringReader(s)));
             } catch (CommandSyntaxException e){
-                throw PARSING_ERROR.createWithContext(GrenadierUtils.correctCursorReader(reader, reader.getString().indexOf(s)), e.getRawMessage().getString());
+                throw PARSING_ERROR.createWithContext(GrenadierUtils.correctReader(reader, reader.getString().indexOf(s)), e.getRawMessage().getString());
             }
         }
 

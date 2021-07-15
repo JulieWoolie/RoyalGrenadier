@@ -16,7 +16,6 @@ import net.forthecrown.royalgrenadier.Main;
 import net.forthecrown.royalgrenadier.source.CommandSources;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -32,8 +31,11 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
     public CommandWrapper(AbstractCommand builder){
         this.builder = builder;
 
-        String permissionMessage = builder.getPermissionMessage() == null ? Bukkit.getPermissionMessage() : builder.getPermissionMessage();
-        this.noPermission = new SimpleCommandExceptionType(() -> permissionMessage);
+        this.noPermission = new SimpleCommandExceptionType(
+                builder.getPermissionMessage() == null ?
+                        new TranslatableComponent("commands.generic.permission") :
+                        builder::getPermissionMessage
+        );
     }
 
     @Override

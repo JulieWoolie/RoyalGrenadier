@@ -8,7 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.EnchantArgument;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.grenadier.types.KeyArgument;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -23,7 +23,7 @@ public class EnchantArgumentImpl implements EnchantArgument {
 
     @Override
     public Enchantment parse(StringReader reader) throws CommandSyntaxException {
-        NamespacedKey key = GrenadierUtils.readKey(reader, NamespacedKey.MINECRAFT);
+        NamespacedKey key = KeyArgument.minecraft().parse(reader);
 
         //Get the enchantment from the key
         Enchantment enchantment = Enchantment.getByKey(key);

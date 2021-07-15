@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.command.AbstractCommand;
+import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -15,6 +16,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.ServerOperator;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface CommandSource extends ResultConsumer<CommandSource>, ServerOperator {
@@ -148,7 +150,14 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * Sends a message to the sender
      * @param component The message
      */
-    void sendMessage(Component component);
+    default void sendMessage(Component component) { sendMessage(component, null); }
+
+    /**
+     * Sends a message to the sender
+     * @param message The message
+     * @param id The ID of the sender
+     */
+    void sendMessage(Component message, @Nullable UUID id);
 
     /**
      * Sends an admin message to this sender and everyone else with permission for the current command
@@ -193,6 +202,12 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * @return Whether this sender should be broadcasting admin messages
      */
     boolean shouldInformAdmins();
+
+    /**
+     * Gets a coordinate suggestion relevant to this source, or null, if relevant cords were found in a 5 block distance
+     * @return Gets the cords of the spot the source is looking at
+     */
+    @Nullable CoordinateSuggestion getCoordinateSuggestion();
 
     /**
      * Suggest matching strings for the specified SuggestionsBuilder

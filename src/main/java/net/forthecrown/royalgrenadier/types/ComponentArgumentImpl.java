@@ -11,15 +11,19 @@ import java.util.Collection;
 public class ComponentArgumentImpl implements ComponentArgument {
     protected ComponentArgumentImpl() {}
     public static final ComponentArgumentImpl INSTANCE = new ComponentArgumentImpl();
-    private final net.minecraft.commands.arguments.ComponentArgument compArg = net.minecraft.commands.arguments.ComponentArgument.textComponent();
+    private final net.minecraft.commands.arguments.ComponentArgument handle = net.minecraft.commands.arguments.ComponentArgument.textComponent();
 
     @Override
     public Component parse(StringReader reader) throws CommandSyntaxException {
-        return PaperAdventure.asAdventure(compArg.parse(reader));
+        return PaperAdventure.asAdventure(handle.parse(reader));
     }
 
     @Override
     public Collection<String> getExamples() {
-        return compArg.getExamples();
+        return handle.getExamples();
+    }
+
+    public net.minecraft.commands.arguments.ComponentArgument getHandle() {
+        return handle;
     }
 }
