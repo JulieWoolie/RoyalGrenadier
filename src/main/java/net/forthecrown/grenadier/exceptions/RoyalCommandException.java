@@ -4,9 +4,9 @@ import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.adventure.AdventureComponent;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -39,6 +39,11 @@ public class RoyalCommandException extends CommandSyntaxException {
      */
     public static Style HERE_POINTER_STYLE = Style.style(NamedTextColor.RED, TextDecoration.ITALIC);
 
+    /**
+     * Determines whether the stack trace of exceptions is printed in the hover event of the command failure message
+     */
+    public static boolean ENABLE_HOVER_STACK_TRACE = true;
+
     public RoyalCommandException(CommandExceptionType type, Message message) {
         super(type, message);
     }
@@ -70,29 +75,7 @@ public class RoyalCommandException extends CommandSyntaxException {
      * @return The context, or null, if no input was given
      */
     public Component getComponentContext(){
-        if (getInput() == null || getCursor() < 0) return null;
-
-        final TextComponent.Builder builder = Component.text();
-        final int cursor = Math.min(getInput().length(), getCursor());
-        final int start = Math.max(0, cursor - CONTEXT_AMOUNT); //Either start of input or cursor - 10
-
-        //Context too long, add dots
-        if (start != 0) builder.append(Component.text("...").color(NamedTextColor.GRAY));
-
-        String grayContext = getInput().substring(start, cursor);
-        String redContext = getInput().substring(cursor);
-
-        builder.append(
-                Component.text()
-                        .clickEvent(ClickEvent.suggestCommand("/" + getInput())) //Clicking on the exception will put the input in chat
-
-                        .append(Component.text(grayContext).style(GRAY_CONTEXT_STYLE))
-                        .append(Component.text(redContext).style(RED_CONTEXT_STYLE))
-                        .append(Component.text("<--[HERE]").style(HERE_POINTER_STYLE)) //Tell them were they went wrong in life, answer is here, writing some useless ass comment for an API no one will use while failing school
-                        .build()
-        );
-
-        return builder.build();
+        return GrenadierUtils.formatExceptionContext(this);
     }
 
     /**

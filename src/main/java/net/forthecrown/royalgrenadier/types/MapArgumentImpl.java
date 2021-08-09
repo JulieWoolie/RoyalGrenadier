@@ -11,14 +11,15 @@ import net.forthecrown.grenadier.types.MapArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class MapArgumentImpl<T> implements MapArgument<T> {
     public static final DynamicCommandExceptionType UNKNOWN_KEY = new DynamicCommandExceptionType(o -> () -> "Unknown key: " + o);
 
-    private final MapSupplier<T> mapSupplier;
-    public MapArgumentImpl(MapSupplier<T> supplier){
-        this.mapSupplier = supplier;
+    private final Map<String, T> map;
+    public MapArgumentImpl(Map<String, T> map){
+        this.map = map;
     }
 
     @Override
@@ -26,7 +27,7 @@ public class MapArgumentImpl<T> implements MapArgument<T> {
         int cursor = reader.getCursor();
         String name = reader.readUnquotedString();
 
-        T result = mapSupplier.get().get(name);
+        T result = map.get(name);
         if(result == null) throw UNKNOWN_KEY.createWithContext(GrenadierUtils.correctReader(reader, cursor), name);
 
         return result;
@@ -34,11 +35,11 @@ public class MapArgumentImpl<T> implements MapArgument<T> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CompletionProvider.suggestMatching(builder, mapSupplier.get().keySet());
+        return CompletionProvider.suggestMatching(builder, map.keySet());
     }
 
     @Override
     public Collection<String> getExamples() {
-        return mapSupplier.get().keySet();
+        return map.keySet();
     }
 }

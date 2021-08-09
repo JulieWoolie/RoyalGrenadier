@@ -1,12 +1,20 @@
 package net.forthecrown.royalgrenadier;
 
 import com.mojang.brigadier.ImmutableStringReader;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import io.papermc.paper.adventure.PaperAdventure;
 import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
+import net.forthecrown.grenadier.exceptions.RoyalCommandException;
+import net.forthecrown.grenadier.types.pos.Vec2Suggestion;
+import net.forthecrown.grenadier.types.pos.Vec3Suggestion;
 import net.forthecrown.royalgrenadier.source.CommandSourceImpl;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +25,7 @@ import org.bukkit.craftbukkit.v1_17_R1.command.CraftBlockCommandSender;
 import org.bukkit.craftbukkit.v1_17_R1.command.ProxiedNativeCommandSender;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,8 +75,53 @@ public class GrenadierUtils {
         return SharedSuggestionProvider.suggestResource(resources, builder);
     }
 
+    public static Component formatCommandException(CommandSyntaxException exception) {
+        Component initialMessage = exception.getRawMessage() instanceof net.minecraft.network.chat.Component ?
+                PaperAdventure.asAdventure((net.minecraft.network.chat.Component) exception.getRawMessage()) :
+                Component.text(exception.getRawMessage().getString());
+
+        initialMessage = initialMessage.style(RoyalCommandException.ERROR_MESSAGE_STYLE);
+
+        if(exception.getInput() == null || exception.getCursor() < 1) return initialMessage;
+
+        TextComponent.Builder builder = Component.text()
+                .append(initialMessage)
+                .append(Component.newline())
+                .append(formatExceptionContext(exception));
+
+        return builder.build();
+    }
+
+    public static Component formatExceptionContext(CommandSyntaxException e) {
+        if (e.getInput() == null || e.getCursor() < 1) return null;
+
+        final TextComponent.Builder builder = Component.text();
+        final int cursor = Math.min(e.getInput().length(), e.getCursor());
+        final int start = Math.max(0, cursor - CommandSyntaxException.CONTEXT_AMOUNT); //Either start of input or cursor - 10
+
+        //Context too long, add dots
+        if (start != 0) builder.append(Component.text("...").style(RoyalCommandException.GRAY_CONTEXT_STYLE));
+
+        String grayContext = e.getInput().substring(start, cursor);
+        String redContext = e.getInput().substring(cursor);
+
+        builder.append(
+                Component.text()
+                        .clickEvent(ClickEvent.suggestCommand("/" + e.getInput())) //Clicking on the exception will put the input in chat
+
+                        .append(Component.text(grayContext).style(RoyalCommandException.GRAY_CONTEXT_STYLE))
+                        .append(Component.text(redContext).style(RoyalCommandException.RED_CONTEXT_STYLE))
+
+                        .append(Component.translatable("command.context.here").style(RoyalCommandException.HERE_POINTER_STYLE)) //Tell them were they went wrong in life, answer is here, writing some useless ass comment for an API no one will use while failing school
+
+                        .build()
+        );
+
+        return builder.build();
+    }
+
     //Creates suggestions for a cord suggestion
-    public static List<String> createSuggestions(CoordinateSuggestion s, boolean allowDecimals){
+    public static List<String> createSuggestions(Vec3Suggestion s, boolean allowDecimals){
         List<String> suggestions = new ArrayList<>();
 
         suggestions.add(decimal(s.getX(), allowDecimals));
@@ -77,20 +131,38 @@ public class GrenadierUtils {
         return suggestions;
     }
 
-    public static List<String> create2DSuggestions(CoordinateSuggestion s, boolean allowDecimals){
+    public static List<String> create2DSuggestions(Vec2Suggestion s, boolean allowDecimals){
         List<String> suggestions = new ArrayList<>();
 
         suggestions.add(decimal(s.getX(), allowDecimals));
-        suggestions.add(decimal(s.getX(), allowDecimals) + ' ' + decimal(s.getZ(), allowDecimals));
+        suggestions.add(decimal(s.getX(), allowDecimals) + ' ' + decimal(s.getY(), allowDecimals));
 
         return suggestions;
     }
 
     //Removes the decimal point from a string, if needed
-    private static String decimal(String check, boolean allowDecimals){
+    public static String decimal(String check, boolean allowDecimals){
         if(allowDecimals) return check;
 
         int index = check.indexOf('.');
         return index == -1 ? check : check.substring(0, index);
+    }
+
+    public static void suggestMatches(SuggestionsBuilder builder, String toSuggest, Message tooltip) {
+        String token = builder.getRemainingLowerCase();
+
+        if(toSuggest.startsWith(token)) builder.suggest(toSuggest, tooltip);
+    }
+
+    public static Message componentToMessage(@Nullable Component component) {
+        if(component == null) return null;
+        return PaperAdventure.asVanilla(component);
+    }
+
+    public static Component messageToComponent(@Nullable Message message) {
+        if(message == null) return null;
+
+        if(message instanceof net.minecraft.network.chat.Component) return PaperAdventure.asAdventure((net.minecraft.network.chat.Component) message);
+        return Component.text(message.getString());
     }
 }

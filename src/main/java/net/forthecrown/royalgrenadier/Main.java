@@ -10,6 +10,7 @@ import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
 import net.forthecrown.royalgrenadier.command.CommandWrapper;
 import net.forthecrown.royalgrenadier.command.WrapperConverter;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
 public class Main extends JavaPlugin {
     public static Logger LOGGER;
     private static CommandDispatcher<CommandSource> dispatcher;
-    private static net.minecraft.commands.Commands serverCommands;
+    private static Commands serverCommands;
 
     /**
      * Gets the dispatcher for the RoyalGrenadier
@@ -33,7 +34,7 @@ public class Main extends JavaPlugin {
     }
 
     /**
-     * Registers the given AbstractCommand, making it useable. Not needed in most cases, as AbstractCommand's register() method calls this.
+     * Registers the given AbstractCommand, making it useable. Not needed in most cases, as {@link AbstractCommand#register()} calls this.
      * @param builder The command
      */
     public static void register(AbstractCommand builder){
@@ -56,7 +57,7 @@ public class Main extends JavaPlugin {
 
         CommandMap map = Bukkit.getCommandMap();
         map.register(builder.getName(), builder.getPlugin().getName(), bukkitWrapper);
-        bukkitWrapper.register(map);
+        //bukkitWrapper.register(map);
     }
 
     //:I I didn't wanna have this be a plugin, but I also couldn't
@@ -73,6 +74,6 @@ public class Main extends JavaPlugin {
         RoyalArgumentsImpl.init();
         CommandSyntaxException.ENABLE_COMMAND_STACK_TRACES = true;
 
-        new TestCommand(this);
+        //new TestCommand(this);
     }
 }

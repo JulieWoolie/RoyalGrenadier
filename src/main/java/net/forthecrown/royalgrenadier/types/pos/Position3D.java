@@ -4,7 +4,7 @@ import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.pos.Position;
 import org.bukkit.Location;
 
-public class PositionImpl implements Position {
+public class Position3D implements Position {
 
     private final boolean xRelative;
     private final boolean yRelative;
@@ -14,8 +14,7 @@ public class PositionImpl implements Position {
     private final double y;
     private final double z;
 
-    private Location result;
-    public PositionImpl(boolean xRelative, boolean yRelative, boolean zRelative, double x,  double y, double z) {
+    public Position3D(boolean xRelative, boolean yRelative, boolean zRelative, double x, double y, double z) {
         this.xRelative = xRelative;
         this.yRelative = yRelative;
         this.zRelative = zRelative;
@@ -27,11 +26,9 @@ public class PositionImpl implements Position {
 
     @Override
     public Location getLocation(CommandSource source){
-        if(result != null) return result;
-
         Location sourceLoc = source.getLocation();
 
-        return result = new Location(sourceLoc.getWorld(),
+        return new Location(sourceLoc.getWorld(),
                 isXRelative() ? sourceLoc.getX() + x : x,
                 isYRelative() ? sourceLoc.getY() + y : y,
                 isZRelative() ? sourceLoc.getZ() + z : z,

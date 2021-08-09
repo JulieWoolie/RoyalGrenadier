@@ -6,8 +6,15 @@ import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.royalgrenadier.types.WorldArgumentImpl;
 import org.bukkit.World;
 
+/**
+ * Argument type that parses and returns a world by its name
+ */
 public interface WorldArgument extends ArgumentType<World> {
 
+    /**
+     * Gets the instance of the argument
+     * @return The argument instance
+     */
     static WorldArgument world(){
         return WorldArgumentImpl.INSTANCE;
     }

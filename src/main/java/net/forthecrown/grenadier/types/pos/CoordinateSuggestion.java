@@ -1,42 +1,45 @@
 package net.forthecrown.grenadier.types.pos;
 
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
+
 /**
- * A class which holds 3 string suggestions for suggest coordinates.
+ * Represents a coordinate suggestion
+ * <p></p>
+ * The two built in implementations of this interface are {@link Vec2Suggestion} for 2d suggestions, and
+ * {@link Vec3Suggestion} for normal suggestions.
  */
-public class CoordinateSuggestion {
+public interface CoordinateSuggestion {
+
     /**
-     * The default ~ ~ ~ coordinate suggestion
+     * The tooltip this suggestion may or may not have
+     * @return The suggestion's tooltip
      */
-    public static final CoordinateSuggestion DEFAULT = new CoordinateSuggestion("~", "~", "~");
+    @Nullable Component tooltip();
 
-    private final String x;
-    private final String y;
-    private final String z;
+    /**
+     * Creates suggestions
+     * @param builder The builder to use for context
+     * @param allowDecimals Whether decimal places are allowed in the suggestion
+     */
+    void applySuggestions(SuggestionsBuilder builder, boolean allowDecimals);
 
-    public CoordinateSuggestion(String x, String y, String z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
+    /**
+     * The x string to suggest
+     * @return X cord suggestion
+     */
+    String getX();
 
-    public CoordinateSuggestion(double x, double y, double z){
-        this(x + "", y + "", z + "");
-    }
+    /**
+     * The y string to suggest
+     * @return Y cord suggestion
+     */
+    String getY();
 
-    public String getX() {
-        return x;
-    }
-
-    public String getY() {
-        return y;
-    }
-
-    public String getZ() {
-        return z;
-    }
-
-    @Override
-    public String toString() {
-        return x + ' ' + y + ' ' + z;
-    }
+    /**
+     * The z string to suggest
+     * @return Z cord suggestion
+     */
+    String getZ();
 }

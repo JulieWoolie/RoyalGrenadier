@@ -7,7 +7,8 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
+import net.forthecrown.grenadier.types.pos.Vec2Suggestion;
+import net.forthecrown.grenadier.types.pos.Vec3Suggestion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
@@ -188,13 +189,25 @@ public class CommandSourceImpl implements CommandSource {
     }
 
     @Override
-    public CoordinateSuggestion getCoordinateSuggestion() {
+    public Vec3Suggestion getRelevant3DCords() {
         Location loc = getLocation();
         RayTraceResult result = getWorld().rayTraceBlocks(loc, loc.getDirection(), 5);
         if(result == null) return null;
 
         Vector hitPos = result.getHitPosition();
-        return new CoordinateSuggestion(hitPos.getX(), hitPos.getY(), hitPos.getZ());
+        return new Vec3Suggestion( //Round to 2 decimal places.
+                String.format("%.2f", hitPos.getX()),
+                String.format("%.2f", hitPos.getY()),
+                String.format("%.2f", hitPos.getZ())
+        );
+    }
+
+    @Override
+    public @Nullable Vec2Suggestion getRelevant2DCords() {
+        Vec3Suggestion suggestion = getRelevant3DCords();
+        if(suggestion == null) return null;
+
+        return new Vec2Suggestion(suggestion.getX(), suggestion.getZ(), suggestion.tooltip());
     }
 
     @Override

@@ -1,6 +1,8 @@
 package net.forthecrown.grenadier.command;
 
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import org.bukkit.permissions.Permission;
 
@@ -11,6 +13,23 @@ public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
     BrigadierCommand(String literal, AbstractCommand command) {
         super(literal);
         this.command = command;
+    }
+
+    @Override
+    protected BrigadierCommand getThis() {
+        return this;
+    }
+
+    @Override
+    public BrigadierCommand then(CommandNode<CommandSource> argument) {
+        super.then(argument);
+        return this;
+    }
+
+    @Override
+    public BrigadierCommand then(ArgumentBuilder<CommandSource, ?> argument) {
+        super.then(argument);
+        return this;
     }
 
     /**
@@ -62,4 +81,9 @@ public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
         command.setDescription(description);
         return this;
     }
+
+    /**
+     * Registers the command
+     */
+    public void register() { command.register(); }
 }

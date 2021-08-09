@@ -1,6 +1,5 @@
 package net.forthecrown.grenadier.command;
 
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -113,7 +112,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @param suggestions The map of suggestions
      * @return The suggestion provider for the inputted map
      */
-    protected SuggestionProvider<CommandSource> suggestMatching(Map<String, Message> suggestions){
+    protected SuggestionProvider<CommandSource> suggestMatching(Map<String, String> suggestions){
         return (c, b) -> CompletionProvider.suggestMatching(b, suggestions);
     }
 

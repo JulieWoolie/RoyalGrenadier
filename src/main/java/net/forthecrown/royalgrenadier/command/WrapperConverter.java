@@ -103,7 +103,9 @@ public class WrapperConverter {
 
         //Here's that hacky af useage of that getSuggestions method in CommandWrapper
         result.suggests((c, b) -> wrapper.getSuggestions(c, b, node));
-        if(RoyalArgumentsImpl.shouldUseVanillaSuggestions(node.getType())) result.suggests(null);
+        if(node.getCustomSuggestions() != null && RoyalArgumentsImpl.shouldUseVanillaSuggestions(node.getType())) {
+            result.suggests(null);
+        }
 
         if(node.getChildren() != null && node.getChildren().size() > 0){
             convertNodes(node.getChildren(), result);

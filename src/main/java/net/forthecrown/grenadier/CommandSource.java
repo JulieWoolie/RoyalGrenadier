@@ -5,7 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
+import net.forthecrown.grenadier.types.pos.Vec2Suggestion;
+import net.forthecrown.grenadier.types.pos.Vec3Suggestion;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -23,6 +24,10 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
 
     /**
      * Checks if the sender is of the type
+     * <p></p>
+     * For example, to use this to check if the sender is a player you'd use
+     * {@code boolean isPlayer = is(Player.class); }
+     *
      * @param clazz The class of the type to check
      * @param <T>
      * @return Whether the sender is of the type
@@ -31,12 +36,26 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
 
     /**
      * Gets the sender as the specified type
+     * <p></p>
+     * To use this to get the sender as, for example, a slime, you'd do:
+     * {@code Slime slime = as(Slime.class); }
+     *
      * @param clazz The class of the type, must extend {@link CommandSender}
      * @param <T> The type
      * @return The sender as the type
      * @throws CommandSyntaxException If the sender is not of the specified type
      */
     <T extends CommandSender> T as(Class<T> clazz) throws CommandSyntaxException;
+
+    /**
+     * Similar to {@link CommandSource#as(Class)} however it won't throw an exception if the sender is not of the
+     * given type, rather it just returns null
+     *
+     * @param clazz The class of the type, must extend {@link CommandSender}
+     * @param <T> The type
+     * @return The sender as the given type, or null if sender isn't of the given type
+     */
+    @Nullable <T extends CommandSender> T asOrNull(Class<T> clazz);
 
     /**
      * Gets the normal Bukkit CommandSender
@@ -68,14 +87,6 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * @return The string display name
      */
     String textName();
-
-    /**
-     * Gets the sender as the specified type, or null if sender isn't of the given type
-     * @param clazz The class of the type, must extend {@link CommandSender}
-     * @param <T> The type
-     * @return The sender as the given type, or null if sender isn't of the given type
-     */
-    @Nullable <T extends CommandSender> T asOrNull(Class<T> clazz);
 
     /**
      * Gets the sender's location
@@ -111,6 +122,9 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
 
     /**
      * Checks if the sender has the vanilla OP level
+     * <p></p>
+     * Constants for levels are in {@link PermissionLevels}
+     * @see PermissionLevels
      * @param level The level to check for
      * @return Whether they have the given level of permissions
      */
@@ -204,10 +218,16 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
     boolean shouldInformAdmins();
 
     /**
-     * Gets a coordinate suggestion relevant to this source, or null, if relevant cords were found in a 5 block distance
+     * Gets a coordinate suggestion relevant to this source, or null, if no relevant cords were found in a 5 block distance
      * @return Gets the cords of the spot the source is looking at
      */
-    @Nullable CoordinateSuggestion getCoordinateSuggestion();
+    @Nullable Vec3Suggestion getRelevant3DCords();
+
+    /**
+     * Gets a coordinate suggestion relevant to this source, or null, if no relevant cords were found in a 5 block distance
+     * @return Gets the cords of the spot the source is looking at
+     */
+    @Nullable Vec2Suggestion getRelevant2DCords();
 
     /**
      * Suggest matching strings for the specified SuggestionsBuilder

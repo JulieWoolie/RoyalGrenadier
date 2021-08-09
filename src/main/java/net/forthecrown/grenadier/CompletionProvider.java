@@ -1,6 +1,6 @@
 package net.forthecrown.grenadier;
 
-import com.mojang.brigadier.Message;
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
@@ -15,11 +15,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -75,11 +72,11 @@ public interface CompletionProvider {
      * @param suggestions The suggestions to pick from
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Map<String, Message> suggestions){
+    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Map<String, String> suggestions){
         String token = b.getRemainingLowerCase();
 
-        for (Map.Entry<String, Message> entry: suggestions.entrySet()){
-            if(entry.getKey().toLowerCase().startsWith(token)) b.suggest(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, String> entry: suggestions.entrySet()){
+            if(entry.getKey().toLowerCase().startsWith(token)) b.suggest(entry.getKey(), new LiteralMessage(entry.getValue()));
         }
 
         return b.buildFuture();
@@ -107,21 +104,18 @@ public interface CompletionProvider {
     }
 
     /**
-     * Suggest coordinates
+     * Suggests 3d cords to given builder
      * @param builder The builder to suggest to
-     * @param source The source to get the cords of for suggestions
-     * @param noDecimals Whether the suggestions should allow decimal places
-     * @return The built suggestions
+     * @param allowDecimals Whether to allow decimal places in the suggestions
+     * @param suggestions Any optional extra sugestions.
+     * @return
      */
-    static CompletableFuture<Suggestions> suggestCords(SuggestionsBuilder builder, @Nullable CommandSource source, boolean noDecimals){
-        List<String> suggestions = new ArrayList<>(GrenadierUtils.createSuggestions(CoordinateSuggestion.DEFAULT, noDecimals));
-
-        if(source != null){
-            CoordinateSuggestion cords = source.getCoordinateSuggestion();
-            if(cords != null) suggestions.addAll(GrenadierUtils.createSuggestions(cords, noDecimals));
+    static CompletableFuture<Suggestions> suggestCords(SuggestionsBuilder builder, boolean allowDecimals, Iterable<CoordinateSuggestion> suggestions){
+        for (CoordinateSuggestion s: suggestions) {
+            s.applySuggestions(builder, allowDecimals);
         }
 
-        return suggestMatching(builder, suggestions);
+        return builder.buildFuture();
     }
 
     /**

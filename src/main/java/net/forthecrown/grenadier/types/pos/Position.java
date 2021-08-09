@@ -8,6 +8,7 @@ public interface Position {
 
     /**
      * Gets the location specified, requires Sender for any relative coordinates
+     * <p>Note: if the position is a 2D position, the Y will always be 0</p>
      * @param source The sender that used this command
      * @return The parsed location
      */

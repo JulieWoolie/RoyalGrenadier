@@ -30,10 +30,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 //Test command because I don't know how to write unit tests
 public class TestCommand extends AbstractCommand {
@@ -64,6 +61,12 @@ public class TestCommand extends AbstractCommand {
                 .then(literal("exception_test")
                         .executes(c -> {
                             throw EntityArgumentImpl.TOO_MANY_PLAYERS.create();
+                        })
+                )
+
+                .then(literal("runtime_exception_test")
+                        .executes(c -> {
+                            throw new IllegalArgumentException("Test exception");
                         })
                 )
 
@@ -142,6 +145,29 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
+                .then(literal("pos_2d_vec")
+                        .then(argument("loc", PositionArgument.position2D())
+                                .executes(c -> {
+                                    CommandSource source = c.getSource();
+                                    Location l = c.getArgument("loc", Position.class).getLocation(source);
+
+                                    source.sendMessage(l.toString());
+                                    return 0;
+                                })
+                        )
+                )
+                .then(literal("pos_2d_block")
+                        .then(argument("loc", PositionArgument.blockPos2D())
+                                .executes(c -> {
+                                    CommandSource source = c.getSource();
+                                    Location l = c.getArgument("loc", Position.class).getLocation(source);
+
+                                    source.sendMessage(l.toString());
+                                    return 0;
+                                })
+                        )
+                )
+
                 .then(literal("world")
                         .then(argument("level", WorldArgument.world())
                                 .executes(c -> {

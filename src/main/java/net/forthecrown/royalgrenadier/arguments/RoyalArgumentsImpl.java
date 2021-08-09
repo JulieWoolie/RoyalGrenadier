@@ -12,6 +12,7 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.ItemEnchantmentArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.synchronization.ArgumentTypes;
+import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -23,28 +24,37 @@ public class RoyalArgumentsImpl {
 
     //Registers the default arguments into the registry
     public static void init(){
-        register(PositionArgumentImpl.class, PositionArgumentImpl::getHandle, true);
-        register(ComponentArgumentImpl.class, ComponentArgumentImpl::getHandle, true);
-        register(WorldArgumentImpl.class, g -> DimensionArgument.dimension(), false);
-        register(EnchantArgumentImpl.class, g -> ItemEnchantmentArgument.enchantment(), false);
-        register(ItemArgumentImpl.class, ItemArgumentImpl::getHandle, true);
-        register(ParticleArgumentImpl.class, ParticleArgumentImpl::getHandle, true);
-        register(EntityArgumentImpl.class, EntityArgumentImpl::getHandle, true);
-        register(UUIDArgumentImpl.class, UUIDArgumentImpl::getHandle, true);
-        register(TeamArgumentImpl.class, TeamArgumentImpl::getHandle, true);
-        register(ObjectiveArgumentImpl.class, ObjectiveArgumentImpl::getHandle, true);
-        register(KeyArgumentImpl.class, KeyArgumentImpl::getHandle, true);
-        register(LootTableArgumentImpl.class, LootTableArgumentImpl::getHandle, false);
-        register(TimeArgumentImpl.class, StringArgumentType::word);
-        register(GameModeArgumentImpl.class, StringArgumentType::word);
+        //Wrappers for vanilla types
+        register(PositionArgumentImpl.class,        PositionArgumentImpl::getHandle,            false);
+        register(ComponentArgumentImpl.class,       ComponentArgumentImpl::getHandle,           true);
+        register(WorldArgumentImpl.class,           g -> DimensionArgument.dimension(),         false);
+        register(EnchantArgumentImpl.class,         g -> ItemEnchantmentArgument.enchantment(), false);
+        register(ItemArgumentImpl.class,            ItemArgumentImpl::getHandle,                true);
+        register(ParticleArgumentImpl.class,        ParticleArgumentImpl::getHandle,            true);
+        register(EntityArgumentImpl.class,          EntityArgumentImpl::getHandle,              true);
+        register(UUIDArgumentImpl.class,            UUIDArgumentImpl::getHandle,                true);
+        register(TeamArgumentImpl.class,            TeamArgumentImpl::getHandle,                true);
+        register(ObjectiveArgumentImpl.class,       ObjectiveArgumentImpl::getHandle,           true);
+        register(KeyArgumentImpl.class,             KeyArgumentImpl::getHandle,                 false);
+
+        //Custom argument types
+        register(LootTableArgumentImpl.class,       LootTableArgumentImpl::getHandle,           false);
+        register(TimeArgumentImpl.class,            StringArgumentType::word);
+        register(GameModeArgumentImpl.class,        StringArgumentType::word);
+        register(ArrayArgumentImpl.class,           StringArgumentType::greedyString);
     }
 
     //Gets the NMS equivalent to a registered argument type
     public static @NotNull ArgumentType<?> getNMS(ArgumentType<?> type){
+        if(isVanillaType(type)) return type;
+
         if(wrapperAndNms.containsKey(type.getClass())){
             RegisteredArgument pair = wrapperAndNms.get(type.getClass());;
 
-            return pair.convert(type);
+            ArgumentType<?> arg = pair.convert(type);
+            Validate.isTrue(isVanillaType(arg), type.getClass().getSimpleName() + " has invalid argument converter");
+
+            return arg;
         }
 
         //ArgumentScoreholder seems to be a works-for-all kind of thing, except not really
