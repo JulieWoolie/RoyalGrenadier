@@ -1,11 +1,13 @@
-import org.apache.tools.ant.filters.ReplaceTokens
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
 plugins {
     id 'java'
 }
 
-group 'net.forthecrown'
-version '1.1.2-SNAPSHOT-mojang-mapped'
+group 'net.net.forthecrown'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -28,6 +30,37 @@ dependencies {
     implementation 'com.mojang:brigadier:1.0.17'
 }
 
-processResources {
-    filter ReplaceTokens, tokens: [version: version]
+tasks.register('moveAll') {
+    it.dependsOn(
+            project("Plugin").getTasks().getByName("remap"),
+            project("Grenadier").getTasks().getByName("remap")
+    )
+
+    it.doLast {
+        moveToBuild("Standalone", true)
+        moveToBuild("Standalone", false)
+        moveToBuild("Plugin", false)
+
+        cleanRemapFolder()
+    }
+}
+
+void cleanRemapFolder() {
+    File plLeftOver = new File(projectDir.absolutePath + '/remapping/Plugin-' + version + '-all.jar')
+    println plLeftOver.absolutePath
+
+    if(plLeftOver.exists()) plLeftOver.delete()
+}
+
+void moveToBuild(String filePrefix, boolean remapped) {
+    String fileName = "Grenadier-" + filePrefix + '-' + version + (remapped ? "-remapped" : "") + '.jar'
+    String dir = '/remapping/' + fileName
+
+    String projDirPath = projectDir.absolutePath
+
+    Files.move(
+            Paths.get(projDirPath + dir),
+            Paths.get(projDirPath + "/build/" + fileName),
+            StandardCopyOption.REPLACE_EXISTING
+    )
 }
