@@ -1,0 +1,44 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'java'
+}
+
+group 'net.net.forthecrown'
+version parent.version
+
+repositories {
+    mavenCentral()
+
+    maven { url 'https://papermc.io/repo/repository/maven-public/' }
+    maven { url 'https://oss.sonatype.org/content/groups/public/' }
+    maven { url "https://libraries.minecraft.net" }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'}
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations:19.0.0'
+
+    //compileOnly "io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT"
+
+    //implementation files("C:/Users/ander/Desktop/ThePitOfTrash/Paper/Paper-Server/target/paper-1.16.5.jar")
+    compileOnly files("D:/GitHubRepos/Paper/Paper-Server/build/libs/Paper-Server-1.17-R0.1-SNAPSHOT-mojang-mapped.jar")
+    compileOnly 'com.mojang:brigadier:1.0.17'
+
+    implementation(project(":Grenadier"))
+}
+
+tasks.register('remap', Copy) {
+    it.dependsOn(shadowJar)
+    it.from "$buildDir/libs" into rootDir.getPath() + "/remapping"
+
+    def inputName = archivesBaseName + '-' + version + '-all.jar'
+    def outputName = "Grenadier-Plugin-" + version + ".jar"
+
+    it.doLast {
+        exec {
+            workingDir rootDir.getPath() + "/remapping"
+            commandLine 'cmd', '/c', 'remap.bat'
+            args inputName, outputName
+        }
+    }
+}
