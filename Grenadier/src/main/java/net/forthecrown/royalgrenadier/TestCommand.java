@@ -34,7 +34,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -350,11 +349,11 @@ public class TestCommand extends AbstractCommand {
                 .then(literal("time")
                         .then(argument("time_actual", TimeArgument.time())
                                 .executes(c -> {
-                                    long ticks = c.getArgument("time_actual", Long.class);
-                                    Date date = Date.from(Instant.ofEpochMilli(ticks * 50));
-                                    c.getSource().sendMessage(ticks + "");
-                                    c.getSource().sendMessage((ticks*50) + "");
-                                    c.getSource().sendMessage(date.toString());
+                                    long millis = TimeArgument.getMillis(c, "time_actual");
+
+                                    c.getSource().sendMessage("Millis: " + millis);
+                                    c.getSource().sendMessage("Ticks: " + millis / 50);
+                                    c.getSource().sendMessage("Date: " + new Date(millis).toString());
                                     return 0;
                                 })
                         )
