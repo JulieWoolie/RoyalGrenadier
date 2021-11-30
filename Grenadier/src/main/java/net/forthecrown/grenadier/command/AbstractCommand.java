@@ -42,8 +42,8 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @param plugin The plugin creating the command
      */
     protected AbstractCommand(@NotNull String name, @NotNull Plugin plugin){
-        this.name = name;
-        this.root = new BrigadierCommand(name, this);
+        this.name = name.toLowerCase();
+        this.root = new BrigadierCommand(this.name, this);
         this.plugin = plugin;
     }
 

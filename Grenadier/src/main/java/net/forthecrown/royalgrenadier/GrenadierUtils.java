@@ -156,4 +156,21 @@ public class GrenadierUtils {
         return Component.text(message.getString());
     }
 
+    public static StringReader filterCommandInput(String input) {
+        int spaceIndex = input.indexOf(' ');
+        if(spaceIndex == -1) spaceIndex = input.length();
+
+        String subStr = input.substring(0, spaceIndex);
+        int seperatorIndex = subStr.indexOf(':');
+        if(seperatorIndex != -1) {
+            subStr = subStr.substring(seperatorIndex+1);
+        }
+
+        String filtered = subStr + input.substring(spaceIndex);
+        StringReader reader = new StringReader(filtered);
+        if(reader.canRead() && reader.peek() == '/') reader.skip();
+
+        return reader;
+    }
+
 }

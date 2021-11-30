@@ -1,6 +1,7 @@
 package net.forthecrown.royalgrenadier.command;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
@@ -22,6 +23,7 @@ import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 //Class for wrapping Grenadier's commands into NMS ones
 public class CommandWrapper implements Command<CommandSourceStack>, Predicate<CommandSourceStack> {
@@ -40,6 +42,8 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         );
     }
 
+    static final Logger LOGGER = Logger.getLogger("TestLogger");
+
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         //Takes the vanilla command source and turns it's input into
@@ -54,11 +58,12 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         }
 
         try {
-            return RoyalGrenadier.getDispatcher().execute(context.getInput(), source);
-        } catch (RoyalCommandException exception) { //Adventure component exceptions
-            source.sendMessage(exception.formattedText());
+            StringReader reader = GrenadierUtils.filterCommandInput(context.getInput());
 
-            return -1;
+            CommandDispatcher<CommandSource> dispatcher = RoyalGrenadier.getDispatcher();
+            ParseResults<CommandSource> parseResults = dispatcher.parse(reader, source);
+
+            return dispatcher.execute(parseResults);
         } catch (CommandSyntaxException syntaxException) {
             source.sendMessage(GrenadierUtils.formatCommandException(syntaxException));
 
@@ -88,12 +93,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
     //Doesn't work in places with mutpliple required arguments, just returns an empty suggestions thing.
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, ArgumentCommandNode<CommandSource, ?> node) throws CommandSyntaxException {
         try {
-            StringReader reader = new StringReader(builder.getInput());
-
-            //Skip / or no work
-            if(reader.canRead() && reader.peek() == '/') {
-                reader.skip();
-            }
+            StringReader reader = GrenadierUtils.filterCommandInput(builder.getInput());
 
             CommandSource source = CommandSources.getOrCreate(context.getSource(), this.builder);
             ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(reader, source);
