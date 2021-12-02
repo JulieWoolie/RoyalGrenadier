@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Grenadier" />
             <option value="$PROJECT_DIR$/Plugin" />
+            <option value="$PROJECT_DIR$/Plugins" />
           </set>
         </option>
       </GradleProjectSettings>

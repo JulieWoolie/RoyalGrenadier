@@ -1,5 +1,0 @@
-name: RoyalGrenadier
-main: net.forthecrown.grenadier.plugin.GrenadierPlugin
-load: STARTUP
-author: JulieWoolie
-version: 1.0-SNAPSHOT
