@@ -9,7 +9,6 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.TimeArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
-import net.kyori.adventure.text.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +20,15 @@ public class TimeArgumentImpl implements TimeArgument {
 
     public static final TranslatableExceptionType INVALID_UNIT = new TranslatableExceptionType("argument.time.invalid_unit");
 
+    public static final long
+            SECOND_IN_MILLIS    = 1000,
+            MINUTE_IN_MILLIS    = SECOND_IN_MILLIS * 60,
+            HOUR_IN_MILLIS      = MINUTE_IN_MILLIS * 60,
+            DAY_IN_MILLIS       = HOUR_IN_MILLIS * 24,
+            WEEK_IN_MILLIS      = DAY_IN_MILLIS * 7,
+            MONTH_IN_MILLIS     = DAY_IN_MILLIS * 31,
+            YEAR_IN_MILLIS      = DAY_IN_MILLIS * 365;
+
     @Override
     public Long parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
@@ -30,40 +38,18 @@ public class TimeArgumentImpl implements TimeArgument {
 
         cursor = reader.getCursor();
         String multiplier = reader.readUnquotedString();
-        int multiplierActual = 1;
 
-        switch (multiplier.toLowerCase()){
-            case "years":
-            case "yr":
-                multiplierActual = multiplierActual * 12;
+        long multiplierActual = switch (multiplier) {
+            case "year", "years", "yr" -> YEAR_IN_MILLIS;
+            case "month", "months", "mo" -> MONTH_IN_MILLIS;
+            case "week", "weeks", "w" -> WEEK_IN_MILLIS;
+            case "day", "days", "d" -> DAY_IN_MILLIS;
+            case "hour", "hours", "h" -> HOUR_IN_MILLIS;
+            case "minute", "minutes", "m" -> MINUTE_IN_MILLIS;
+            case "second", "seconds", "s" -> SECOND_IN_MILLIS;
 
-            case "months":
-            case "mo":
-                multiplierActual = multiplierActual * 4;
-
-            case "weeks":
-            case "w":
-                multiplierActual = multiplierActual * 7;
-
-            case "days":
-            case "d":
-                multiplierActual = multiplierActual * 24;
-
-            case "hours":
-            case "h":
-                multiplierActual = multiplierActual * 60;
-
-            case "mins":
-            case "m":
-                multiplierActual = multiplierActual * 60;
-
-            case "seconds":
-            case "s":
-                multiplierActual = multiplierActual * 20;
-                break;
-
-            default: throw INVALID_UNIT.createWithContext(GrenadierUtils.correctReader(reader, cursor), Component.text(multiplier));
-        }
+            default -> throw INVALID_UNIT.createWithContext(GrenadierUtils.correctReader(reader, cursor));
+        };
 
         return initialTime * multiplierActual;
     }

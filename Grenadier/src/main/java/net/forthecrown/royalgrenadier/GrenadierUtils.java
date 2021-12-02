@@ -21,10 +21,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
-import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_17_R1.command.CraftBlockCommandSender;
-import org.bukkit.craftbukkit.v1_17_R1.command.ProxiedNativeCommandSender;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_18_R1.command.CraftBlockCommandSender;
+import org.bukkit.craftbukkit.v1_18_R1.command.ProxiedNativeCommandSender;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -154,6 +154,23 @@ public class GrenadierUtils {
 
         if(message instanceof net.minecraft.network.chat.Component) return PaperAdventure.asAdventure((net.minecraft.network.chat.Component) message);
         return Component.text(message.getString());
+    }
+
+    public static StringReader filterCommandInput(String input) {
+        int spaceIndex = input.indexOf(' ');
+        if(spaceIndex == -1) spaceIndex = input.length();
+
+        String subStr = input.substring(0, spaceIndex);
+        int seperatorIndex = subStr.indexOf(':');
+        if(seperatorIndex != -1) {
+            subStr = subStr.substring(seperatorIndex+1);
+        }
+
+        String filtered = subStr + input.substring(spaceIndex);
+        StringReader reader = new StringReader(filtered);
+        if(reader.canRead() && reader.peek() == '/') reader.skip();
+
+        return reader;
     }
 
 }

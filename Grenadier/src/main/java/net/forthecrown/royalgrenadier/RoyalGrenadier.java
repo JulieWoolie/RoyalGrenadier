@@ -13,7 +13,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
-import org.bukkit.craftbukkit.v1_17_R1.command.VanillaCommandWrapper;
+import org.bukkit.craftbukkit.v1_18_R1.command.VanillaCommandWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

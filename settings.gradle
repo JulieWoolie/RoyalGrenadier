@@ -1,4 +1,6 @@
-rootProject.name = 'RoyalGrenReOrg'
+rootProject.name = 'RoyalGrenadier'
 include 'Grenadier'
+include 'Plugins'
+include 'Plugin'
 include 'Plugin'
 

@@ -6,7 +6,7 @@ import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.royalgrenadier.types.TimeArgumentImpl;
 
 /**
- * Parses a given int with a suffix like "t", "s", "d" or "h" into ticks
+ * Parses a given int with a suffix like "t", "s", "d" or "h" into millis
  */
 public interface TimeArgument extends ArgumentType<Long> {
 
@@ -14,11 +14,11 @@ public interface TimeArgument extends ArgumentType<Long> {
         return TimeArgumentImpl.INSTANCE;
     }
 
-    static Long getTicks(CommandContext<CommandSource> c, String argument){
-        return c.getArgument(argument, Long.class);
+    static long getTicks(CommandContext<CommandSource> c, String argument){
+        return getMillis(c, argument) / 50;
     }
 
-    static Long getMillis(CommandContext<CommandSource> c, String argument){
-        return getTicks(c, argument) * 50;
+    static long getMillis(CommandContext<CommandSource> c, String argument){
+        return c.getArgument(argument, Long.class);
     }
 }

@@ -9,7 +9,7 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.PotionEffectArgument;
 import net.minecraft.commands.arguments.MobEffectArgument;
 import net.minecraft.world.effect.MobEffect;
-import org.bukkit.craftbukkit.v1_17_R1.potion.CraftPotionEffectType;
+import org.bukkit.craftbukkit.v1_18_R1.potion.CraftPotionEffectType;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.concurrent.CompletableFuture;
