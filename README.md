@@ -3,13 +3,17 @@ Implementation of Mojang's Brigadier for PaperMC
 
 **Requires Java 11+ and Paper**
 
-All classes in net.forthecrown.grenadier are considered API. While classes in net.forthecrown.royalgrenadier are considered internal and shouldn't be used unless neccessary.
+Mojang created a command engine called Brigadier that's been in use since 1.13. Neither Spigot nor Paper have implemented this engine, so I've done it for them lol.
 
-## Using the RoyalGrenadier in a project
-Unfortunately there isn't currently a maven repository for this project.
-To use the RoyalGrenadier, you'll have to download the jar and add it as a dependency, and add it to your server's plugins as well.
+###### Initially created for the ForTheCrown minecraft server
 
-To get Brigadier itself, head over to the [Brigadier repo](https://github.com/Mojang/brigadier) and get the dependency from there.
+## Using Grenadier
+Using Grenadier is easy. 
 
-## Usage
-Check out the [Wiki](https://github.com/BotulToxin/RoyalGrenadier/wiki/Creating-a-command) for info on creating commands.
+Download the remapped jar and add it to your dependencies. Then go to the [Brigadier Repo](https://github.com/Mojang/brigadier) and get Mojang's Brigadier as well.
+
+There is no maven repository for Grenadier at the moment.
+
+To learn how to create commands with Grenadier, check out the [Wiki](https://github.com/BotulToxin/RoyalGrenadier/wiki/Creating-a-command)
+
+After you've created a plugin with Grenadier you can either shade the remapped standalone jar into your plugin, or use the grenadier plugin on your server.
