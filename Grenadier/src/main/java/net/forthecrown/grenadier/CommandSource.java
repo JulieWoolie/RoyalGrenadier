@@ -7,7 +7,15 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.types.pos.Vec2Suggestion;
 import net.forthecrown.grenadier.types.pos.Vec3Suggestion;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -15,12 +23,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.ServerOperator;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface CommandSource extends ResultConsumer<CommandSource>, ServerOperator {
+public interface CommandSource extends ResultConsumer<CommandSource>, ServerOperator, Audience {
 
     /**
      * Checks if the sender is of the type
@@ -164,7 +173,7 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * Sends a message to the sender
      * @param component The message
      */
-    default void sendMessage(Component component) { sendMessage(component, null); }
+    default void sendMessage(@NotNull Component component) { sendMessage(component, (UUID) null); }
 
     /**
      * Sends a message to the sender
@@ -239,5 +248,70 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
     @Deprecated
     static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Iterable<String> suggestions){
         return CompletionProvider.suggestMatching(b, suggestions);
+    }
+
+    @Override
+    default void sendMessage(@NotNull Identity source, @NotNull Component message, @NotNull MessageType type) {
+        asBukkit().sendMessage(source, message, type);
+    }
+
+    @Override
+    default void sendActionBar(@NotNull Component message) {
+        asBukkit().sendActionBar(message);
+    }
+
+    @Override
+    default void sendPlayerListHeaderAndFooter(@NotNull Component header, @NotNull Component footer) {
+        asBukkit().sendPlayerListHeaderAndFooter(header, footer);
+    }
+
+    @Override
+    default <T> void sendTitlePart(@NotNull TitlePart<T> part, @NotNull T value) {
+        asBukkit().sendTitlePart(part, value);
+    }
+
+    @Override
+    default void clearTitle() {
+        asBukkit().clearTitle();
+    }
+
+    @Override
+    default void resetTitle() {
+        asBukkit().resetTitle();
+    }
+
+    @Override
+    default void showBossBar(@NotNull BossBar bar) {
+        asBukkit().showBossBar(bar);
+    }
+
+    @Override
+    default void hideBossBar(@NotNull BossBar bar) {
+        asBukkit().hideBossBar(bar);
+    }
+
+    @Override
+    default void playSound(@NotNull Sound sound) {
+        asBukkit().playSound(sound);
+    }
+
+    @Override
+    default void playSound(@NotNull Sound sound, Sound.@NotNull Emitter emitter) {
+        asBukkit().playSound(sound, emitter);
+    }
+
+    @Override
+    default void playSound(@NotNull Sound sound, double x, double y, double z) {
+        asBukkit().playSound(sound, x, y, z);
+    }
+
+    @Override
+    default void stopSound(@NotNull SoundStop stop) {
+        asBukkit().stopSound(stop);
+    }
+
+    @Override
+    default void openBook(@NotNull Book book) {
+        asBukkit().openBook(book);
     }
 }
