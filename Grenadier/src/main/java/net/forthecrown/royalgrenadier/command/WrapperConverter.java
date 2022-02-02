@@ -10,8 +10,8 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
-import net.forthecrown.royalgrenadier.source.CommandSources;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 
@@ -54,7 +54,7 @@ public class WrapperConverter {
     }
 
     Predicate<CommandSourceStack> convertTest(CommandNode<CommandSource> node){
-        return lis -> node.getRequirement().test(CommandSources.getOrCreate(lis, abstractCommand));
+        return lis -> node.getRequirement().test(GrenadierUtils.wrap(lis, abstractCommand));
     }
 
     void convertNodes(Collection<CommandNode<CommandSource>> nodes, ArgumentBuilder<CommandSourceStack, ?> to){

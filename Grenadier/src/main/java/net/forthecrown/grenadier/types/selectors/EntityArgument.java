@@ -13,19 +13,19 @@ import java.util.List;
 
 public interface EntityArgument extends ArgumentType<EntitySelector> {
 
-    static EntityArgument multipleEntities(){
+    static EntityArgument multipleEntities() {
         return EntityArgumentImpl.ENTITIES;
     }
 
-    static EntityArgument entity(){
+    static EntityArgument entity() {
         return EntityArgumentImpl.ENTITY;
     }
 
-    static EntityArgument player(){
+    static EntityArgument player() {
         return EntityArgumentImpl.PLAYER;
     }
 
-    static EntityArgument players(){
+    static EntityArgument players() {
         return EntityArgumentImpl.PLAYERS;
     }
 

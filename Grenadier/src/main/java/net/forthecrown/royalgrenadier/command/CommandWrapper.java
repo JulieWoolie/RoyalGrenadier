@@ -12,52 +12,52 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
+import net.forthecrown.grenadier.exceptions.ImmutableCommandExceptionType;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
-import net.forthecrown.royalgrenadier.source.CommandSources;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import java.util.logging.Logger;
 
 //Class for wrapping Grenadier's commands into NMS ones
 public class CommandWrapper implements Command<CommandSourceStack>, Predicate<CommandSourceStack> {
 
     final AbstractCommand builder;
-    final SimpleCommandExceptionType noPermission;
+    final ImmutableCommandExceptionType noPermission;
     static final SimpleCommandExceptionType NOT_ALLOWED_TO_USE_COMMAND = new SimpleCommandExceptionType(() -> "You aren't allowed to use this command at the moment");
 
     public CommandWrapper(AbstractCommand builder){
         this.builder = builder;
 
-        this.noPermission = new SimpleCommandExceptionType(
-                builder.getPermissionMessage() == null ?
-                        Bukkit::getPermissionMessage :
-                        builder::getPermissionMessage
-        );
+        if(builder.permissionMessage() == null) {
+            noPermission = new ImmutableCommandExceptionType(
+                    LegacyComponentSerializer.legacySection().deserialize(Bukkit.getPermissionMessage())
+            );
+        } else {
+            noPermission = new ImmutableCommandExceptionType(builder.permissionMessage());
+        }
     }
-
-    static final Logger LOGGER = Logger.getLogger("TestLogger");
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         //Takes the vanilla command source and turns it's input into
         //Grenadier's sender and executes command with it
-        CommandSource source = CommandSources.getOrCreate(context.getSource(), builder);
-
-        //Test if the sender is even allowed to use the command
-        //VanillaCommandWrapper should test this for us, but we should still test, just in case
-        if(!test(context.getSource())){
-            if(!builder.testPermissionSilent(context.getSource().getBukkitSender())) throw noPermission.create();
-            throw NOT_ALLOWED_TO_USE_COMMAND.create();
-        }
+        CommandSource source = GrenadierUtils.wrap(context.getSource(), builder);
 
         try {
+            //Test if the sender is even allowed to use the command
+            //VanillaCommandWrapper should test this for us, but we should still test, just in case
+            if(!test(context.getSource())){
+                if(!builder.testPermissionSilent(context.getSource().getBukkitSender())) throw noPermission.create();
+                throw NOT_ALLOWED_TO_USE_COMMAND.create();
+            }
+
             StringReader reader = GrenadierUtils.filterCommandInput(context.getInput());
 
             CommandDispatcher<CommandSource> dispatcher = RoyalGrenadier.getDispatcher();
@@ -95,7 +95,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         try {
             StringReader reader = GrenadierUtils.filterCommandInput(builder.getInput());
 
-            CommandSource source = CommandSources.getOrCreate(context.getSource(), this.builder);
+            CommandSource source = GrenadierUtils.wrap(context.getSource(), this.builder);
             ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(reader, source);
 
             return node.listSuggestions(results.getContext().build(builder.getInput()), builder);
@@ -106,6 +106,6 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
 
     @Override
     public boolean test(CommandSourceStack wrapper) {
-        return builder.test(CommandSources.getOrCreate(wrapper, builder));
+        return builder.test(GrenadierUtils.wrap(wrapper, builder));
     }
 }

@@ -9,8 +9,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.adventure.AdventureComponent;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.forthecrown.grenadier.CommandSource;
+import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
-import net.forthecrown.royalgrenadier.source.CommandSourceImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -19,6 +19,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
@@ -41,8 +42,16 @@ public class GrenadierUtils {
         return ((CommandSourceImpl) source).getHandle();
     }
 
+    public static CommandSourceImpl wrap(CommandSourceStack stack, AbstractCommand command) {
+        if(stack.source == net.minecraft.commands.CommandSource.NULL) {
+            stack = MinecraftServer.getServer().createCommandSourceStack();
+        }
+
+        return new CommandSourceImpl(stack, command);
+    }
+
     //Bukkit's getListener in VanillaCommandWrapper didn't have enough functionality to be as applicable
-    public static CommandSourceStack senderToWrapper(CommandSender sender){
+    public static CommandSourceStack senderToWrapper(CommandSender sender) {
         if(sender instanceof Entity) return ((CraftEntity) sender).getHandle().createCommandSourceStack();
         else if(sender instanceof BlockCommandSender) return ((CraftBlockCommandSender) sender).getWrapper();
         else if(sender instanceof RemoteConsoleCommandSender || sender instanceof ConsoleCommandSender) return ((CraftServer) Bukkit.getServer()).getServer().createCommandSourceStack();

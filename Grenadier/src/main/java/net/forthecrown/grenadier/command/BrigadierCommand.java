@@ -1,10 +1,13 @@
 package net.forthecrown.grenadier.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import org.bukkit.permissions.Permission;
+
+import java.util.function.Predicate;
 
 public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
 
@@ -29,6 +32,18 @@ public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
     @Override
     public BrigadierCommand then(ArgumentBuilder<CommandSource, ?> argument) {
         super.then(argument);
+        return this;
+    }
+
+    @Override
+    public BrigadierCommand executes(Command<CommandSource> command) {
+        super.executes(command);
+        return this;
+    }
+
+    @Override
+    public BrigadierCommand requires(Predicate<CommandSource> requirement) {
+        super.requires(requirement);
         return this;
     }
 

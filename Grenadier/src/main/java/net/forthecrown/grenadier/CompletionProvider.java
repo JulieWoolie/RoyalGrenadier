@@ -33,7 +33,7 @@ public interface CompletionProvider {
      * @param suggestions The suggestions to pick from
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, Iterable<String> suggestions){
+    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, Iterable<String> suggestions) {
         String token = builder.getRemainingLowerCase();
         for (String s: suggestions) if(s.toLowerCase().startsWith(token)) builder.suggest(s);
 
@@ -46,7 +46,7 @@ public interface CompletionProvider {
      * @param suggestions The suggestions to pick from
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, String... suggestions){
+    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, String... suggestions) {
         return suggestMatching(builder, Arrays.asList(suggestions));
     }
 
@@ -56,7 +56,7 @@ public interface CompletionProvider {
      * @param suggestions The suggestions to pick from
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, Stream<String> suggestions){
+    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, Stream<String> suggestions) {
         String token = builder.getRemainingLowerCase();
 
         suggestions
@@ -72,10 +72,10 @@ public interface CompletionProvider {
      * @param suggestions The suggestions to pick from
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Map<String, String> suggestions){
+    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Map<String, String> suggestions) {
         String token = b.getRemainingLowerCase();
 
-        for (Map.Entry<String, String> entry: suggestions.entrySet()){
+        for (Map.Entry<String, String> entry: suggestions.entrySet()) {
             if(entry.getKey().toLowerCase().startsWith(token)) b.suggest(entry.getKey(), new LiteralMessage(entry.getValue()));
         }
 
@@ -88,10 +88,10 @@ public interface CompletionProvider {
      * @param suggestions The suggestions to pick from
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestKeys(SuggestionsBuilder builder, Iterable<Key> suggestions){
+    static CompletableFuture<Suggestions> suggestKeys(SuggestionsBuilder builder, Iterable<? extends Key> suggestions) {
         String token = builder.getRemainingLowerCase();
 
-        for (Key k: suggestions){
+        for (Key k: suggestions) {
             if(k.asString().startsWith(token)
                     || k.value().startsWith(token)
                     || k.namespace().startsWith(token)
@@ -110,7 +110,7 @@ public interface CompletionProvider {
      * @param suggestions Any optional extra sugestions.
      * @return
      */
-    static CompletableFuture<Suggestions> suggestCords(SuggestionsBuilder builder, boolean allowDecimals, Iterable<CoordinateSuggestion> suggestions){
+    static CompletableFuture<Suggestions> suggestCords(SuggestionsBuilder builder, boolean allowDecimals, Iterable<CoordinateSuggestion> suggestions) {
         for (CoordinateSuggestion s: suggestions) {
             s.applySuggestions(builder, allowDecimals);
         }
@@ -123,7 +123,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestWorlds(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestWorlds(SuggestionsBuilder builder) {
         return suggestMatching(builder, GrenadierUtils.convertList(Bukkit.getWorlds(), World::getName));
     }
 
@@ -132,7 +132,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestSounds(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestSounds(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.SOUND_EVENT.keySet(), builder);
     }
 
@@ -141,7 +141,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestParticles(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestParticles(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.PARTICLE_TYPE.keySet(), builder);
     }
 
@@ -150,7 +150,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestEnchantments(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestEnchantments(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.ENCHANTMENT.keySet(), builder);
     }
 
@@ -159,7 +159,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestEntities(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestEntities(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.ENTITY_TYPE.keySet(), builder);
     }
 
@@ -168,7 +168,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestTeams(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestTeams(SuggestionsBuilder builder) {
         return suggestMatching(builder, GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getTeams(), Team::getName));
     }
 
@@ -177,7 +177,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestObjectives(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestObjectives(SuggestionsBuilder builder) {
         return suggestMatching(builder, GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getObjectives(), Objective::getName));
     }
 
@@ -186,7 +186,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestBlocks(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestBlocks(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.BLOCK.keySet(), builder);
     }
 
@@ -195,7 +195,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestPotionEffects(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestPotionEffects(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.POTION.keySet(), builder);
     }
 
@@ -204,7 +204,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestEffects(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestEffects(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.MOB_EFFECT.keySet(), builder);
     }
 
@@ -213,7 +213,7 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestPlayerNames(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestPlayerNames(SuggestionsBuilder builder) {
         return suggestMatching(builder, GrenadierUtils.convertList(Bukkit.getOnlinePlayers(), Player::getName));
     }
 
@@ -222,19 +222,15 @@ public interface CompletionProvider {
      * @param builder The builder to suggest to
      * @return The built suggestions
      */
-    static CompletableFuture<Suggestions> suggestEntityTypes(SuggestionsBuilder builder){
+    static CompletableFuture<Suggestions> suggestEntityTypes(SuggestionsBuilder builder) {
         return GrenadierUtils.suggestResource(Registry.ENTITY_TYPE.keySet(), builder);
     }
 
     static CompletableFuture<Suggestions> suggestLootTables(SuggestionsBuilder builder) {
-        try { //this is dumb af, obfuscation is horrible, am in pain
-            MinecraftServer server = MinecraftServer.getServer();
-            ServerResources manager = server.resources;
-            LootTables lootTables = (LootTables) manager.getClass().getDeclaredMethod("getLootTables").invoke(manager);
+        MinecraftServer server = MinecraftServer.getServer();
+        ServerResources manager = server.resources;
+        LootTables lootTables = manager.getLootTables();
 
-            return GrenadierUtils.suggestResource(lootTables.getIds(), builder);
-        } catch (Exception e) {
-            return Suggestions.empty();
-        }
+        return GrenadierUtils.suggestResource(lootTables.getIds(), builder);
     }
 }

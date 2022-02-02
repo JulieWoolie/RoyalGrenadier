@@ -1,5 +1,4 @@
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
 plugins {
@@ -7,44 +6,33 @@ plugins {
 }
 
 group 'net.forthecrown'
-version '1.2.1'
+version '1.2.2'
 
-repositories {
-    mavenCentral()
-}
+tasks.register("buildGrenadier") {
+    Project grenadier = project('Grenadier')
+    Project plugin = project('Plugin')
 
-dependencies {
-}
-
-tasks.register('moveAll') {
     it.dependsOn(
-            project("Plugin").getTasks().getByName("remap"),
-            project("Grenadier").getTasks().getByName("remap")
+            grenadier.tasks.getByName("build"),
+            plugin.tasks.getByName("shadowJar")
     )
 
     it.doLast {
-        moveToBuild("Standalone", true)
-        moveToBuild("Standalone", false)
-        moveToBuild("Plugin", false)
+        File grenadierLibs = new File(grenadier.buildDir, "/libs/")
+        File pluginLibs = new File(plugin.buildDir, "/libs/")
 
-        cleanRemapFolder()
+        moveDirContents(grenadierLibs, buildDir)
+        moveDirContents(pluginLibs, buildDir)
     }
 }
 
-void cleanRemapFolder() {
-    File plLeftOver = new File(projectDir.absolutePath + '/remapping/Plugin-' + version + '-all.jar')
-    if(plLeftOver.exists()) plLeftOver.delete()
-}
+private static void moveDirContents(File from, File to) {
+    File[] files = from.listFiles();
+    if(files == null || files.length < 1) return
 
-void moveToBuild(String filePrefix, boolean remapped) {
-    String fileName = "Grenadier-" + filePrefix + '-' + version + (remapped ? "-remapped" : "") + '.jar'
-    String dir = '/remapping/' + fileName
+    for (File f: from.listFiles()) {
+        File dest = new File(to, f.getName())
 
-    String projDirPath = projectDir.absolutePath
-
-    Files.move(
-            Paths.get(projDirPath + dir),
-            Paths.get(projDirPath + "/build/" + fileName),
-            StandardCopyOption.REPLACE_EXISTING
-    )
+        Files.copy(f.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    }
 }

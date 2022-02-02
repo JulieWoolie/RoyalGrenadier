@@ -13,21 +13,11 @@ repositories {
 
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT'
-    implementation project(":Grenadier")
+
+    File grenBuildDir = new File(parent.getChildProjects().get("Grenadier").getBuildDir(), "libs")
+    implementation files(new File(grenBuildDir, "Grenadier-" + version + ".jar"))
 }
 
-tasks.register('remap', Copy) {
-    it.dependsOn(shadowJar)
-    it.from "$buildDir/libs" into rootDir.getPath() + "/remapping"
-
-    def inputName = archivesBaseName + '-' + version + '-all.jar'
-    def outputName = "Grenadier-Plugin-" + version + ".jar"
-
-    it.doLast {
-        exec {
-            workingDir rootDir.getPath() + "/remapping"
-            commandLine 'cmd', '/c', 'remap.bat'
-            args inputName, outputName
-        }
-    }
+assemble {
+    archivesBaseName = 'Grenadier-Plugin'
 }

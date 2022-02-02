@@ -52,7 +52,7 @@ public class RoyalGrenadier {
         if(builder.getPermission() != null) bukkitWrapper.setPermission(builder.getPermission().getName());
         else bukkitWrapper.setPermission(null);
 
-        bukkitWrapper.setPermissionMessage(builder.getPermissionMessage());
+        bukkitWrapper.permissionMessage(builder.permissionMessage());
 
         CommandMap map = Bukkit.getCommandMap();
         map.register(builder.getName(), builder.getPlugin().getName(), bukkitWrapper);

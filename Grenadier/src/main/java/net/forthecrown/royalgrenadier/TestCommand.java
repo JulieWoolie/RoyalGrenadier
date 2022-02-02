@@ -1,6 +1,6 @@
 package net.forthecrown.royalgrenadier;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.*;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.command.AbstractCommand;
@@ -65,6 +65,80 @@ public class TestCommand extends AbstractCommand {
     @Override
     protected void createCommand(BrigadierCommand command) {
         command
+                .then(literal("built_int")
+                        .then(literal("str_word")
+                                .then(argument("str", StringArgumentType.word())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("str", String.class));
+                                            return 0;
+                                        })
+                                )
+                        )
+
+                        .then(literal("str_string")
+                                .then(argument("str", StringArgumentType.string())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("str", String.class));
+                                            return 0;
+                                        })
+                                )
+                        )
+
+                        .then(literal("str_greedy")
+                                .then(argument("str", StringArgumentType.greedyString())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("str", String.class));
+                                            return 0;
+                                        })
+                                )
+                        )
+
+                        .then(literal("bool")
+                                .then(argument("val", BoolArgumentType.bool())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("val", Boolean.class) + "");
+                                            return 0;
+                                        })
+                                )
+                        )
+
+                        .then(literal("int")
+                                .then(argument("val", IntegerArgumentType.integer())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("val", Integer.class) + "");
+                                            return 0;
+                                        })
+                                )
+                        )
+
+                        .then(literal("long")
+                                .then(argument("val", LongArgumentType.longArg())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("val", Long.class) + "");
+                                            return 0;
+                                        })
+                                )
+                        )
+
+                        .then(literal("float")
+                                .then(argument("val", FloatArgumentType.floatArg())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("val", Float.class) + "");
+                                            return 0;
+                                        })
+                                )
+                        )
+
+                        .then(literal("double")
+                                .then(argument("val", DoubleArgumentType.doubleArg())
+                                        .executes(c -> {
+                                            c.getSource().sendMessage(c.getArgument("val", Double.class) + "");
+                                            return 0;
+                                        })
+                                )
+                        )
+                )
+
                 .then(literal("ref_earlier_arg")
                         .then(argument("pos", PositionArgument.blockPos())
                                 .then(argument("str", StringArgumentType.greedyString())

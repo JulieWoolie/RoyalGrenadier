@@ -1,12 +1,12 @@
 package net.forthecrown.grenadier.command;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import net.forthecrown.grenadier.CmdUtil;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 /**
  * The abstract class used to create and register Grenadier commands
  */
-public abstract class AbstractCommand implements Predicate<CommandSource> {
+public abstract class AbstractCommand extends CmdUtil implements Predicate<CommandSource> {
 
     private final String name;
     private final BrigadierCommand root;
@@ -31,7 +31,7 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
 
     protected String[] aliases;
     protected Permission permission;
-    protected String permissionMessage;
+    protected Component permissionMessage;
     protected String description;
 
     private boolean registered = false;
@@ -67,26 +67,6 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      */
     public final boolean isRegistered(){
         return registered;
-    }
-
-    /**
-     * Utility method for creating a literal argument
-     * @param name The literal string
-     * @return A Literal argument
-     */
-    protected LiteralArgumentBuilder<CommandSource> literal(String name){
-        return LiteralArgumentBuilder.literal(name);
-    }
-
-    /**
-     * Utility method for creating a required argument
-     * @param name The name of the argument
-     * @param type The ArgumentType for the type
-     * @param <T> The type
-     * @return A required argument for the type
-     */
-    protected <T> RequiredArgumentBuilder<CommandSource, T> argument(String name, ArgumentType<T> type){
-        return RequiredArgumentBuilder.argument(name, type);
     }
 
     /**
@@ -210,11 +190,34 @@ public abstract class AbstractCommand implements Predicate<CommandSource> {
      * @return The permission message
      */
     public @Nullable String getPermissionMessage() {
+        if(permissionMessage == null) return null;
+        return LegacyComponentSerializer.legacySection().serialize(permissionMessage);
+    }
+
+    /**
+     * Sets the permission message this command will use
+     * @param permissionMessage The permission message
+     */
+    public void setPermissionMessage(String permissionMessage) {
+        if(registered) return;
+        if(permissionMessage == null || permissionMessage.isBlank()) this.permissionMessage = null;
+        else this.permissionMessage = LegacyComponentSerializer.legacySection().deserialize(permissionMessage);
+    }
+
+    /**
+     * Gets the message the command will show to senders who
+     * don't have permission for this command
+     * @return The permission message
+     */
+    public Component permissionMessage() {
         return permissionMessage;
     }
 
-    public void setPermissionMessage(String permissionMessage) {
-        if(registered) return;
+    /**
+     * Sets the permission message this command will use
+     * @param permissionMessage The permission message
+     */
+    public void permissionMessage(Component permissionMessage) {
         this.permissionMessage = permissionMessage;
     }
 
