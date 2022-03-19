@@ -3,7 +3,7 @@ package net.forthecrown.royalgrenadier.types.item;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.forthecrown.grenadier.types.item.ParsedItemStack;
 import net.minecraft.commands.arguments.item.ItemInput;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
 public class ParsedItemImpl implements ParsedItemStack {

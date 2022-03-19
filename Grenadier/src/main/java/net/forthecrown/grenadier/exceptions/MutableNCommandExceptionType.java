@@ -17,6 +17,10 @@ public class MutableNCommandExceptionType implements CommandExceptionType {
         this.function = function;
     }
 
+    public Function<Object[], Component> getFunction() {
+        return function;
+    }
+
     public RoyalCommandException create(Object... args){
         return new RoyalCommandException(this, function.apply(args));
     }

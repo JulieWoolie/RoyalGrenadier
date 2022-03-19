@@ -38,4 +38,8 @@ public class MutableCommandExceptionType implements CommandExceptionType {
     public RoyalCommandException createWithContext(ImmutableStringReader reader, Object arg){
         return new RoyalCommandException(this, function.apply(arg), reader.getString(), reader.getCursor());
     }
+
+    public Function<Object, Component> getFunction() {
+        return function;
+    }
 }

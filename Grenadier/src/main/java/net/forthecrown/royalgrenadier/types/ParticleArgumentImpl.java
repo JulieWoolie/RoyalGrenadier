@@ -9,7 +9,7 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.ParticleArgument;
 import net.minecraft.core.particles.ParticleOptions;
 import org.bukkit.Particle;
-import org.bukkit.craftbukkit.v1_18_R1.CraftParticle;
+import org.bukkit.craftbukkit.v1_18_R2.CraftParticle;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;

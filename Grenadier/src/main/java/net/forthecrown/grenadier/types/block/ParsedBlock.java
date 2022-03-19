@@ -4,6 +4,8 @@ import org.bukkit.Keyed;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +21,37 @@ public interface ParsedBlock extends Keyed, net.kyori.adventure.key.Keyed {
      * @return The String NBT of the parsed block
      */
     @Nullable String getTags();
+
+    /**
+     * Tests the block against the given block
+     * @param block The block to test against
+     *
+     * @return True, if the block share the
+     *         same properties and data, false otherwise
+     */
+    boolean test(Block block);
+
+    /**
+     * Tests the parsed block against the given data.
+     * Note that this will not compare any NBT data
+     *
+     * @param data The data to compare
+     * @return True, if the blocks share the same
+     *         material and properties
+     */
+    boolean test(BlockData data);
+
+    /**
+     * Tests the given block state against
+     * this parsed block
+     *
+     * @param state The state to check
+     * @return True, if the blocks share the
+     *         same NBT data and properties
+     */
+    default boolean test(BlockState state) {
+        return test(state.getBlock());
+    }
 
     /**
      * Places the parsed block in the given world at the given coordinates

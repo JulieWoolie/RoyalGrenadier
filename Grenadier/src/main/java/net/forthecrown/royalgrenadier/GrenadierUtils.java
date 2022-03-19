@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.adventure.AdventureComponent;
 import io.papermc.paper.adventure.PaperAdventure;
+import io.papermc.paper.commands.FeedbackForwardingSender;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
@@ -22,10 +23,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
-import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_18_R1.command.CraftBlockCommandSender;
-import org.bukkit.craftbukkit.v1_18_R1.command.ProxiedNativeCommandSender;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_18_R2.CraftServer;
+import org.bukkit.craftbukkit.v1_18_R2.command.CraftBlockCommandSender;
+import org.bukkit.craftbukkit.v1_18_R2.command.ProxiedNativeCommandSender;
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +57,7 @@ public class GrenadierUtils {
         else if(sender instanceof BlockCommandSender) return ((CraftBlockCommandSender) sender).getWrapper();
         else if(sender instanceof RemoteConsoleCommandSender || sender instanceof ConsoleCommandSender) return ((CraftServer) Bukkit.getServer()).getServer().createCommandSourceStack();
         else if(sender instanceof ProxiedCommandSender) return ((ProxiedNativeCommandSender)sender).getHandle();
+        else if(sender instanceof FeedbackForwardingSender serverSender) return serverSender.asVanilla();
         else return null;
     }
 
@@ -181,5 +183,4 @@ public class GrenadierUtils {
 
         return reader;
     }
-
 }

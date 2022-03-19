@@ -2,7 +2,6 @@ package net.forthecrown.grenadier.types;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.royalgrenadier.types.ShortArgumentImpl;
 
 public interface ShortArgument extends ArgumentType<Short> {
@@ -18,7 +17,7 @@ public interface ShortArgument extends ArgumentType<Short> {
         return new ShortArgumentImpl(min, max);
     }
 
-    static short getShort(CommandContext<CommandSource> c, String argument) {
+    static short getShort(CommandContext<?> c, String argument) {
         return c.getArgument(argument, Short.class);
     }
 }

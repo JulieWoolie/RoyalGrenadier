@@ -21,14 +21,15 @@ import java.util.function.Supplier;
  * @see RoyalArguments#register(Class, VanillaArgumentType)
  */
 public class VanillaArgumentType {
-    public static final VanillaArgumentType STRING = new VanillaArgumentType(StringArgumentType::string);
-    public static final VanillaArgumentType GREEDY_STRING = new VanillaArgumentType(StringArgumentType::greedyString);
-    public static final VanillaArgumentType WORD = new VanillaArgumentType(StringArgumentType::word);
-    public static final VanillaArgumentType INTEGER = new VanillaArgumentType(IntegerArgumentType::integer);
-    public static final VanillaArgumentType LONG = new VanillaArgumentType(LongArgumentType::longArg);
-    public static final VanillaArgumentType DOUBLE = new VanillaArgumentType(DoubleArgumentType::doubleArg);
-    public static final VanillaArgumentType BOOLEAN = new VanillaArgumentType(BoolArgumentType::bool);
-    public static final VanillaArgumentType FLOAT = new VanillaArgumentType(FloatArgumentType::floatArg);
+    public static final VanillaArgumentType
+            STRING          = new VanillaArgumentType(StringArgumentType::string),
+            GREEDY_STRING   = new VanillaArgumentType(StringArgumentType::greedyString),
+            WORD            = new VanillaArgumentType(StringArgumentType::word),
+            INTEGER         = new VanillaArgumentType(IntegerArgumentType::integer),
+            LONG            = new VanillaArgumentType(LongArgumentType::longArg),
+            DOUBLE          = new VanillaArgumentType(DoubleArgumentType::doubleArg),
+            BOOLEAN         = new VanillaArgumentType(BoolArgumentType::bool),
+            FLOAT           = new VanillaArgumentType(FloatArgumentType::floatArg);
 
     private final Supplier<ArgumentType<?>> supplier;
     VanillaArgumentType(Supplier<ArgumentType<?>> supplier){

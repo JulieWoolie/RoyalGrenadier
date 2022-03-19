@@ -11,9 +11,10 @@ import net.forthecrown.royalgrenadier.command.WrapperConverter;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.dedicated.DedicatedServer;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
-import org.bukkit.craftbukkit.v1_18_R1.command.VanillaCommandWrapper;
+import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +23,7 @@ public class RoyalGrenadier {
     private static CommandDispatcher<CommandSource> dispatcher;
     private static Commands serverCommands;
     private static boolean initialized = false;
+    private static Logger logger;
 
     /**
      * Gets the dispatcher for the RoyalGrenadier
@@ -31,17 +33,23 @@ public class RoyalGrenadier {
         return dispatcher;
     }
 
+    public static Logger getLogger() {
+        return logger;
+    }
+
     /**
      * Registers the given AbstractCommand, making it useable. Not needed in most cases, as {@link AbstractCommand#register()} calls this.
      * @param builder The command
      */
-    public static void register(AbstractCommand builder){
+    public static LiteralCommandNode<CommandSource> register(AbstractCommand builder){
         CommandWrapper wrapper = new CommandWrapper(builder);
         LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
 
         LiteralArgumentBuilder<CommandSourceStack> wrapped = new WrapperConverter(wrapper, builder, built).finish();
         LiteralCommandNode<CommandSourceStack> builtNms = serverCommands.getDispatcher().register(wrapped);
 
+        // Apply builder's parameters to bukkitWrapper, so aliases, permissions, description,
+        // all that
         VanillaCommandWrapper bukkitWrapper = new VanillaCommandWrapper(serverCommands, builtNms);
         if(builder.getAliases() != null) bukkitWrapper.setAliases(Arrays.asList(builder.getAliases()));
         else bukkitWrapper.setAliases(new ArrayList<>());
@@ -57,15 +65,18 @@ public class RoyalGrenadier {
         CommandMap map = Bukkit.getCommandMap();
         map.register(builder.getName(), builder.getPlugin().getName(), bukkitWrapper);
         //bukkitWrapper.register(map);
+
+        return built;
     }
 
     public static boolean isInitialized() {
         return initialized;
     }
 
-    public static void initialize() {
+    public static void initialize(Logger logger) {
         if(isInitialized()) return;
 
+        RoyalGrenadier.logger = logger;
         dispatcher = new CommandDispatcher<>();
         serverCommands = DedicatedServer.getServer().vanillaCommandDispatcher;
 

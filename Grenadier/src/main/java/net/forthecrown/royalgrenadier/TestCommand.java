@@ -27,8 +27,10 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Objective;
@@ -50,6 +52,8 @@ public class TestCommand extends AbstractCommand {
         mapArgTest.put("key3", 111);
         mapArgTest.put("key4", 1111);
         mapArgTest.put("key5", 11111);
+
+        setShowUsageOnFail(true);
 
         register();
     }
@@ -368,6 +372,32 @@ public class TestCommand extends AbstractCommand {
                                 })
                         )
                 )
+
+                .then(literal("block_comparator")
+                        .then(argument("block", BlockArgument.block())
+                                .executes(c -> {
+                                    Player player = c.getSource().asPlayer();
+
+                                    ParsedBlock block = c.getArgument("block", ParsedBlock.class);
+                                    c.getSource().sendMessage("parsed: " + block.getData().toString());
+
+                                    Block lookingAt = player.getTargetBlock(5);
+                                    if(lookingAt == null) {
+                                        player.sendMessage("You must be looking at a block");
+                                        return 0;
+                                    }
+
+                                    BlockData data = lookingAt.getBlockData();
+                                    c.getSource().sendMessage("comparison: " + data);
+
+                                    c.getSource().sendMessage("parsed == comparison data: " + block.test(data));
+                                    c.getSource().sendMessage("parsed == comparison complete: " + block.test(lookingAt));
+
+                                    return 0;
+                                })
+                        )
+                )
+
                 .then(literal("item")
                         .then(argument("i", ItemArgument.itemStack())
                                 .executes(c -> {

@@ -6,7 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class GrenadierPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
-        RoyalGrenadier.initialize();
+        RoyalGrenadier.initialize(getLog4JLogger());
 
         //new TestCommand(this);
     }

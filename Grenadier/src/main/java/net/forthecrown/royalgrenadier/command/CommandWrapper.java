@@ -20,6 +20,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
@@ -27,6 +29,7 @@ import java.util.function.Predicate;
 
 //Class for wrapping Grenadier's commands into NMS ones
 public class CommandWrapper implements Command<CommandSourceStack>, Predicate<CommandSourceStack> {
+    private static final Logger LOGGER = RoyalGrenadier.getLogger();
 
     final AbstractCommand builder;
     final ImmutableCommandExceptionType noPermission;
@@ -67,9 +70,20 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         } catch (CommandSyntaxException syntaxException) {
             source.sendMessage(GrenadierUtils.formatCommandException(syntaxException));
 
+            if(builder.getShowUsageOnFail()) {
+                Component usage = builder.getUsage(source);
+                if(usage != null) source.sendMessage(usage);
+            }
+
             return -1;
         } catch (Exception e){
-            e.printStackTrace();
+            LOGGER.error(
+                    new ParameterizedMessage(
+                            "Error while executing command '{}'",
+                            new Object[]{builder.getName()},
+                            e
+                    )
+            );
 
             TextComponent.Builder builder = Component.text()
                     .append(Component.text(e.getClass().getName() + ": " + e.getMessage()));
@@ -100,7 +114,15 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
 
             return node.listSuggestions(results.getContext().build(builder.getInput()), builder);
         } catch (RuntimeException e) {
-            throw SuggestionException.create(e);
+            LOGGER.error(
+                    new ParameterizedMessage(
+                            "Error while attempting to get suggestions for command '{}'",
+                            new Object[] { this.builder.getName()},
+                            e
+                    )
+            );
+
+            return Suggestions.empty();
         }
     }
 

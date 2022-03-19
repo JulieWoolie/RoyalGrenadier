@@ -9,7 +9,7 @@ import net.forthecrown.grenadier.types.block.BlockArgument;
 import net.forthecrown.grenadier.types.block.ParsedBlock;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.core.Registry;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +27,7 @@ public class BlockArgumentImpl implements BlockArgument {
     public ParsedBlock parse(StringReader reader, boolean allowTag, boolean allowNBT) throws CommandSyntaxException {
         BlockStateParser parser = new BlockStateParser(reader, allowTag).parse(allowNBT);
 
-        return new ParsedBlockImpl(parser.getState(), parser.getProperties().keySet(), parser.getNbt(), parser.getTag());
+        return new ParsedBlockImpl(parser.getState(), parser.getProperties().keySet(), parser.getNbt(), parser.getTag().location());
     }
 
     @Override
@@ -45,7 +45,7 @@ public class BlockArgumentImpl implements BlockArgument {
             parser.parse(true);
         } catch (CommandSyntaxException ignored) {}
 
-        return parser.fillSuggestions(builder, BlockTags.getAllTags());
+        return parser.fillSuggestions(builder, Registry.BLOCK);
     }
 
     @Override

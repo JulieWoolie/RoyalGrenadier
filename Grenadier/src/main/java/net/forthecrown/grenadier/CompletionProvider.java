@@ -8,7 +8,6 @@ import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.Registry;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
 import net.minecraft.world.level.storage.loot.LootTables;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -228,8 +227,8 @@ public interface CompletionProvider {
 
     static CompletableFuture<Suggestions> suggestLootTables(SuggestionsBuilder builder) {
         MinecraftServer server = MinecraftServer.getServer();
-        ServerResources manager = server.resources;
-        LootTables lootTables = manager.getLootTables();
+        MinecraftServer.ReloadableResources manager = server.resources;
+        LootTables lootTables = manager.managers().getLootTables();
 
         return GrenadierUtils.suggestResource(lootTables.getIds(), builder);
     }

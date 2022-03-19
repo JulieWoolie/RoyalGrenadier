@@ -4,6 +4,7 @@ import net.forthecrown.grenadier.types.block.ParsedBlock;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,8 +14,10 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R1.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_18_R2.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftNamespacedKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,6 +85,39 @@ public class ParsedBlockImpl implements ParsedBlock {
     @Override
     public @Nullable String getTags() {
         return tags == null ? null : tags.toString();
+    }
+
+    @Override
+    public boolean test(Block block) {
+        CraftBlock b = (CraftBlock) block;
+        BlockState state = b.getNMS();
+
+        if(!state.is(this.state.getBlock())) return false;
+        if(!testProperties(state)) return false;
+        if(tags == null || tags.isEmpty()) return true;
+
+        return compareTags(b.getHandle().getBlockEntity(b.getPosition()));
+    }
+
+    @Override
+    public boolean test(BlockData data) {
+        CraftBlockData d = (CraftBlockData) data;
+        return testProperties(d.getState());
+    }
+
+    private boolean testProperties(BlockState state) {
+        for (Property<?> p: getProperties()) {
+            if(state.getValue(p) != this.state.getValue(p)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean compareTags(BlockEntity entity) {
+        if(entity == null) return false;
+        return NbtUtils.compareNbt(tags, entity.saveWithFullMetadata(), true);
     }
 
     @Override

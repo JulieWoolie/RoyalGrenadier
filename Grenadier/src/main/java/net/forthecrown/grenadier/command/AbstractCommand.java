@@ -1,6 +1,7 @@
 package net.forthecrown.grenadier.command;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CmdUtil;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -33,7 +35,10 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
     protected Permission permission;
     protected Component permissionMessage;
     protected String description;
+    protected boolean showUsageOnFail;
 
+    // Will be null until command is registered
+    protected LiteralCommandNode<CommandSource> built;
     private boolean registered = false;
 
     /**
@@ -57,7 +62,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
         root.requires(this);
         createCommand(root);
 
-        RoyalGrenadier.register(this);
+        built = RoyalGrenadier.register(this);
         registered = true;
     }
 
@@ -252,5 +257,34 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      */
     public BrigadierCommand getCommand() {
         return root;
+    }
+
+    public Component getUsage(CommandSource source) {
+        Iterator<String> iterator = RoyalGrenadier.getDispatcher().getSmartUsage(built, source).values().iterator();
+
+        String prefix = "/" + getName() + " ";
+        StringBuilder builder = new StringBuilder(prefix);
+
+        while (iterator.hasNext()) {
+            String s = iterator.next();
+
+            builder.append(s);
+
+            if(iterator.hasNext()) {
+                builder
+                        .append('\n')
+                        .append(prefix);
+            }
+        }
+
+        return Component.text(builder.toString());
+    }
+
+    public boolean getShowUsageOnFail() {
+        return showUsageOnFail;
+    }
+
+    public void setShowUsageOnFail(boolean showUsageOnFail) {
+        this.showUsageOnFail = showUsageOnFail;
     }
 }
