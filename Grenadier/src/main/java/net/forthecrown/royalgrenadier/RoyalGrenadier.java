@@ -3,6 +3,8 @@ package net.forthecrown.royalgrenadier;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.forthecrown.grenadier.CmdUtil;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
@@ -13,11 +15,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandMap;
+import org.bukkit.command.Command;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class RoyalGrenadier {
     private static CommandDispatcher<CommandSource> dispatcher;
@@ -41,7 +43,9 @@ public class RoyalGrenadier {
      * Registers the given AbstractCommand, making it useable. Not needed in most cases, as {@link AbstractCommand#register()} calls this.
      * @param builder The command
      */
-    public static LiteralCommandNode<CommandSource> register(AbstractCommand builder){
+    public static LiteralCommandNode<CommandSource> register(AbstractCommand builder) {
+        String fallBack = builder.getPlugin().getName().toLowerCase();
+
         CommandWrapper wrapper = new CommandWrapper(builder);
         LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
 
@@ -51,8 +55,9 @@ public class RoyalGrenadier {
         // Apply builder's parameters to bukkitWrapper, so aliases, permissions, description,
         // all that
         VanillaCommandWrapper bukkitWrapper = new VanillaCommandWrapper(serverCommands, builtNms);
-        if(builder.getAliases() != null) bukkitWrapper.setAliases(Arrays.asList(builder.getAliases()));
-        else bukkitWrapper.setAliases(new ArrayList<>());
+        List<String> aliases = builder.getAliases() == null ? new ObjectArrayList<>() : new ObjectArrayList<>(builder.getAliases());
+        aliases.remove(builder.getName());
+        bukkitWrapper.setAliases(aliases);
 
         if(builder.getDescription() != null) bukkitWrapper.setDescription(builder.getDescription());
         else bukkitWrapper.setDescription("");
@@ -62,12 +67,51 @@ public class RoyalGrenadier {
 
         bukkitWrapper.permissionMessage(builder.permissionMessage());
 
-        CommandMap map = Bukkit.getCommandMap();
-        map.register(builder.getName(), builder.getPlugin().getName(), bukkitWrapper);
-        //bukkitWrapper.register(map);
+        SimpleCommandMap map = (SimpleCommandMap) Bukkit.getCommandMap();
+        Map<String, Command> cmds = map.getKnownCommands();
 
+        Set<String> allLabels = new HashSet<>(bukkitWrapper.getAliases());
+        allLabels.add(builder.getName());
+
+        for (String s: allLabels) {
+            String label = s.toLowerCase(Locale.ROOT);
+
+            boolean alias = !label.equalsIgnoreCase(builder.getName());
+
+            registerLabel(fallBack + ':' + label, cmds, bukkitWrapper, alias, built, builtNms);
+            registerLabel(label, cmds, bukkitWrapper, alias, built, builtNms);
+        }
+
+        bukkitWrapper.register(map);
         return built;
     }
+
+     private static void registerLabel(String l,
+                                       Map<String, Command> map,
+                                       VanillaCommandWrapper wrapper,
+                                       boolean alias,
+                                       LiteralCommandNode<CommandSource> built,
+                                       LiteralCommandNode<CommandSourceStack> builtNms
+     ) {
+         map.put(l, wrapper);
+
+         if(!alias) return;
+
+         dispatcher.getRoot().removeCommand(l);
+         dispatcher.register(
+                 CmdUtil.literal(l)
+                         .requires(built.getRequirement())
+                         .redirect(built)
+         );
+
+         serverCommands.getDispatcher().getRoot().removeCommand(l);
+
+         serverCommands.getDispatcher().register(
+                 Commands.literal(l)
+                         .requires(builtNms.getRequirement())
+                         .redirect(builtNms)
+         );
+     }
 
     public static boolean isInitialized() {
         return initialized;

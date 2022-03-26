@@ -55,6 +55,7 @@ public class TestCommand extends AbstractCommand {
 
         setShowUsageOnFail(true);
 
+        setAliases("grenadier_testalias_1", "grenadier_testalias_2");
         register();
     }
 

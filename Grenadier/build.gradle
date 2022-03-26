@@ -26,3 +26,7 @@ dependencies {
 assemble {
     dependsOn(reobfJar)
 }
+
+java {
+    withSourcesJar()
+}

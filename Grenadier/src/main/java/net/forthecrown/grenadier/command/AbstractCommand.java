@@ -8,6 +8,7 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
@@ -140,11 +141,18 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
 
     /**
      * Sets the command's aliases
-     * @param aliases Aliases
+     * @param newAliases Aliases
      */
-    public void setAliases(String... aliases) {
+    public void setAliases(String... newAliases) {
         if(registered) return;
-        this.aliases = aliases;
+        this.aliases = newAliases;
+
+        // Ensure all given aliases are lower case
+        if(aliases != null && aliases.length > 0) {
+            for (int i = 0; i < aliases.length; i++) {
+                aliases[i] = Validate.notNull(aliases[i]).toLowerCase();
+            }
+        }
     }
 
     /**
