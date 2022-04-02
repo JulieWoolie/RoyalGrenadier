@@ -20,6 +20,7 @@ import net.forthecrown.royalgrenadier.types.selector.EntityArgumentImpl;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -43,6 +44,8 @@ import java.util.Map;
 
 //Test command because I don't know how to write unit tests
 public class TestCommand extends AbstractCommand {
+    private static final Logger LOGGER = RoyalGrenadier.getLogger();
+
     public TestCommand(Plugin plugin) {
         super("grenadiertest", plugin);
 
@@ -70,6 +73,28 @@ public class TestCommand extends AbstractCommand {
     @Override
     protected void createCommand(BrigadierCommand command) {
         command
+                .then(literal("execute_cmd_test")
+                        .executes(c -> {
+                            CommandSource source = c.getSource();
+                            LOGGER.info("sourceName: {}", source.textName());
+
+                            LOGGER.info("shouldInformAdmins: {}", source.shouldInformAdmins());
+                            LOGGER.info("acceptsFailure: {}", source.acceptsFailureMessage());
+                            LOGGER.info("acceptsSuccess: {}", source.acceptsSuccessMessage());
+                            LOGGER.info("isSilent: {}", source.isSilent());
+
+                            LOGGER.info("sendMessage: message: 'Hello, world!'");
+                            source.sendMessage("Hello, world!");
+
+                            LOGGER.info("location: {}", source.getLocation());
+                            LOGGER.info("isPlayer(): {}", source.isPlayer());
+                            LOGGER.info("getWorld: {}", source.getWorld().getName());
+
+                            LOGGER.info("test finished!");
+                            return 0;
+                        })
+                )
+
                 .then(literal("built_int")
                         .then(literal("str_word")
                                 .then(argument("str", StringArgumentType.word())

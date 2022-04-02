@@ -12,11 +12,11 @@ import net.forthecrown.royalgrenadier.command.CommandWrapper;
 import net.forthecrown.royalgrenadier.command.WrapperConverter;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.dedicated.DedicatedServer;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.craftbukkit.v1_18_R2.CraftServer;
 import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper;
 
 import java.util.*;
@@ -105,7 +105,6 @@ public class RoyalGrenadier {
          );
 
          serverCommands.getDispatcher().getRoot().removeCommand(l);
-
          serverCommands.getDispatcher().register(
                  Commands.literal(l)
                          .requires(builtNms.getRequirement())
@@ -122,7 +121,7 @@ public class RoyalGrenadier {
 
         RoyalGrenadier.logger = logger;
         dispatcher = new CommandDispatcher<>();
-        serverCommands = DedicatedServer.getServer().vanillaCommandDispatcher;
+        serverCommands = ((CraftServer) Bukkit.getServer()).getServer().vanillaCommandDispatcher;
 
         dispatcher.setConsumer((context, b, i) -> context.getSource().onCommandComplete(context, b, i));
 

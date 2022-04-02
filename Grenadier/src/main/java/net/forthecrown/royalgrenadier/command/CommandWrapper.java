@@ -68,7 +68,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
 
             return dispatcher.execute(parseResults);
         } catch (CommandSyntaxException syntaxException) {
-            source.sendMessage(GrenadierUtils.formatCommandException(syntaxException));
+            source.sendFailure(GrenadierUtils.formatCommandException(syntaxException));
 
             if(builder.getShowUsageOnFail()) {
                 Component usage = builder.getUsage(source);
@@ -76,7 +76,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
             }
 
             return -1;
-        } catch (Exception e){
+        } catch (Throwable e){
             LOGGER.error(
                     new ParameterizedMessage(
                             "Error while executing command '{}'",
@@ -91,20 +91,17 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
             if(RoyalCommandException.ENABLE_HOVER_STACK_TRACE) {
                 for (StackTraceElement element : e.getStackTrace()) {
                     String info = element.getClassName() + '.' + element.getMethodName() + " (Line: " + element.getLineNumber() + ')';
-
                     builder
                             .append(Component.newline())
                             .append(Component.text("  " + info));
                 }
             }
 
-            source.sendMessage(Component.translatable("command.failed", RoyalCommandException.ERROR_MESSAGE_STYLE).hoverEvent(builder.build()));
+            source.sendFailure(Component.translatable("command.failed", RoyalCommandException.ERROR_MESSAGE_STYLE).hoverEvent(builder.build()));
             return -1;
         }
     }
 
-    //FIXME This shit broken
-    //Doesn't work in places with mutpliple required arguments, just returns an empty suggestions thing.
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, ArgumentCommandNode<CommandSource, ?> node) throws CommandSyntaxException {
         try {
             StringReader reader = GrenadierUtils.filterCommandInput(builder.getInput());

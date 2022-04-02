@@ -135,11 +135,13 @@ public class CommandSourceImpl implements CommandSource {
 
     @Override
     public void sendMessage(String s) {
+        if(isSilent()) return;
         source.getBukkitSender().sendMessage(s);
     }
 
     @Override
-    public void sendMessage(Component message, @Nullable UUID id){
+    public void sendMessage(Component message, @Nullable UUID id) {
+        if(isSilent()) return;
         source.source.sendMessage(PaperAdventure.asVanilla(message), id == null ? Util.NIL_UUID : id);
     }
 
@@ -148,6 +150,16 @@ public class CommandSourceImpl implements CommandSource {
         if(sendToSelf) sendMessage(component);
         if(!shouldInformAdmins()) return;
 
+        broadcastAdmin(component);
+    }
+
+    @Override
+    public void sendAdmin(String s, boolean sendToSelf) {
+        sendAdmin(lSerializer.deserialize(s), sendToSelf);
+    }
+
+    @Override
+    public void broadcastAdmin(Component component) {
         String name = textName();
         Component message = Component.translatable("chat.type.admin",
                 Style.style(NamedTextColor.GRAY, TextDecoration.ITALIC),
@@ -169,11 +181,6 @@ public class CommandSourceImpl implements CommandSource {
 
         //Let console know as well
         if(!is(ConsoleCommandSender.class)) Bukkit.getConsoleSender().sendMessage(message);
-    }
-
-    @Override
-    public void sendAdmin(String s, boolean sendToSelf) {
-        sendAdmin(lSerializer.deserialize(s), sendToSelf);
     }
 
     @Override
@@ -207,6 +214,21 @@ public class CommandSourceImpl implements CommandSource {
         if(suggestion == null) return null;
 
         return new Vec2Suggestion(suggestion.getX(), suggestion.getZ(), suggestion.tooltip());
+    }
+
+    @Override
+    public boolean isSilent() {
+        return GrenadierUtils.isSilent(source);
+    }
+
+    @Override
+    public boolean acceptsSuccessMessage() {
+        return source.source.acceptsSuccess();
+    }
+
+    @Override
+    public boolean acceptsFailureMessage() {
+        return source.source.acceptsFailure();
     }
 
     @Override

@@ -60,11 +60,10 @@ public class WrapperConverter {
     void convertNodes(Collection<CommandNode<CommandSource>> nodes, ArgumentBuilder<CommandSourceStack, ?> to){
         for (CommandNode<CommandSource> n: nodes){
 
-            if(n instanceof LiteralCommandNode){
-                to.then(convertNode((LiteralCommandNode<CommandSource>) n));
-            } else if(n instanceof ArgumentCommandNode) {
-                ArgumentCommandNode<CommandSource, ?> n1 = (ArgumentCommandNode<CommandSource, ?>) n;
-                to.then(convertNode(n1));
+            if(n instanceof LiteralCommandNode literal){
+                to.then(convertNode(literal));
+            } else if(n instanceof ArgumentCommandNode arg) {
+                to.then(convertNode(arg));
             } else throw new IllegalStateException("Unknown node: " + n.getClass().getName());
         }
     }

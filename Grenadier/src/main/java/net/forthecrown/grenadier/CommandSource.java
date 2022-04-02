@@ -209,6 +209,12 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
     void sendAdmin(String s, boolean sendToSelf);
 
     /**
+     * Broadcasts the message to other admins
+     * @param message The message to broadcast
+     */
+    void broadcastAdmin(Component message);
+
+    /**
      * Gets the current command the sender is using, null if no command is currently in use
      * @return The command the sender is currently using
      */
@@ -239,6 +245,71 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
     @Nullable Vec2Suggestion getRelevant2DCords();
 
     /**
+     * Checks if this source is 'silent', meaning it doesn't accept any
+     * messages
+     * @return True, if silent, false otherwise
+     */
+    boolean isSilent();
+
+    /**
+     * Checks whether this source accepts command success messages
+     * @return Whether this source accepts success messages
+     */
+    boolean acceptsSuccessMessage();
+
+    /**
+     * Checks whether this source accepts command failure messages
+     * @return Whether this source accepts failure messages
+     */
+    boolean acceptsFailureMessage();
+
+    /**
+     * Sends a success message
+     * @param msg The message to send
+     */
+    default void sendSuccess(Component msg) {
+        sendSuccess(msg, true);
+    }
+
+    /**
+     * Send a command success message
+     * @param msg The message to send
+     * @param broadcast Whether to broadcast that message to other OPs
+     */
+    default void sendSuccess(Component msg, boolean broadcast) {
+        if(!isSilent() && acceptsSuccessMessage()) {
+            sendMessage(msg);
+        }
+
+        if(broadcast && !isSilent() && shouldInformAdmins()) {
+            broadcastAdmin(msg);
+        }
+    }
+
+    /**
+     * Send a command failure message
+     * @param msg The message to send
+     */
+    default void sendFailure(Component msg) {
+        sendFailure(msg, false);
+    }
+
+    /**
+     * Send a command failure message
+     * @param msg The message to send
+     * @param broadcast Whether to broadcast that message to other OPs
+     */
+    default void sendFailure(Component msg, boolean broadcast) {
+        if(!isSilent() && acceptsFailureMessage()) {
+            sendMessage(msg);
+        }
+
+        if(broadcast && !isSilent() && shouldInformAdmins()) {
+            broadcastAdmin(msg);
+        }
+    }
+
+    /**
      * Suggest matching strings for the specified SuggestionsBuilder
      * @deprecated Use {@link CompletionProvider#suggestMatching(SuggestionsBuilder, Iterable)}
      * @param b The builder
@@ -252,66 +323,79 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
 
     @Override
     default void sendMessage(@NotNull Identity source, @NotNull Component message, @NotNull MessageType type) {
+        if(isSilent()) return;
         asBukkit().sendMessage(source, message, type);
     }
 
     @Override
     default void sendActionBar(@NotNull Component message) {
+        if(isSilent()) return;
         asBukkit().sendActionBar(message);
     }
 
     @Override
     default void sendPlayerListHeaderAndFooter(@NotNull Component header, @NotNull Component footer) {
+        if(isSilent()) return;
         asBukkit().sendPlayerListHeaderAndFooter(header, footer);
     }
 
     @Override
     default <T> void sendTitlePart(@NotNull TitlePart<T> part, @NotNull T value) {
+        if(isSilent()) return;
         asBukkit().sendTitlePart(part, value);
     }
 
     @Override
     default void clearTitle() {
+        if(isSilent()) return;
         asBukkit().clearTitle();
     }
 
     @Override
     default void resetTitle() {
+        if(isSilent()) return;
         asBukkit().resetTitle();
     }
 
     @Override
     default void showBossBar(@NotNull BossBar bar) {
+        if(isSilent()) return;
         asBukkit().showBossBar(bar);
     }
 
     @Override
     default void hideBossBar(@NotNull BossBar bar) {
+        if(isSilent()) return;
         asBukkit().hideBossBar(bar);
     }
 
     @Override
     default void playSound(@NotNull Sound sound) {
+        if(isSilent()) return;
         asBukkit().playSound(sound);
     }
 
     @Override
     default void playSound(@NotNull Sound sound, Sound.@NotNull Emitter emitter) {
+        if(isSilent()) return;
         asBukkit().playSound(sound, emitter);
     }
 
     @Override
     default void playSound(@NotNull Sound sound, double x, double y, double z) {
+        if(isSilent()) return;
         asBukkit().playSound(sound, x, y, z);
     }
 
     @Override
     default void stopSound(@NotNull SoundStop stop) {
+        if(isSilent()) return;
         asBukkit().stopSound(stop);
     }
 
     @Override
     default void openBook(@NotNull Book book) {
+        if(isSilent()) return;
         asBukkit().openBook(book);
     }
 }

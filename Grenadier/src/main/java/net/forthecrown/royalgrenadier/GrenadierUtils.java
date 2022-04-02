@@ -30,6 +30,7 @@ import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -178,9 +179,48 @@ public class GrenadierUtils {
         }
 
         String filtered = subStr + input.substring(spaceIndex);
+
         StringReader reader = new StringReader(filtered);
         if(reader.canRead() && reader.peek() == '/') reader.skip();
 
+        // we've been passed the 'execute' command input, gotta find the 'run' argument
+        if(reader.getRemaining().startsWith("execute")) {
+            String remaining = reader.getRemaining();
+            int runIndex = remaining.indexOf("run");
+
+            if(runIndex != -1) {
+                reader = new StringReader(remaining.substring(runIndex + 3).trim());
+            }
+        }
+
         return reader;
+    }
+
+    public static boolean isSilent(CommandSourceStack stack) {
+        Field silent = null;
+
+        // the 'silent' field is the only boolean field in CommandSourceStack
+        // at least currently, so any boolean fields we find must be the
+        // silent field.
+        for (Field f: stack.getClass().getDeclaredFields()) {
+            if(f.getType().equals(Boolean.TYPE)) {
+                silent = f;
+                break;
+            }
+        }
+
+        if(silent == null) {
+            // This should not happen
+            return false;
+        }
+
+        silent.setAccessible(true);
+
+        try {
+            return (boolean) silent.get(stack);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
