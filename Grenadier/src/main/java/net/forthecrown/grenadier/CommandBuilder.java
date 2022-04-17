@@ -2,6 +2,7 @@ package net.forthecrown.grenadier;
 
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
+import net.forthecrown.royalgrenadier.RoyalGrenadier;
 import net.kyori.adventure.text.Component;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
@@ -33,6 +34,10 @@ public class CommandBuilder {
         this.creator = CommandCreator.EMPTY;
     }
 
+    public CommandBuilder(String name) {
+        this(name, RoyalGrenadier.getPlugin());
+    }
+
     /**
      * Gets the command's name
      * @return The command's name
@@ -58,7 +63,7 @@ public class CommandBuilder {
 
     /**
      * Checks if the command is already registered
-     * @return
+     * @return True, if the command is registered, false otherwise
      */
     public boolean isRegistered() {
         return command.isRegistered();

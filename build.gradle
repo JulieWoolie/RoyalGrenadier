@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'net.forthecrown'
-version '1.3.2'
+version '1.3.3'
 
 tasks.register("buildGrenadier") {
     Project grenadier = project('Grenadier')
@@ -27,7 +27,7 @@ tasks.register("buildGrenadier") {
 }
 
 private static void moveDirContents(File from, File to) {
-    File[] files = from.listFiles();
+    File[] files = from.listFiles()
     if(files == null || files.length < 1) return
 
     for (File f: from.listFiles()) {

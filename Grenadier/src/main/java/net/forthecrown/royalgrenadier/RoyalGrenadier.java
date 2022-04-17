@@ -18,14 +18,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.craftbukkit.v1_18_R2.CraftServer;
 import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper;
+import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
 public class RoyalGrenadier {
     private static CommandDispatcher<CommandSource> dispatcher;
+    private static CommandDispatcher<CommandSourceStack> serverDispatcher;
     private static Commands serverCommands;
     private static boolean initialized = false;
+
     private static Logger logger;
+    private static Plugin plugin;
 
     /**
      * Gets the dispatcher for the RoyalGrenadier
@@ -39,6 +43,10 @@ public class RoyalGrenadier {
         return logger;
     }
 
+    public static Plugin getPlugin() {
+        return plugin;
+    }
+
     /**
      * Registers the given AbstractCommand, making it useable. Not needed in most cases, as {@link AbstractCommand#register()} calls this.
      * @param builder The command
@@ -47,8 +55,13 @@ public class RoyalGrenadier {
         String fallBack = builder.getPlugin().getName().toLowerCase();
 
         CommandWrapper wrapper = new CommandWrapper(builder);
-        LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
 
+        // There might be a command with this name already
+        // registered, so remove it lol. Last come, first served
+        dispatcher.getRoot().removeCommand(builder.getName());
+        serverDispatcher.getRoot().removeCommand(builder.getName());
+
+        LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
         LiteralArgumentBuilder<CommandSourceStack> wrapped = new WrapperConverter(wrapper, builder, built).finish();
         LiteralCommandNode<CommandSourceStack> builtNms = serverCommands.getDispatcher().register(wrapped);
 
@@ -104,8 +117,8 @@ public class RoyalGrenadier {
                          .redirect(built)
          );
 
-         serverCommands.getDispatcher().getRoot().removeCommand(l);
-         serverCommands.getDispatcher().register(
+         serverDispatcher.getRoot().removeCommand(l);
+         serverDispatcher.register(
                  Commands.literal(l)
                          .requires(builtNms.getRequirement())
                          .redirect(builtNms)
@@ -116,12 +129,15 @@ public class RoyalGrenadier {
         return initialized;
     }
 
-    public static void initialize(Logger logger) {
+    @SuppressWarnings("deprecation")
+    public static void initialize(Plugin plugin) {
         if(isInitialized()) return;
 
-        RoyalGrenadier.logger = logger;
+        RoyalGrenadier.plugin = plugin;
+        logger = plugin.getLog4JLogger();
         dispatcher = new CommandDispatcher<>();
         serverCommands = ((CraftServer) Bukkit.getServer()).getServer().vanillaCommandDispatcher;
+        serverDispatcher = serverCommands.getDispatcher();
 
         dispatcher.setConsumer((context, b, i) -> context.getSource().onCommandComplete(context, b, i));
 

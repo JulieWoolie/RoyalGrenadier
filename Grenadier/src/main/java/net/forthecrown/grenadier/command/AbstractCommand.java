@@ -53,6 +53,10 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
         this.plugin = plugin;
     }
 
+    protected AbstractCommand(@NotNull String name) {
+        this(name, RoyalGrenadier.getPlugin());
+    }
+
     protected abstract void createCommand(BrigadierCommand command);
 
     /**
