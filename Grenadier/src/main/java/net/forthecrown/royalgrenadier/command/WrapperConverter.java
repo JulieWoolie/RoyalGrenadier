@@ -11,9 +11,12 @@ import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
-import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -90,7 +93,8 @@ public class WrapperConverter {
     }
 
     RequiredArgumentBuilder<CommandSourceStack, ?> convertNode(ArgumentCommandNode<CommandSource, ?> node){
-        ArgumentType<?> type = RoyalArgumentsImpl.getNMS(node.getType());
+        ArgumentType<?> type = convertType(node.getType());
+        boolean vanillaSuggests = useVanillaSuggestions(node.getType());
 
         RequiredArgumentBuilder<CommandSourceStack, ?> result = required(node.getName(), type);
 
@@ -99,7 +103,7 @@ public class WrapperConverter {
 
         //Here's that hacky af usage of that getSuggestions method in CommandWrapper
         result.suggests((c, b) -> wrapper.getSuggestions(c, b, node));
-        if(node.getCustomSuggestions() == null && RoyalArgumentsImpl.shouldUseVanillaSuggestions(node.getType())) {
+        if(node.getCustomSuggestions() == null && vanillaSuggests) {
             result.suggests(null);
         }
 
@@ -108,5 +112,34 @@ public class WrapperConverter {
         }
 
         return result;
+    }
+
+    boolean useVanillaSuggestions(ArgumentType type) {
+        if (type instanceof VanillaMappedArgument vType) {
+            return vType.useVanillaSuggestions();
+        }
+
+        return false;
+    }
+
+    ArgumentType convertType(ArgumentType type) {
+        if (ArgumentTypeInfos.isClassRecognized(type.getClass())) {
+            return type;
+        }
+
+        if (type instanceof VanillaMappedArgument vType) {
+            ArgumentType vanilla = vType.getVanillaArgumentType();
+
+            Validate.isTrue(ArgumentTypeInfos.isClassRecognized(vanilla.getClass()), "Type returned by "
+                    + VanillaMappedArgument.class.getSimpleName()
+                    + " is not registered in vanilla registry"
+            );
+
+            return vanilla;
+        }
+
+        // This seems to be a works-for-all kind of thing for the most part
+        // It's good enough, but still limiting
+        return ScoreHolderArgument.scoreHolder();
     }
 }

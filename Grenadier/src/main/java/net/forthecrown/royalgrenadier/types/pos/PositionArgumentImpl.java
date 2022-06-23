@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.pos.*;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.arguments.coordinates.*;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PositionArgumentImpl implements PositionArgument {
+public class PositionArgumentImpl implements PositionArgument, VanillaMappedArgument {
     public static final PositionArgumentImpl VECTOR_INSTANCE = new PositionArgumentImpl(false, false);
     public static final PositionArgumentImpl VECTOR_2D_INSTANCE = new PositionArgumentImpl(false, true);
 
@@ -67,7 +68,12 @@ public class PositionArgumentImpl implements PositionArgument {
         return handle.getExamples();
     }
 
-    public ArgumentType<Coordinates> getHandle() {
+    public ArgumentType<Coordinates> getVanillaArgumentType() {
         return handle;
+    }
+
+    @Override
+    public boolean useVanillaSuggestions() {
+        return true;
     }
 }

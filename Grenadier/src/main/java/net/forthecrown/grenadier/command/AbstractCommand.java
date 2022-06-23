@@ -1,12 +1,15 @@
 package net.forthecrown.grenadier.command;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
 import net.forthecrown.grenadier.CmdUtil;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
@@ -38,8 +41,6 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
     protected String description;
     protected boolean showUsageOnFail;
 
-    // Will be null until command is registered
-    protected LiteralCommandNode<CommandSource> built;
     private boolean registered = false;
 
     /**
@@ -67,7 +68,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
         root.requires(this);
         createCommand(root);
 
-        built = RoyalGrenadier.register(this);
+        RoyalGrenadier.register(this);
         registered = true;
     }
 
@@ -271,25 +272,53 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
         return root;
     }
 
-    public Component getUsage(CommandSource source) {
-        Iterator<String> iterator = RoyalGrenadier.getDispatcher().getSmartUsage(built, source).values().iterator();
-
-        String prefix = "/" + getName() + " ";
-        StringBuilder builder = new StringBuilder(prefix);
-
-        while (iterator.hasNext()) {
-            String s = iterator.next();
-
-            builder.append(s);
-
-            if(iterator.hasNext()) {
-                builder
-                        .append('\n')
-                        .append(prefix);
-            }
+    /**
+     * Gets the usage message for the given command
+     * @param context The context to get the usage of
+     * @param exception The exception thrown to warrant the usage message call
+     * @return The command's usage message
+     */
+    public Component getUsage(CommandContext<CommandSource> context, CommandSyntaxException exception, ExecPhase phase) {
+        if (phase == ExecPhase.LOGIC_EXECUTION) {
+            return null;
         }
 
-        return Component.text(builder.toString());
+        CommandNode<CommandSource> node = context.getNodes().get(context.getNodes().size() - 1).getNode();
+
+        Collection<String> path = RoyalGrenadier.getDispatcher().getPath(node);
+        StringBuilder prefixBuilder = new StringBuilder("/");
+
+        CommandNode<CommandSource> lastNode = RoyalGrenadier.getDispatcher().getRoot();
+
+        for (String s: path) {
+            lastNode = lastNode.getChild(s);
+            prefixBuilder
+                    .append(lastNode.getUsageText())
+                    .append(" ");
+        }
+
+        String prefix = prefixBuilder.toString();
+        TextComponent.Builder builder = Component.text();
+
+        Collection<String> usages = RoyalGrenadier.getDispatcher()
+                .getSmartUsage(node, context.getSource())
+                .values();
+
+        if (!usages.isEmpty()) {
+            Iterator<String> iterator = usages.iterator();
+
+            while (iterator.hasNext()) {
+                builder.append(Component.text(prefix + iterator.next()));
+
+                if(iterator.hasNext()) {
+                    builder.append(Component.newline());
+                }
+            }
+        } else {
+            builder.append(Component.text(prefix.trim()));
+        }
+
+        return builder.build();
     }
 
     public boolean getShowUsageOnFail() {
@@ -298,5 +327,9 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
 
     public void setShowUsageOnFail(boolean showUsageOnFail) {
         this.showUsageOnFail = showUsageOnFail;
+    }
+
+    public enum ExecPhase {
+        PARSING, LOGIC_EXECUTION
     }
 }

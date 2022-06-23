@@ -2,11 +2,11 @@ package net.forthecrown.royalgrenadier.types;
 
 import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.KeyArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.kyori.adventure.key.Key;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +15,7 @@ import org.bukkit.NamespacedKey;
 
 import java.util.regex.Pattern;
 
-public class KeyArgumentImpl implements KeyArgument {
+public class KeyArgumentImpl implements KeyArgument, VanillaMappedArgument {
     //Make this field public in NamespacedKey ;-;
     public static final Pattern VALID_NAMESPACE = Pattern.compile("[a-z0-9._-]+");
 
@@ -55,7 +55,7 @@ public class KeyArgumentImpl implements KeyArgument {
         return tryReturn(getDefaultNamespace(), str, reader, cursor);
     }
 
-    public ArgumentType<ResourceLocation> getHandle() {
+    public ResourceLocationArgument getVanillaArgumentType() {
         return ResourceLocationArgument.id();
     }
 

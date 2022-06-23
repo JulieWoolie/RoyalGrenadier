@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.KeyArgument;
 import net.forthecrown.grenadier.types.LootTableArgument;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.resources.ResourceLocation;
 import org.bukkit.Bukkit;
@@ -17,7 +18,7 @@ import org.bukkit.loot.LootTable;
 
 import java.util.concurrent.CompletableFuture;
 
-public class LootTableArgumentImpl implements LootTableArgument {
+public class LootTableArgumentImpl implements LootTableArgument, VanillaMappedArgument {
     public static final LootTableArgumentImpl INSTANCE = new LootTableArgumentImpl();
     protected LootTableArgumentImpl() {}
 
@@ -33,7 +34,7 @@ public class LootTableArgumentImpl implements LootTableArgument {
         return CompletionProvider.suggestLootTables(builder);
     }
 
-    public ArgumentType<ResourceLocation> getHandle() {
+    public ArgumentType<ResourceLocation> getVanillaArgumentType() {
         return ResourceLocationArgument.id();
     }
 }

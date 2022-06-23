@@ -8,11 +8,11 @@ version parent.version
 
 repositories {
     mavenCentral()
-    maven { url 'https://papermc.io/repo/repository/maven-public/' }
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT'
 
     File grenBuildDir = new File(parent.getChildProjects().get("Grenadier").getBuildDir(), "libs")
     implementation files(new File(grenBuildDir, "Grenadier-" + version + ".jar"))
@@ -20,4 +20,13 @@ dependencies {
 
 assemble {
     archivesBaseName = 'Grenadier-Plugin'
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
 }

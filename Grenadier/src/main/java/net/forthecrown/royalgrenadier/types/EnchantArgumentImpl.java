@@ -9,13 +9,15 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.EnchantArgument;
 import net.forthecrown.grenadier.types.KeyArgument;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.kyori.adventure.text.Component;
+import net.minecraft.commands.arguments.ItemEnchantmentArgument;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.concurrent.CompletableFuture;
 
-public class EnchantArgumentImpl implements EnchantArgument {
+public class EnchantArgumentImpl implements EnchantArgument, VanillaMappedArgument {
 
     public static final TranslatableExceptionType UNKNOWN_ENCHANTMENT = new TranslatableExceptionType("enchantment.unknown");
     protected EnchantArgumentImpl() {}
@@ -35,5 +37,15 @@ public class EnchantArgumentImpl implements EnchantArgument {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return CompletionProvider.suggestEnchantments(builder);
+    }
+
+    @Override
+    public ItemEnchantmentArgument getVanillaArgumentType() {
+        return ItemEnchantmentArgument.enchantment();
+    }
+
+    @Override
+    public boolean useVanillaSuggestions() {
+        return true;
     }
 }

@@ -11,6 +11,7 @@ import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.bukkit.Bukkit;
@@ -20,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class EntityArgumentImpl implements EntityArgument {
+public class EntityArgumentImpl implements EntityArgument, VanillaMappedArgument {
     private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "@e", "@e[type=foo]", "dd12be42-52a9-4a91-a8a1-11c01849e498");
 
     public static final TranslatableExceptionType TOO_MANY_ENTITIES = new TranslatableExceptionType("argument.entity.toomany");
@@ -41,11 +42,6 @@ public class EntityArgumentImpl implements EntityArgument {
     public EntityArgumentImpl(boolean multiple, boolean allowEntities){
         this.multiple = multiple;
         this.allowEntities = allowEntities;
-    }
-
-    @Override
-    public EntitySelector parse(StringReader reader) throws CommandSyntaxException {
-        return parse(reader, false);
     }
 
     @Override
@@ -106,7 +102,7 @@ public class EntityArgumentImpl implements EntityArgument {
         return EXAMPLES;
     }
 
-    public net.minecraft.commands.arguments.EntityArgument getHandle(){
+    public net.minecraft.commands.arguments.EntityArgument getVanillaArgumentType() {
         if(allowEntities){
             if(multiple) return net.minecraft.commands.arguments.EntityArgument.entities();
             else return net.minecraft.commands.arguments.EntityArgument.entity();
@@ -114,5 +110,10 @@ public class EntityArgumentImpl implements EntityArgument {
             if(multiple) return net.minecraft.commands.arguments.EntityArgument.players();
             else return net.minecraft.commands.arguments.EntityArgument.player();
         }
+    }
+
+    @Override
+    public boolean useVanillaSuggestions() {
+        return true;
     }
 }

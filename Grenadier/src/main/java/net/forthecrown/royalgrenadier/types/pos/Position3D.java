@@ -1,6 +1,5 @@
 package net.forthecrown.royalgrenadier.types.pos;
 
-import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.pos.Position;
 import org.bukkit.Location;
 
@@ -25,9 +24,7 @@ public class Position3D implements Position {
     }
 
     @Override
-    public Location getLocation(CommandSource source){
-        Location sourceLoc = source.getLocation();
-
+    public Location apply(Location sourceLoc) {
         return new Location(
                 sourceLoc.getWorld(),
 

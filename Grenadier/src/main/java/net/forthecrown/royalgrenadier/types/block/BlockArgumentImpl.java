@@ -7,27 +7,37 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.block.BlockArgument;
 import net.forthecrown.grenadier.types.block.ParsedBlock;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Registry;
+import net.minecraft.server.dedicated.DedicatedServer;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class BlockArgumentImpl implements BlockArgument {
+public class BlockArgumentImpl implements BlockArgument, VanillaMappedArgument {
     protected BlockArgumentImpl() {}
     public static final BlockArgumentImpl INSTANCE = new BlockArgumentImpl();
-    private final BlockStateArgument handle = BlockStateArgument.block();
+    private final BlockStateArgument handle = BlockStateArgument.block(
+            new CommandBuildContext(DedicatedServer.getServer().registryHolder)
+    );
 
     @Override
     public ParsedBlock parse(StringReader reader) throws CommandSyntaxException {
-        return parse(reader, true, true);
+        return parse(reader, true);
     }
 
-    public ParsedBlock parse(StringReader reader, boolean allowTag, boolean allowNBT) throws CommandSyntaxException {
-        BlockStateParser parser = new BlockStateParser(reader, allowTag).parse(allowNBT);
+    public ParsedBlock parse(StringReader reader, boolean allowNBT) throws CommandSyntaxException {
+        BlockStateParser.BlockResult parser = BlockStateParser.parseForBlock(Registry.BLOCK, reader, allowNBT);
 
-        return new ParsedBlockImpl(parser.getState(), parser.getProperties().keySet(), parser.getNbt(), parser.getTag().location());
+        return new ParsedBlockImpl(
+                parser.blockState(),
+                parser.properties(),
+                parser.nbt(),
+                Registry.BLOCK.getKey(parser.blockState().getBlock())
+        );
     }
 
     @Override
@@ -36,16 +46,7 @@ public class BlockArgumentImpl implements BlockArgument {
     }
 
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder, boolean allowTag) {
-        StringReader reader = new StringReader(builder.getInput());
-        reader.setCursor(builder.getStart());
-
-        BlockStateParser parser = new BlockStateParser(reader, allowTag);
-
-        try {
-            parser.parse(true);
-        } catch (CommandSyntaxException ignored) {}
-
-        return parser.fillSuggestions(builder, Registry.BLOCK);
+        return handle.listSuggestions(context, builder);
     }
 
     @Override
@@ -53,7 +54,12 @@ public class BlockArgumentImpl implements BlockArgument {
         return handle.getExamples();
     }
 
-    public BlockStateArgument getHandle() {
+    public BlockStateArgument getVanillaArgumentType() {
         return handle;
+    }
+
+    @Override
+    public boolean useVanillaSuggestions() {
+        return true;
     }
 }

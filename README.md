@@ -8,12 +8,20 @@ Mojang created a command engine called Brigadier that's been in use since 1.13. 
 ###### Initially created for the ForTheCrown minecraft server
 
 ## Using Grenadier
-Using Grenadier is easy. 
+Using Grenadier is easy.
 
-Download the remapped jar and add it to your dependencies. Then go to the [Brigadier Repo](https://github.com/Mojang/brigadier) and get Mojang's Brigadier as well.
+If you're using a mojang mappings to write your plugin, download the jar file ending with `-dev` otherwise, download the normal jar.  
+Make sure you also have Mojang's Brigadier as well, you can get that [here!](https://github.com/Mojang/brigadier#gradle)
 
-There is no maven repository for Grenadier at the moment.
+If you're shading Grenadier into your own plugin, make sure to call `RoyalGrenadier.initialize(Plugin)` in your `onEnable()`, like so:
+```java
+public class Example extends JavaPlugin {
+	@Override
+	public void onEnable() {
+		RoyalGrenadier.initialize(this);
+	}
+}
+```
+If you're using the Grenadier plugin, just add `RoyalGrenadier` as a depend in your plugin.yml
 
-To learn how to create commands with Grenadier, check out the [Wiki](https://github.com/BotulToxin/RoyalGrenadier/wiki/Creating-a-command)
-
-After you've created a plugin with Grenadier you can either shade the remapped standalone jar into your plugin, or use the grenadier plugin on your server.
+You can go [to the wiki here](https://github.com/BotulToxin/RoyalGrenadier/wiki/Creating-a-command) to see how to create a simple command to get you started

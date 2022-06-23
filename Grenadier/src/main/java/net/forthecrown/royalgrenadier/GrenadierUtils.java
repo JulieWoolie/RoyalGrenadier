@@ -8,7 +8,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.adventure.AdventureComponent;
 import io.papermc.paper.adventure.PaperAdventure;
-import io.papermc.paper.commands.FeedbackForwardingSender;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
@@ -21,13 +20,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import org.bukkit.Bukkit;
-import org.bukkit.command.*;
-import org.bukkit.craftbukkit.v1_18_R2.CraftServer;
-import org.bukkit.craftbukkit.v1_18_R2.command.CraftBlockCommandSender;
-import org.bukkit.craftbukkit.v1_18_R2.command.ProxiedNativeCommandSender;
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity;
-import org.bukkit.entity.Entity;
+import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_19_R1.command.VanillaCommandWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -52,14 +46,13 @@ public class GrenadierUtils {
         return new CommandSourceImpl(stack, command);
     }
 
-    //Bukkit's getListener in VanillaCommandWrapper didn't have enough functionality to be as applicable
+    public static CommandSource wrap(CommandSender sender, AbstractCommand command) {
+        return wrap(senderToWrapper(sender), command);
+    }
+
+    // Thank god for paperMC fixing this method
     public static CommandSourceStack senderToWrapper(CommandSender sender) {
-        if(sender instanceof Entity) return ((CraftEntity) sender).getHandle().createCommandSourceStack();
-        else if(sender instanceof BlockCommandSender) return ((CraftBlockCommandSender) sender).getWrapper();
-        else if(sender instanceof RemoteConsoleCommandSender || sender instanceof ConsoleCommandSender) return ((CraftServer) Bukkit.getServer()).getServer().createCommandSourceStack();
-        else if(sender instanceof ProxiedCommandSender) return ((ProxiedNativeCommandSender)sender).getHandle();
-        else if(sender instanceof FeedbackForwardingSender serverSender) return serverSender.asVanilla();
-        else return null;
+        return VanillaCommandWrapper.getListener(sender);
     }
 
     //Converts a list from one type to another using the given function
@@ -104,7 +97,7 @@ public class GrenadierUtils {
 
         initialMessage = initialMessage.style(RoyalCommandException.ERROR_MESSAGE_STYLE);
 
-        if(exception.getInput() == null || exception.getCursor() < 1) return initialMessage;
+        if(exception.getInput() == null || exception.getCursor() < 0) return initialMessage;
 
         TextComponent.Builder builder = Component.text()
                 .append(initialMessage)
@@ -169,6 +162,9 @@ public class GrenadierUtils {
     }
 
     public static StringReader filterCommandInput(String input) {
+        // Sometimes we get given input with a plugin's namespace, like
+        // 'bukkit:reload' or something to that effect, to use that input,
+        // we must remove the namespace
         int spaceIndex = input.indexOf(' ');
         if(spaceIndex == -1) spaceIndex = input.length();
 
@@ -202,6 +198,7 @@ public class GrenadierUtils {
         // the 'silent' field is the only boolean field in CommandSourceStack
         // at least currently, so any boolean fields we find must be the
         // silent field.
+        // Why not just put the field name here directly? Obfuscation mappings
         for (Field f: stack.getClass().getDeclaredFields()) {
             if(f.getType().equals(Boolean.TYPE)) {
                 silent = f;

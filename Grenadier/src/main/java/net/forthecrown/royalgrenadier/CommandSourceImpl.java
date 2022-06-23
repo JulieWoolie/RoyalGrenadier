@@ -14,7 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.Util;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -27,6 +27,7 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -142,7 +143,18 @@ public class CommandSourceImpl implements CommandSource {
     @Override
     public void sendMessage(Component message, @Nullable UUID id) {
         if(isSilent()) return;
-        source.source.sendMessage(PaperAdventure.asVanilla(message), id == null ? Util.NIL_UUID : id);
+        // Well uhh, idk what to do with the UUID anymore lol
+        //UUID formattedId = id == null ? Util.NIL_UUID : id;
+
+        source.source.sendSystemMessage(PaperAdventure.asVanilla(GlobalTranslator.render(message, getLocale())));
+    }
+
+    public Locale getLocale() {
+        if (is(Player.class)) {
+            return asOrNull(Player.class).locale();
+        }
+
+        return Locale.ROOT;
     }
 
     @Override

@@ -3,4 +3,4 @@ main: net.forthecrown.grenadier.plugin.GrenadierPlugin
 load: STARTUP
 author: JulieWoolie
 api-version: 1.18
-version: 1.2.0
+version: '${version}'

@@ -14,23 +14,23 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_18_R2.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_18_R2.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_19_R1.util.CraftNamespacedKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.Map;
 
 public class ParsedBlockImpl implements ParsedBlock {
 
     private final BlockState state;
-    private final Set<Property<?>> properties;
+    private final Map<Property<?>, Comparable<?>> properties;
     private final CompoundTag tags;
     private final ResourceLocation key;
 
-    ParsedBlockImpl(BlockState state, Set<Property<?>> properties, CompoundTag tags, ResourceLocation key) {
+    ParsedBlockImpl(BlockState state, Map<Property<?>, Comparable<?>> properties, CompoundTag tags, ResourceLocation key) {
         this.state = state;
         this.properties = properties;
         this.tags = tags;
@@ -64,7 +64,7 @@ public class ParsedBlockImpl implements ParsedBlock {
         }
     }
 
-    public Set<Property<?>> getProperties() {
+    public Map<Property<?>, Comparable<?>> getProperties() {
         return properties;
     }
 
@@ -106,7 +106,7 @@ public class ParsedBlockImpl implements ParsedBlock {
     }
 
     private boolean testProperties(BlockState state) {
-        for (Property<?> p: getProperties()) {
+        for (Property<?> p: getProperties().keySet()) {
             if(state.getValue(p) != this.state.getValue(p)) {
                 return false;
             }

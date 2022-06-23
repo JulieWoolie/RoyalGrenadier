@@ -9,6 +9,7 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.scoreboard.TeamArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Team;
@@ -16,7 +17,7 @@ import org.bukkit.scoreboard.Team;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class TeamArgumentImpl implements TeamArgument {
+public class TeamArgumentImpl implements TeamArgument, VanillaMappedArgument {
     public static final TranslatableExceptionType UNKNOWN_TEAM = new TranslatableExceptionType("team.notFound");
     public static final TeamArgumentImpl INSTANCE = new TeamArgumentImpl();
 
@@ -41,7 +42,12 @@ public class TeamArgumentImpl implements TeamArgument {
         return GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getTeams(), Team::getName);
     }
 
-    public net.minecraft.commands.arguments.TeamArgument getHandle(){
+    public net.minecraft.commands.arguments.TeamArgument getVanillaArgumentType() {
         return net.minecraft.commands.arguments.TeamArgument.team();
+    }
+
+    @Override
+    public boolean useVanillaSuggestions() {
+        return true;
     }
 }

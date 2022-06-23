@@ -16,7 +16,7 @@ public interface PermissionLevels {
     int MODERATORS = 1;
 
     /**
-     * Level 2, GameMasters, I don't know what that means lol
+     * Level 2, GameMasters
      */
     int GAMEMASTERS = 2;
 

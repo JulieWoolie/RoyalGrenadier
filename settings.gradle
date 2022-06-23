@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url 'https://papermc.io/repo/repository/maven-public/' }
+        maven { url 'https://repo.papermc.io/repository/maven-public/' }
     }
 }
 
@@ -10,4 +10,3 @@ include 'Grenadier'
 include 'Plugins'
 include 'Plugin'
 include 'Plugin'
-

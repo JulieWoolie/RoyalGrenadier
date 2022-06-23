@@ -14,48 +14,39 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class TimeArgumentImpl implements TimeArgument {
     public static final TimeArgumentImpl INSTANCE = new TimeArgumentImpl();
 
     public static final TranslatableExceptionType INVALID_UNIT = new TranslatableExceptionType("argument.time.invalid_unit");
 
-    public static final long
-            SECOND_IN_MILLIS    = 1000,
-            MINUTE_IN_MILLIS    = SECOND_IN_MILLIS * 60,
-            HOUR_IN_MILLIS      = MINUTE_IN_MILLIS * 60,
-            DAY_IN_MILLIS       = HOUR_IN_MILLIS * 24,
-            WEEK_IN_MILLIS      = DAY_IN_MILLIS * 7,
-            MONTH_IN_MILLIS     = DAY_IN_MILLIS * 31,
-            YEAR_IN_MILLIS      = DAY_IN_MILLIS * 365;
-
     @Override
     public Long parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        long initialTime = reader.readInt();
+        long initialTime = reader.readLong();
         if(initialTime < 1) throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooLow().createWithContext(GrenadierUtils.correctReader(reader, cursor), initialTime, 1);
         if(!reader.canRead()) return initialTime;
 
         cursor = reader.getCursor();
         String multiplier = reader.readUnquotedString();
 
-        long multiplierActual = switch (multiplier) {
-            case "year", "years", "yr" -> YEAR_IN_MILLIS;
-            case "month", "months", "mo" -> MONTH_IN_MILLIS;
-            case "week", "weeks", "w" -> WEEK_IN_MILLIS;
-            case "day", "days", "d" -> DAY_IN_MILLIS;
-            case "hour", "hours", "h" -> HOUR_IN_MILLIS;
-            case "minute", "minutes", "m" -> MINUTE_IN_MILLIS;
-            case "second", "seconds", "s" -> SECOND_IN_MILLIS;
+        return switch (multiplier) {
+            case "year",   "years",   "yr" -> TimeUnit.DAYS.toMillis(365) * initialTime;
+            case "month",  "months",  "mo" -> TimeUnit.DAYS.toMillis(28) * initialTime;
+            case "week",   "weeks",   "w"  -> TimeUnit.DAYS.toMillis(7) * initialTime;
+            case "day",    "days",    "d"  -> TimeUnit.DAYS.toMillis(initialTime);
+            case "hour",   "hours",   "h"  -> TimeUnit.HOURS.toMillis(initialTime);
+            case "minute", "minutes", "m"  -> TimeUnit.MINUTES.toMillis(initialTime);
+            case "second", "seconds", "s"  -> TimeUnit.SECONDS.toMillis(initialTime);
+            case "tick",   "ticks",   "t"  -> initialTime * 50;
 
             default -> throw INVALID_UNIT.createWithContext(GrenadierUtils.correctReader(reader, cursor));
         };
-
-        return initialTime * multiplierActual;
     }
 
     private static final List<String> EXAMPLES = Arrays.asList("10s", "10m", "10h", "10d", "10w", "10mo", "10yr");
-    private static final List<String> SUGGESTIONS = Arrays.asList("s", "m", "h", "d", "w", "mo", "yr");
+    private static final List<String> SUGGESTIONS = Arrays.asList("t", "s", "m", "h", "d", "w", "mo", "yr");
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {

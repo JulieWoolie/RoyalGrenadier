@@ -12,7 +12,16 @@ public interface Position {
      * @param source The sender that used this command
      * @return The parsed location
      */
-    Location getLocation(CommandSource source);
+    default Location getLocation(CommandSource source) {
+        return apply(source.getLocation());
+    }
+
+    /**
+     * Applies this position's data to the given location
+     * @param base The base location to modify
+     * @return The transformed location with this position's data applied
+     */
+    Location apply(Location base);
 
     /**
      * Gets the location specified, requires Sender for any relative coordinates
@@ -62,19 +71,19 @@ public interface Position {
 
     /**
      * Gets the X of this position, may or may not be relative depending on if {@link Position#isXRelative()} is true
-     * @return The X of this potion
+     * @return The X of this position
      */
     double getX();
 
     /**
      * Gets the Y of this position, may or may not be relative depending on if {@link Position#isYRelative()} is true
-     * @return The Y of this potion
+     * @return The Y of this position
      */
     double getY();
 
     /**
      * Gets the Z of this position, may or may not be relative depending on if {@link Position#isZRelative()} is true
-     * @return The Z of this potion
+     * @return The Z of this position
      */
     double getZ();
 }

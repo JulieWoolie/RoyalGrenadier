@@ -3,12 +3,13 @@ package net.forthecrown.royalgrenadier.types;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.forthecrown.grenadier.types.UUIDArgument;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 
 import java.util.Collection;
 import java.util.UUID;
 
-public class UUIDArgumentImpl implements UUIDArgument {
+public class UUIDArgumentImpl implements UUIDArgument, VanillaMappedArgument {
     protected UUIDArgumentImpl() {}
     public static final UUIDArgumentImpl INSTANCE = new UUIDArgumentImpl();
     private final UuidArgument idArg = UuidArgument.uuid();
@@ -23,7 +24,7 @@ public class UUIDArgumentImpl implements UUIDArgument {
         return idArg.getExamples();
     }
 
-    public UuidArgument getHandle() {
+    public UuidArgument getVanillaArgumentType() {
         return idArg;
     }
 }

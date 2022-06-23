@@ -2,13 +2,13 @@ package net.forthecrown.royalgrenadier;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.forthecrown.grenadier.CmdUtil;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.forthecrown.royalgrenadier.arguments.RoyalArgumentsImpl;
 import net.forthecrown.royalgrenadier.command.CommandWrapper;
+import net.forthecrown.royalgrenadier.command.GrenadierBukkitWrapper;
 import net.forthecrown.royalgrenadier.command.WrapperConverter;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -16,11 +16,13 @@ import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.craftbukkit.v1_18_R2.CraftServer;
-import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper;
+import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 public class RoyalGrenadier {
     private static CommandDispatcher<CommandSource> dispatcher;
@@ -67,18 +69,7 @@ public class RoyalGrenadier {
 
         // Apply builder's parameters to bukkitWrapper, so aliases, permissions, description,
         // all that
-        VanillaCommandWrapper bukkitWrapper = new VanillaCommandWrapper(serverCommands, builtNms);
-        List<String> aliases = builder.getAliases() == null ? new ObjectArrayList<>() : new ObjectArrayList<>(builder.getAliases());
-        aliases.remove(builder.getName());
-        bukkitWrapper.setAliases(aliases);
-
-        if(builder.getDescription() != null) bukkitWrapper.setDescription(builder.getDescription());
-        else bukkitWrapper.setDescription("");
-
-        if(builder.getPermission() != null) bukkitWrapper.setPermission(builder.getPermission().getName());
-        else bukkitWrapper.setPermission(null);
-
-        bukkitWrapper.permissionMessage(builder.permissionMessage());
+        GrenadierBukkitWrapper bukkitWrapper = new GrenadierBukkitWrapper(builder, wrapper, built, builtNms);
 
         SimpleCommandMap map = (SimpleCommandMap) Bukkit.getCommandMap();
         Map<String, Command> cmds = map.getKnownCommands();
@@ -99,9 +90,9 @@ public class RoyalGrenadier {
         return built;
     }
 
-     private static void registerLabel(String l,
+    static void registerLabel(String l,
                                        Map<String, Command> map,
-                                       VanillaCommandWrapper wrapper,
+                                       GrenadierBukkitWrapper wrapper,
                                        boolean alias,
                                        LiteralCommandNode<CommandSource> built,
                                        LiteralCommandNode<CommandSourceStack> builtNms
@@ -111,11 +102,15 @@ public class RoyalGrenadier {
          if(!alias) return;
 
          dispatcher.getRoot().removeCommand(l);
-         dispatcher.register(
-                 CmdUtil.literal(l)
-                         .requires(built.getRequirement())
-                         .redirect(built)
-         );
+         LiteralArgumentBuilder<CommandSource> node = CmdUtil.literal(l)
+                 .requires(built.getRequirement())
+                 .executes(built.getCommand());
+
+         for (CommandNode n: built.getChildren()) {
+             node.then(n);
+         }
+
+         dispatcher.register(node);
 
          serverDispatcher.getRoot().removeCommand(l);
          serverDispatcher.register(
@@ -129,7 +124,7 @@ public class RoyalGrenadier {
         return initialized;
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings("deprecation") // Log4j smh
     public static void initialize(Plugin plugin) {
         if(isInitialized()) return;
 
@@ -141,7 +136,8 @@ public class RoyalGrenadier {
 
         dispatcher.setConsumer((context, b, i) -> context.getSource().onCommandComplete(context, b, i));
 
-        RoyalArgumentsImpl.init();
+        plugin.getServer().getPluginManager()
+                .registerEvents(new GrenadierListener(), plugin);
 
         initialized = true;
     }

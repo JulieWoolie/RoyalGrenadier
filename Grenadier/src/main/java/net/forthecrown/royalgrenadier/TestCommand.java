@@ -427,7 +427,7 @@ public class TestCommand extends AbstractCommand {
                 .then(literal("item")
                         .then(argument("i", ItemArgument.itemStack())
                                 .executes(c -> {
-                                    c.getSource().sendMessage(c.getArgument("i", ParsedItemStack.class).singular(true).toString());
+                                    c.getSource().sendMessage(c.getArgument("i", ParsedItemStack.class).create(1, true).toString());
                                     return 0;
                                 })
                         )

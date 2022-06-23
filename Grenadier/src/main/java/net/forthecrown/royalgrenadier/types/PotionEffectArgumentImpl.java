@@ -7,14 +7,15 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.PotionEffectArgument;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.arguments.MobEffectArgument;
 import net.minecraft.world.effect.MobEffect;
-import org.bukkit.craftbukkit.v1_18_R2.potion.CraftPotionEffectType;
+import org.bukkit.craftbukkit.v1_19_R1.potion.CraftPotionEffectType;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.concurrent.CompletableFuture;
 
-public class PotionEffectArgumentImpl implements PotionEffectArgument {
+public class PotionEffectArgumentImpl implements PotionEffectArgument, VanillaMappedArgument {
     public static final PotionEffectArgumentImpl INSTANCE = new PotionEffectArgumentImpl();
     protected PotionEffectArgumentImpl() {}
 
@@ -32,7 +33,12 @@ public class PotionEffectArgumentImpl implements PotionEffectArgument {
         return CompletionProvider.suggestEffects(builder);
     }
 
-    public MobEffectArgument getHandle() {
+    public MobEffectArgument getVanillaArgumentType() {
         return handle;
+    }
+
+    @Override
+    public boolean useVanillaSuggestions() {
+        return true;
     }
 }

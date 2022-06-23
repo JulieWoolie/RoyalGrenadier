@@ -97,12 +97,6 @@ public class BrigadierCommand extends LiteralArgumentBuilder<CommandSource> {
         return this;
     }
 
-    /**
-     * This is dumb, like actually dumb, I'm leaving this here to showcase my stupidity.
-     * Registers the command
-     */
-    //public void register() { abstractCommand.register(); }
-
     public AbstractCommand getAbstractCommand() {
         return abstractCommand;
     }

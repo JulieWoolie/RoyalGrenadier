@@ -9,6 +9,7 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.scoreboard.ObjectiveArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
+import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Objective;
@@ -16,7 +17,7 @@ import org.bukkit.scoreboard.Objective;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class ObjectiveArgumentImpl implements ObjectiveArgument {
+public class ObjectiveArgumentImpl implements ObjectiveArgument, VanillaMappedArgument {
     public static final ObjectiveArgumentImpl INSTANCE = new ObjectiveArgumentImpl();
     public static final TranslatableExceptionType UNKNOWN_OBJECTIVE = new TranslatableExceptionType("arguments.objective.notFound");
 
@@ -41,7 +42,12 @@ public class ObjectiveArgumentImpl implements ObjectiveArgument {
         return GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getObjectives(), Objective::getName);
     }
 
-    public net.minecraft.commands.arguments.ObjectiveArgument getHandle(){
+    public net.minecraft.commands.arguments.ObjectiveArgument getVanillaArgumentType() {
         return net.minecraft.commands.arguments.ObjectiveArgument.objective();
+    }
+
+    @Override
+    public boolean useVanillaSuggestions() {
+        return true;
     }
 }
