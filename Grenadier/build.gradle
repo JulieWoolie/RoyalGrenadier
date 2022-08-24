@@ -14,13 +14,16 @@ repositories {
 }
 
 dependencies {
-    paperweightDevelopmentBundle('io.papermc.paper:dev-bundle:1.19-R0.1-SNAPSHOT')
+    paperweightDevelopmentBundle('io.papermc.paper:dev-bundle:1.19.2-R0.1-SNAPSHOT')
 
-    compileOnly 'io.papermc.paper:paper-mojangapi:1.19-R0.1-SNAPSHOT'
-    compileOnly 'io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-mojangapi:1.19.2-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT'
 
     compileOnly 'com.mojang:brigadier:1.0.18'
     compileOnly 'com.mojang:datafixerupper:4.0.26'
+
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 assemble {

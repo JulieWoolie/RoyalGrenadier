@@ -27,6 +27,20 @@ import java.util.stream.Stream;
 public interface CompletionProvider {
 
     /**
+     * Checks if the given string starts with the given token
+     * @param token The token the string should start with
+     * @param s The string to check
+     * @return True, if <code>s</code> starts with <code>token</code>
+     */
+    static boolean startsWith(String token, String s) {
+        if (token.length() > s.length()) {
+            return false;
+        }
+
+        return s.regionMatches(true, 0, token, 0, token.length());
+    }
+
+    /**
      * Suggest all matching strings into the given SuggestionsBuilder
      * @param builder The builder to give suggestions to
      * @param suggestions The suggestions to pick from
@@ -34,7 +48,10 @@ public interface CompletionProvider {
      */
     static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder builder, Iterable<String> suggestions) {
         String token = builder.getRemainingLowerCase();
-        for (String s: suggestions) if(s.toLowerCase().startsWith(token)) builder.suggest(s);
+
+        for (String s: suggestions) {
+            if (startsWith(token, s)) builder.suggest(s);
+        }
 
         return builder.buildFuture();
     }
@@ -59,7 +76,7 @@ public interface CompletionProvider {
         String token = builder.getRemainingLowerCase();
 
         suggestions
-                .filter(s -> s.toLowerCase().startsWith(token))
+                .filter(s -> startsWith(token, s))
                 .forEach(builder::suggest);
 
         return builder.buildFuture();
@@ -75,7 +92,9 @@ public interface CompletionProvider {
         String token = b.getRemainingLowerCase();
 
         for (Map.Entry<String, String> entry: suggestions.entrySet()) {
-            if(entry.getKey().toLowerCase().startsWith(token)) b.suggest(entry.getKey(), new LiteralMessage(entry.getValue()));
+            if(startsWith(token, entry.getKey())) {
+                b.suggest(entry.getKey(), new LiteralMessage(entry.getValue()));
+            }
         }
 
         return b.buildFuture();
@@ -91,9 +110,9 @@ public interface CompletionProvider {
         String token = builder.getRemainingLowerCase();
 
         for (Key k: suggestions) {
-            if(k.asString().startsWith(token)
-                    || k.value().startsWith(token)
-                    || k.namespace().startsWith(token)
+            if (startsWith(token, k.asString())
+                    || startsWith(token, k.value())
+                    || startsWith(token, k.namespace())
             ) {
                 builder.suggest(k.asString());
             }

@@ -12,10 +12,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT'
 
-    File grenBuildDir = new File(parent.getChildProjects().get("Grenadier").getBuildDir(), "libs")
-    implementation files(new File(grenBuildDir, "Grenadier-" + version + ".jar"))
+    File parentBuildDir = parent.buildDir
+    File libs = new File(parentBuildDir, "libs")
+    String jarName = "Grenadier-" + version + ".jar"
+
+    implementation files(new File(libs, jarName))
 }
 
 assemble {

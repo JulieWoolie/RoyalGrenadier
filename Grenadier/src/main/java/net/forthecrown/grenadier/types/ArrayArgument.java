@@ -13,7 +13,7 @@ import java.util.Collection;
 public interface ArrayArgument<V> extends ArgumentType<Collection<V>> {
     ArgumentType<V> getType();
 
-    static <A> ArrayArgument<A> of(ArgumentType<A> e){
+    static <A> ArrayArgument<A> of(ArgumentType<A> e) {
         return new ArrayArgumentImpl<>(e);
     }
 }

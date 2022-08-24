@@ -1,38 +1,18 @@
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-
 plugins {
     id 'java'
 }
 
 group 'net.forthecrown'
-version '1.4'
+version '1.5'
 
 tasks.register("buildGrenadier") {
     Project grenadier = project('Grenadier')
     Project plugin = project('Plugin')
 
+    grenadier.buildDir = buildDir
+
     it.dependsOn(
             grenadier.tasks.getByName("build"),
             plugin.tasks.getByName("shadowJar")
     )
-
-    it.doLast {
-        File grenadierLibs = new File(grenadier.buildDir, "/libs/")
-        File pluginLibs = new File(plugin.buildDir, "/libs/")
-
-        moveDirContents(grenadierLibs, buildDir)
-        moveDirContents(pluginLibs, buildDir)
-    }
-}
-
-private static void moveDirContents(File from, File to) {
-    File[] files = from.listFiles()
-    if(files == null || files.length < 1) return
-
-    for (File f: from.listFiles()) {
-        File dest = new File(to, f.getName())
-
-        Files.copy(f.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING)
-    }
 }

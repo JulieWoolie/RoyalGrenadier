@@ -11,7 +11,6 @@ import net.forthecrown.grenadier.types.ArrayArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -20,6 +19,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V> {
 
     private final ArgumentType<V> type;
     public static final DynamicCommandExceptionType PARSING_ERROR = new DynamicCommandExceptionType(o -> () -> "Error parsing array: " + o);
+    public static final DynamicCommandExceptionType ELEMENT_ALREADY_USED = new DynamicCommandExceptionType(o -> () -> "Value already used: '" + o + "'");
 
     public ArrayArgumentImpl(ArgumentType<V> type){
         this.type = type;
@@ -33,35 +33,35 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V> {
     @Override
     public Collection<V> parse(StringReader reader) throws CommandSyntaxException {
         List<V> result = new ArrayList<>();
-        String splittable = getSplittableString(reader);
-        String[] array = splittable.split(",");
-        System.out.println(Arrays.toString(array));
 
-        for (String s: array){
-            try {
-                result.add(type.parse(new StringReader(s)));
-            } catch (CommandSyntaxException e){
-                throw PARSING_ERROR.createWithContext(GrenadierUtils.correctReader(reader, reader.getString().indexOf(s)), e.getRawMessage().getString());
+        while (reader.canRead()) {
+            reader.skipWhitespace();
+
+            int cursor = reader.getCursor();
+            V parsed = getType().parse(reader);
+
+            if (result.contains(parsed)) {
+                ELEMENT_ALREADY_USED.createWithContext(
+                        GrenadierUtils.correctReader(reader, cursor),
+                        parsed
+                );
+            }
+
+            result.add(parsed);
+
+            if (reader.canRead() && reader.peek() == ',') {
+                reader.skip();
+            } else {
+                break;
             }
         }
 
-        reader.setCursor(reader.getCursor() + splittable.length());
         return result;
-    }
-
-    private String getSplittableString(StringReader reader){
-        String remaining = reader.getRemaining();
-        if(remaining.indexOf(' ') == -1) return remaining;
-
-        return remaining.substring(0, remaining.indexOf(' '));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        String input = builder.getInput();
-        int index = input.lastIndexOf(',');
-        if(index != -1) builder = builder.createOffset(index + 1);
-
+        builder = builder.createOffset(builder.getStart() + builder.getRemainingLowerCase().indexOf(',') + 1);
         return type.listSuggestions(context, builder);
     }
 }

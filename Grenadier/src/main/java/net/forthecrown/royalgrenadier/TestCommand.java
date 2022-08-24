@@ -458,7 +458,7 @@ public class TestCommand extends AbstractCommand {
                 )
                 .then(literal("customSuggest")
                         .then(argument("str", StringArgumentType.string())
-                                .suggests(suggestMatching("1", "2", "asd", "DaftFuck", "3"))
+                                .suggests(suggestMatching("1", "2", "asd", "WhySwearRude", "3"))
 
                                 .executes(c -> {
                                     c.getSource().sendMessage(c.getArgument("str", String.class));

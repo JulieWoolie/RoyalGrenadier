@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.adventure.AdventureComponent;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.forthecrown.grenadier.CommandSource;
+import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
 import net.kyori.adventure.text.Component;
@@ -146,7 +147,7 @@ public class GrenadierUtils {
     public static void suggestMatches(SuggestionsBuilder builder, String toSuggest, Message tooltip) {
         String token = builder.getRemainingLowerCase();
 
-        if(toSuggest.startsWith(token)) builder.suggest(toSuggest, tooltip);
+        if(CompletionProvider.startsWith(token, toSuggest)) builder.suggest(toSuggest, tooltip);
     }
 
     public static Message componentToMessage(@Nullable Component component) {
