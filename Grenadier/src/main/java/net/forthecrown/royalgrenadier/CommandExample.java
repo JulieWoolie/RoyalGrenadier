@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
 import net.forthecrown.grenadier.types.selectors.EntityArgument;
-import net.forthecrown.grenadier.types.selectors.EntitySelector;
 import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 
@@ -45,11 +44,11 @@ public class CommandExample extends AbstractCommand {
                                 .executes(context -> {
                                     //Gets all the entities in the entity Selector
                                     //Check out the EntitySelector class for more info
-                                    Collection<Entity> entities = context.getArgument("entities", EntitySelector.class).getEntities(context.getSource());
+                                    Collection<Entity> entities = EntityArgument.getEntities(context, "entities");
                                     String message = context.getArgument("message", String.class);
 
                                     //Send all selected entities a message
-                                    for (Entity e: entities){
+                                    for (Entity e: entities) {
                                         e.sendMessage(message);
                                     }
 
@@ -62,9 +61,9 @@ public class CommandExample extends AbstractCommand {
 
                         //If no message is entered, this gets called
                         .executes(context -> {
-                            Collection<Entity> entities = context.getArgument("entities", EntitySelector.class).getEntities(context.getSource());
+                            Collection<Entity> entities = EntityArgument.getEntities(context, "entities");
 
-                            for (Entity e: entities){
+                            for (Entity e: entities) {
                                 e.sendMessage("I hope you're having a good day! :D");
                             }
 

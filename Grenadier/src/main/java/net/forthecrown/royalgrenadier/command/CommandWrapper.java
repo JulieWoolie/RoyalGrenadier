@@ -6,25 +6,23 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.ImmutableCommandExceptionType;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
+import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
+import net.forthecrown.royalgrenadier.CommandSourceImpl;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_19_R1.command.VanillaCommandWrapper;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -35,29 +33,16 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
 
     final AbstractCommand builder;
     final ImmutableCommandExceptionType noPermission;
-    static final SimpleCommandExceptionType NOT_ALLOWED_TO_USE_COMMAND = new SimpleCommandExceptionType(() -> "You aren't allowed to use this command at the moment");
+    static final TranslatableExceptionType NOT_ALLOWED_TO_USE_COMMAND = new TranslatableExceptionType("commands.help.failed");
 
-    VanillaCommandWrapper vanillaWrapper;
-    LiteralCommandNode<CommandSourceStack> node;
-
-    public CommandWrapper(AbstractCommand builder){
+    public CommandWrapper(AbstractCommand builder) {
         this.builder = builder;
 
-        if(builder.permissionMessage() == null) {
-            noPermission = new ImmutableCommandExceptionType(
-                    LegacyComponentSerializer.legacySection().deserialize(Bukkit.getPermissionMessage())
-            );
+        if (builder.permissionMessage() == null) {
+            noPermission = new ImmutableCommandExceptionType(Bukkit.permissionMessage());
         } else {
             noPermission = new ImmutableCommandExceptionType(builder.permissionMessage());
         }
-    }
-
-    public void setVanillaWrapper(VanillaCommandWrapper vanillaWrapper) {
-        this.vanillaWrapper = vanillaWrapper;
-    }
-
-    public void setNode(LiteralCommandNode<CommandSourceStack> node) {
-        this.node = node;
     }
 
     @Override
@@ -68,7 +53,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
     public int run(CommandSourceStack stack, String input) {
         //Takes the vanilla command source and turns it's input into
         //Grenadier's sender and executes command with it
-        CommandSource source = GrenadierUtils.wrap(stack, builder);
+        CommandSource source = CommandSourceImpl.of(stack, builder, null);
         StringReader reader = GrenadierUtils.filterCommandInput(input);
 
         boolean parsing = true;
@@ -76,10 +61,12 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         ParseResults<CommandSource> parse = dispatcher.parse(reader, source);
 
         try {
-            //Test if the sender is even allowed to use the command
-            //VanillaCommandWrapper should test this for us, but we should still test, just in case
+            // Test if the sender is even allowed to use the command
             if (!test(stack)) {
-                if(!builder.testPermissionSilent(stack.getBukkitSender())) throw noPermission.create();
+                if (!builder.testPermissionSilent(stack.getBukkitSender())) {
+                    throw noPermission.create();
+                }
+
                 throw NOT_ALLOWED_TO_USE_COMMAND.create();
             }
 
@@ -89,9 +76,13 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
                 if (parse.getExceptions().size() == 1) {
                     throw parse.getExceptions().values().iterator().next();
                 } else if (parse.getContext().getRange().isEmpty()) {
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parse.getReader());
+                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS
+                            .dispatcherUnknownCommand()
+                            .createWithContext(parse.getReader());
                 } else {
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parse.getReader());
+                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS
+                            .dispatcherUnknownArgument()
+                            .createWithContext(parse.getReader());
                 }
             }
 
@@ -100,12 +91,15 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         } catch (CommandSyntaxException syntaxException) {
             source.sendFailure(GrenadierUtils.formatCommandException(syntaxException));
 
-            if(builder.getShowUsageOnFail()) {
+            if (builder.getShowUsageOnFail()) {
                 Component usage = builder.getUsage(parse.getContext().build(input),
                         syntaxException,
                         parsing ? AbstractCommand.ExecPhase.PARSING : AbstractCommand.ExecPhase.LOGIC_EXECUTION
                 );
-                if(usage != null) source.sendMessage(usage);
+
+                if(usage != null) {
+                    source.sendMessage(usage);
+                }
             }
 
             return -1;
@@ -121,7 +115,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
             TextComponent.Builder builder = Component.text()
                     .append(Component.text(e.getClass().getName() + ": " + e.getMessage()));
 
-            if(RoyalCommandException.ENABLE_HOVER_STACK_TRACE) {
+            if (RoyalCommandException.ENABLE_HOVER_STACK_TRACE) {
                 for (StackTraceElement element : e.getStackTrace()) {
                     String info = element.getClassName() + '.' + element.getMethodName() + " (Line: " + element.getLineNumber() + ')';
                     builder
@@ -130,7 +124,10 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
                 }
             }
 
-            source.sendFailure(Component.translatable("command.failed", RoyalCommandException.ERROR_MESSAGE_STYLE).hoverEvent(builder.build()));
+            source.sendFailure(
+                    Component.translatable("command.failed", RoyalCommandException.ERROR_MESSAGE_STYLE)
+                            .hoverEvent(builder.build())
+            );
             return -1;
         }
     }
@@ -139,11 +136,11 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         try {
             StringReader reader = GrenadierUtils.filterCommandInput(builder.getInput());
 
-            CommandSource source = GrenadierUtils.wrap(context.getSource(), this.builder);
+            CommandSource source = CommandSourceImpl.of(context.getSource(), this.builder, null);
             ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(reader, source);
 
             return node.listSuggestions(results.getContext().build(builder.getInput()), builder);
-        } catch (RuntimeException e) {
+        } catch (Throwable e) {
             LOGGER.error(
                     new ParameterizedMessage(
                             "Error while attempting to get suggestions for command '{}'",
@@ -156,8 +153,14 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         }
     }
 
+    public CompletableFuture<Suggestions> suggest(CommandSource source, String input) {
+        StringReader reader = GrenadierUtils.filterCommandInput(input);
+        ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(reader, source);
+        return RoyalGrenadier.getDispatcher().getCompletionSuggestions(results);
+    }
+
     @Override
     public boolean test(CommandSourceStack wrapper) {
-        return builder.test(GrenadierUtils.wrap(wrapper, builder));
+        return builder.test(CommandSourceImpl.of(wrapper, this.builder, null));
     }
 }

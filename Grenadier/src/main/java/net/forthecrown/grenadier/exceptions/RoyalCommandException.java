@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -67,29 +66,5 @@ public class RoyalCommandException extends CommandSyntaxException {
      */
     public Component getComponentMessage() {
         return message;
-    }
-
-    /**
-     * Creates a context component with the given input, or null, if no input was given
-     * @return The context, or null, if no input was given
-     */
-    public Component getComponentContext(){
-        return GrenadierUtils.formatExceptionContext(this);
-    }
-
-    /**
-     * Gets the formatted text with the message and context
-     * @return The formatted message
-     */
-    public Component formattedText(){
-        Component errorMessageFormatted = message.hasStyling() ? message : message.style(ERROR_MESSAGE_STYLE);
-        if(getInput() == null || getCursor() == 0) return errorMessageFormatted;
-
-        TextComponent.Builder builder = Component.text()
-                .append(errorMessageFormatted)
-                .append(Component.newline())
-                .append(getComponentContext());
-
-        return builder.build();
     }
 }

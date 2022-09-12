@@ -28,7 +28,13 @@ public class MapArgumentImpl<T> implements MapArgument<T> {
         String name = reader.readUnquotedString();
 
         T result = map.get(name);
-        if(result == null) throw UNKNOWN_KEY.createWithContext(GrenadierUtils.correctReader(reader, cursor), name);
+        if(result == null) {
+            throw UNKNOWN_KEY
+                    .createWithContext(
+                            GrenadierUtils.correctReader(reader, cursor),
+                            name
+                    );
+        }
 
         return result;
     }

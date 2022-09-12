@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Team;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +28,13 @@ public class TeamArgumentImpl implements TeamArgument, VanillaMappedArgument {
         String name = reader.readUnquotedString();
 
         Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(name);
-        if(team == null) throw UNKNOWN_TEAM.createWithContext(GrenadierUtils.correctReader(reader, cursor), Component.text(name));
+        if (team == null) {
+            throw UNKNOWN_TEAM
+                    .createWithContext(
+                            GrenadierUtils.correctReader(reader, cursor),
+                            Component.text(name)
+                    );
+        }
 
         return team;
     }
@@ -39,7 +46,7 @@ public class TeamArgumentImpl implements TeamArgument, VanillaMappedArgument {
 
     @Override
     public Collection<String> getExamples() {
-        return GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getTeams(), Team::getName);
+        return Arrays.asList("foo", "123");
     }
 
     public net.minecraft.commands.arguments.TeamArgument getVanillaArgumentType() {

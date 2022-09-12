@@ -9,6 +9,7 @@ import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.EnchantArgument;
 import net.forthecrown.grenadier.types.KeyArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.arguments.ItemEnchantmentArgument;
@@ -25,11 +26,19 @@ public class EnchantArgumentImpl implements EnchantArgument, VanillaMappedArgume
 
     @Override
     public Enchantment parse(StringReader reader) throws CommandSyntaxException {
+        int cursor = reader.getCursor();
         NamespacedKey key = KeyArgument.minecraft().parse(reader);
 
         //Get the enchantment from the key
         Enchantment enchantment = Enchantment.getByKey(key);
-        if(enchantment == null) throw UNKNOWN_ENCHANTMENT.createWithContext(reader, Component.text(key.toString()));
+
+        if (enchantment == null) {
+            throw UNKNOWN_ENCHANTMENT
+                    .createWithContext(
+                            GrenadierUtils.correctReader(reader, cursor),
+                            Component.text(key.toString())
+                    );
+        }
 
         return enchantment;
     }

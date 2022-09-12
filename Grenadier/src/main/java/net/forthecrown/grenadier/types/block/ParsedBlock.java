@@ -13,7 +13,16 @@ import org.jetbrains.annotations.Nullable;
  * Represents a block or block data which has been parsed through Brigadier
  */
 public interface ParsedBlock extends Keyed, net.kyori.adventure.key.Keyed {
+    /**
+     * Gets the data of the parsed block
+     * @return The block's parsed data
+     */
     BlockData getData();
+
+    /**
+     * Gets the material of the parsed block
+     * @return The parsed block's type
+     */
     Material getMaterial();
 
     /**
@@ -54,8 +63,11 @@ public interface ParsedBlock extends Keyed, net.kyori.adventure.key.Keyed {
     }
 
     /**
-     * Places the parsed block in the given world at the given coordinates
-     * <p> This will place the block and apply any NBT data the parsed result holds </p>
+     * Places the parsed block in the given world at
+     * the given coordinates
+     * <p>
+     * This will place the block and apply any NBT
+     * data the parsed result holds
      *
      * @param world The world to place in
      * @param x The block's X cord
@@ -66,7 +78,12 @@ public interface ParsedBlock extends Keyed, net.kyori.adventure.key.Keyed {
     void place(World world, int x, int y, int z, boolean applyPhysics);
 
     /**
-     * @see ParsedBlock#place(World, int, int, int, boolean)
+     * Places the parsed block in the given world at
+     * the given coordinates
+     * <p>
+     * This will place the block and apply any NBT
+     * data the parsed result holds
+     * @see #place(World, int, int, int, boolean)
      * @param world The world to place in
      * @param x The block's X cord
      * @param y the block's Y cord
@@ -77,7 +94,12 @@ public interface ParsedBlock extends Keyed, net.kyori.adventure.key.Keyed {
     }
 
     /**
-     * @see ParsedBlock#place(World, int, int, int, boolean)
+     * Places the parsed block in the given world at
+     * the given coordinates
+     * <p>
+     * This will place the block and apply any NBT
+     * data the parsed result holds
+     * @see #place(World, int, int, int, boolean)
      * @param location The location to place at
      */
     default void place(Location location) {
@@ -85,7 +107,12 @@ public interface ParsedBlock extends Keyed, net.kyori.adventure.key.Keyed {
     }
 
     /**
-     * @see ParsedBlock#place(World, int, int, int, boolean)
+     * Places the parsed block in the given world at
+     * the given coordinates
+     * <p>
+     * This will place the block and apply any NBT
+     * data the parsed result holds
+     * @see #place(World, int, int, int, boolean)
      * @param location The location to place at
      * @param applyPhysics Whether to apply physics to the set block
      */

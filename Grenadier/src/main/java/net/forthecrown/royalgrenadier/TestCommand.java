@@ -1,11 +1,15 @@
 package net.forthecrown.royalgrenadier;
 
 import com.mojang.brigadier.arguments.*;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.command.BrigadierCommand;
 import net.forthecrown.grenadier.types.*;
+import net.forthecrown.grenadier.types.args.ArgsArgument;
+import net.forthecrown.grenadier.types.args.Argument;
+import net.forthecrown.grenadier.types.args.ParsedArgs;
 import net.forthecrown.grenadier.types.block.BlockArgument;
 import net.forthecrown.grenadier.types.block.ParsedBlock;
 import net.forthecrown.grenadier.types.item.ItemArgument;
@@ -20,6 +24,7 @@ import net.forthecrown.royalgrenadier.types.selector.EntityArgumentImpl;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.util.TriState;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -67,6 +72,21 @@ public class TestCommand extends AbstractCommand {
         return source.isOp();
     }
 
+    static final Argument<Integer> INT_ARG = Argument.builder("int_arg", IntegerArgumentType.integer(1, 2500))
+            .setDefaultValue(-1)
+            .setRequires(source -> source.is(Player.class))
+            .build();
+
+    static final Argument<String> WORD_ARG = Argument.of("word_arg", StringArgumentType.word(), new String[] {"word", "w"});
+    static final Argument<World> WORLD_ARG = Argument.of("world_arg", WorldArgument.world(), "world", "dim", "d");
+
+    static final ArgsArgument ARGS_ARGUMENT = ArgsArgument.builder()
+            .bracketsForced(TriState.NOT_SET)
+            .addRequired(WORLD_ARG)
+            .addOptional(WORD_ARG)
+            .addOptional(INT_ARG)
+            .build();
+
     private final Map<String, Integer> mapArgTest;
     ArrayArgument<ParsedBlock> blocks = ArrayArgument.of(BlockArgument.block());
 
@@ -93,6 +113,23 @@ public class TestCommand extends AbstractCommand {
                             LOGGER.info("test finished!");
                             return 0;
                         })
+                )
+
+                .then(literal("args_test")
+                        .then(argument("args", ARGS_ARGUMENT)
+                                .executes(c -> {
+                                    var args = c.getArgument("args", ParsedArgs.class);
+
+                                     LOGGER.info("world: {}, word: '{}', int: {}",
+                                             args.get(WORLD_ARG, c.getSource()),
+                                             args.get(WORD_ARG, c.getSource()),
+                                             args.get(INT_ARG, c.getSource())
+                                     );
+
+                                     c.getSource().sendMessage("Check console");
+                                    return 0;
+                                })
+                        )
                 )
 
                 .then(literal("built_int")
@@ -174,10 +211,11 @@ public class TestCommand extends AbstractCommand {
                                 .then(argument("str", StringArgumentType.greedyString())
                                         .suggests((context, builder) -> {
                                             Block block = context.getArgument("pos", Position.class).getBlock(context.getSource());
-
                                             BlockState state = block.getState();
-                                            if(!(state instanceof Sign)) return CompletionProvider.suggestMatching(builder, "No Sign");
-                                            Sign sign = (Sign) state;
+
+                                            if (!(state instanceof Sign sign)) {
+                                                return CompletionProvider.suggestMatching(builder, "No Sign");
+                                            }
 
                                             return CompletionProvider.suggestMatching(builder, LegacyComponentSerializer.legacyAmpersand().serialize(sign.line(0)));
                                         })
@@ -496,6 +534,47 @@ public class TestCommand extends AbstractCommand {
                                     return 0;
                                 })
                         )
-                );
+                )
+
+                .then(redirectArgument());
+    }
+
+    private LiteralCommandNode<CommandSource> redirectArgument() {
+        var escape = literal("escape")
+                .executes(c -> {
+                    c.getSource().sendMessage("Executing!");
+                    return 0;
+                });
+
+        var boolRedirectArgument = argument("boolean_red", BoolArgumentType.bool());
+        var stringRedirectArgument = argument("string_red", StringArgumentType.word());
+
+        var literal = literal("redirect_test")
+                .build();
+
+        boolRedirectArgument.redirect(literal, context -> {
+            context.getSource().sendMessage("Boolean redirected");
+            return context.getSource();
+        });
+
+        stringRedirectArgument.redirect(literal, context -> {
+            context.getSource().sendMessage("String redirect");
+            return context.getSource();
+        });
+
+        literal.addChild(
+                literal("string_redirect")
+                        .then(stringRedirectArgument)
+                        .build()
+        );
+        literal.addChild(
+                literal("bool_redirect")
+                        .then(boolRedirectArgument)
+                        .build()
+        );
+
+        literal.addChild(escape.build());
+
+        return literal;
     }
 }

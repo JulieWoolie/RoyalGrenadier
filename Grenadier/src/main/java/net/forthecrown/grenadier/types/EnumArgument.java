@@ -24,5 +24,7 @@ public interface EnumArgument<E extends Enum<E>> extends ArgumentType<E> {
         return new EnumArgumentImpl<>(clazz);
     }
 
+    Class<E> getEnumType();
+
     <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder, boolean lowerCase);
 }

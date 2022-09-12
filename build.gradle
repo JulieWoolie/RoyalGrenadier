@@ -2,8 +2,13 @@ plugins {
     id 'java'
 }
 
+// I won't lie, this project setup is an absolute mess
+// and should be changed, I can't for the life of me
+// be bothered to go through with all of the work needed
+// to do that.
+
 group 'net.forthecrown'
-version '1.5'
+version '1.5.1'
 
 tasks.register("buildGrenadier") {
     Project grenadier = project('Grenadier')

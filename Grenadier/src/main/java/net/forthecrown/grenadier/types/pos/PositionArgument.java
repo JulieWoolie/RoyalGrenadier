@@ -9,17 +9,19 @@ import org.bukkit.Location;
 public interface PositionArgument extends ArgumentType<Position> {
 
     /**
-     * A vector position argument which allows decimal places in the given input.
+     * A vector position argument which allows decimal
+     * places in the given input.
      * @return A vector position argument
      */
-    static PositionArgument position(){
+    static PositionArgument position() {
         return PositionArgumentImpl.VECTOR_INSTANCE;
     }
 
     /**
      * Returns a 2D vector position argument.
-     * <p></p>
-     * Takes in two coordinates instead of 3 and will always parse a position with a Y level of 0
+     * <p>
+     * Takes in two coordinates instead of 3 and will
+     * always parse a position with a Y level of 0
      * @return A 2D vector argument
      */
     static PositionArgument position2D() {
@@ -27,24 +29,37 @@ public interface PositionArgument extends ArgumentType<Position> {
     }
 
     /**
-     * A block position argument which only accepts integers in the given input
+     * A block position argument which only accepts
+     * integers in the given input
      * @return A block position argument
      */
-    static PositionArgument blockPos(){
+    static PositionArgument blockPos() {
         return PositionArgumentImpl.BLOCK_INSTANCE;
     }
 
     /**
      * Returns a 2d block pos argument, aka, a column pos argument
-     * <p></p>
-     * Accepts only 2 cords, both must be integers or relative coordinates, will always return with a Y level of 0
+     * <p>
+     * Accepts only 2 cords, both must be integers or relative
+     * coordinates, will always return with a Y level of 0
      * @return A 2d block pos argument
      */
     static PositionArgument blockPos2D() {
         return PositionArgumentImpl.BLOCK_2D_INSTANCE;
     }
 
-    static Location getLocation(CommandContext<CommandSource> c, String argument){
+    /**
+     * Gets a location from the given context
+     * <p>
+     * This gets the {@link Position} object at
+     * the given argument and then calls {@link Position#getLocation(CommandSource)}
+     * with the source of the given context.
+     *
+     * @param c The context to get the location from
+     * @param argument The name of the argument the location is under
+     * @return The gotten location.
+     */
+    static Location getLocation(CommandContext<CommandSource> c, String argument) {
         return c.getArgument(argument, Position.class).getLocation(c.getSource());
     }
 }

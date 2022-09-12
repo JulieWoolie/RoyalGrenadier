@@ -12,10 +12,10 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Don't want to extend a command class to create commands?
  * Here you go! :D
- * <p></p>
+ * <p>
  * This allows for commands to be built without there needing to
  * be a class that extends AbstractCommand.
- * <p></p>
+ * <p><
  * Use the {@link CommandCreator} interface and {@link CommandBuilder#setCommandLogic(CommandCreator)}
  * to create the command's logic.
  */

@@ -6,13 +6,26 @@ import net.forthecrown.royalgrenadier.types.UUIDArgumentImpl;
 
 import java.util.UUID;
 
+/**
+ * An argument type which parses a given input into a UUID
+ */
 public interface UUIDArgument extends ArgumentType<UUID> {
-
-    static UUIDArgument uuid(){
+    /**
+     * Gets the argument instance
+     * @return The argument instance
+     */
+    static UUIDArgument uuid() {
         return UUIDArgumentImpl.INSTANCE;
     }
 
-    static UUID getUUID(CommandContext<?> c, String argument){
+    /**
+     * Gets a UUID from the given
+     * context
+     * @param c The context to get the UUID from
+     * @param argument The name of the argument the UUID is under
+     * @return The gotten UUID
+     */
+    static UUID getUUID(CommandContext<?> c, String argument) {
         return c.getArgument(argument, UUID.class);
     }
 }

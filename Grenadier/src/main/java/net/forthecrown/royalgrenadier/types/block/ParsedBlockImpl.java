@@ -1,5 +1,6 @@
 package net.forthecrown.royalgrenadier.types.block;
 
+import lombok.Getter;
 import net.forthecrown.grenadier.types.block.ParsedBlock;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
@@ -22,35 +23,39 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class ParsedBlockImpl implements ParsedBlock {
 
+    @Getter
     private final BlockState state;
+
+    @Getter
     private final Map<Property<?>, Comparable<?>> properties;
-    private final CompoundTag tags;
+
+    @Getter
+    private final CompoundTag tagCompound;
     private final ResourceLocation key;
 
-    ParsedBlockImpl(BlockState state, Map<Property<?>, Comparable<?>> properties, CompoundTag tags, ResourceLocation key) {
+    ParsedBlockImpl(BlockState state, Map<Property<?>, Comparable<?>> properties, CompoundTag tagCompound, ResourceLocation key) {
         this.state = state;
         this.properties = properties;
-        this.tags = tags;
+        this.tagCompound = tagCompound;
         this.key = key;
-    }
-
-    public BlockState getState() {
-        return state;
-    }
-
-    public @Nullable CompoundTag getTagCompound() {
-        return tags;
     }
 
     @Override
     public void place(World world, int x, int y, int z, boolean applyPhysics) {
         // Configure the state we're setting
         BlockState state = getState();
-        if(!getMaterial().isAir()) { // If we're not setting it to air, make sure state has correct shape
-            state = net.minecraft.world.level.block.Block.updateFromNeighbourShapes(getState(), ((CraftWorld) world).getHandle(), new BlockPos(x, y, z));
+
+        // If we're not setting it to air, make sure state has correct shape
+        if (!getMaterial().isAir()) {
+            state = net.minecraft.world.level.block.Block.updateFromNeighbourShapes(
+                    getState(),
+                    ((CraftWorld) world).getHandle(),
+                    new BlockPos(x, y, z)
+            );
         }
 
         // Set the block
@@ -58,17 +63,17 @@ public class ParsedBlockImpl implements ParsedBlock {
         b.setBlockData(state.createCraftBlockData(), applyPhysics);
 
         // If we have NBT tags to set, set them
-        if(tags != null) {
-            BlockEntity entity = ((CraftWorld) world).getHandle().getBlockEntity(new BlockPos(x, y, z));
-            if(entity != null) entity.load(tags);
+        if (tagCompound != null) {
+            BlockEntity entity = ((CraftWorld) world).getHandle()
+                    .getBlockEntity(new BlockPos(x, y, z));
+
+            if(entity != null) {
+                entity.load(tagCompound);
+            }
         }
     }
 
-    public Map<Property<?>, Comparable<?>> getProperties() {
-        return properties;
-    }
-
-    public ResourceLocation getVanillaKey(){
+    public ResourceLocation getVanillaKey() {
         return key;
     }
 
@@ -84,7 +89,7 @@ public class ParsedBlockImpl implements ParsedBlock {
 
     @Override
     public @Nullable String getTags() {
-        return tags == null ? null : tags.toString();
+        return Objects.toString(getTagCompound(), null);
     }
 
     @Override
@@ -92,9 +97,17 @@ public class ParsedBlockImpl implements ParsedBlock {
         CraftBlock b = (CraftBlock) block;
         BlockState state = b.getNMS();
 
-        if(!state.is(this.state.getBlock())) return false;
-        if(!testProperties(state)) return false;
-        if(tags == null || tags.isEmpty()) return true;
+        if (!state.is(this.state.getBlock())) {
+            return false;
+        }
+
+        if (!testProperties(state)) {
+            return false;
+        }
+
+        if (tagCompound == null || tagCompound.isEmpty()) {
+            return true;
+        }
 
         return compareTags(b.getHandle().getBlockEntity(b.getPosition()));
     }
@@ -107,7 +120,7 @@ public class ParsedBlockImpl implements ParsedBlock {
 
     private boolean testProperties(BlockState state) {
         for (Property<?> p: getProperties().keySet()) {
-            if(state.getValue(p) != this.state.getValue(p)) {
+            if (state.getValue(p) != this.state.getValue(p)) {
                 return false;
             }
         }
@@ -116,8 +129,11 @@ public class ParsedBlockImpl implements ParsedBlock {
     }
 
     private boolean compareTags(BlockEntity entity) {
-        if(entity == null) return false;
-        return NbtUtils.compareNbt(tags, entity.saveWithFullMetadata(), true);
+        if(entity == null) {
+            return false;
+        }
+
+        return NbtUtils.compareNbt(tagCompound, entity.saveWithFullMetadata(), true);
     }
 
     @Override

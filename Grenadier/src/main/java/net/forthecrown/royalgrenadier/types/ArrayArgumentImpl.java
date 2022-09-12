@@ -19,7 +19,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V> {
 
     private final ArgumentType<V> type;
     public static final DynamicCommandExceptionType PARSING_ERROR = new DynamicCommandExceptionType(o -> () -> "Error parsing array: " + o);
-    public static final DynamicCommandExceptionType ELEMENT_ALREADY_USED = new DynamicCommandExceptionType(o -> () -> "Value already used: '" + o + "'");
+    public static final DynamicCommandExceptionType ELEMENT_ALREADY_USED = new DynamicCommandExceptionType(o -> () -> "Duplicate value: '" + o + "'");
 
     public ArrayArgumentImpl(ArgumentType<V> type){
         this.type = type;

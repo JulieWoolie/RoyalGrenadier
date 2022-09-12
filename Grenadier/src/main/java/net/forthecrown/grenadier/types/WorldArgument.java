@@ -14,11 +14,11 @@ public interface WorldArgument extends ArgumentType<World> {
      * Gets the instance of the argument
      * @return The argument instance
      */
-    static WorldArgument world(){
+    static WorldArgument world() {
         return WorldArgumentImpl.INSTANCE;
     }
 
-    static World getWorld(CommandContext<?> c, String argument){
+    static World getWorld(CommandContext<?> c, String argument) {
         return c.getArgument(argument, World.class);
     }
 }

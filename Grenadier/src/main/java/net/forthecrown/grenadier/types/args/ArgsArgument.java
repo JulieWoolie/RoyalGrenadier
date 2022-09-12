@@ -2,7 +2,10 @@ package net.forthecrown.grenadier.types.args;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.forthecrown.royalgrenadier.types.args.ArgsArgumentImpl;
+import net.kyori.adventure.util.TriState;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -18,11 +21,31 @@ public interface ArgsArgument extends ArgumentType<ParsedArgs> {
         EQUALS_SEPARATOR = '=';
 
     /**
-     * Gets the char this instance uses to separate
-     * labels from values
-     * @return The separator char
+     * Determines whether this argument requires/allows
+     * brackets like "[" or "{".
+     * <p>
+     * If this returns {@link TriState#TRUE} then the
+     * arguments parser will require any given input
+     * to have brackets and will throw an exception if
+     * they are not present.
+     * <p>
+     * If this returns {@link TriState#FALSE} then
+     * the arguments parser will require any given
+     * input to NOT have brackets.
+     * <p>
+     * Else, the parser won't care if there's brackets
+     * or not, it'll attempt to parse all given input
+     * until it reaches the end of said input.
+     * <p>
+     * That's what brackets allow, to possibly have
+     * multiple {@link ArgsArgument} inside one another,
+     * or to simply have extra arguments after the
+     * args argument
+     *
+     * @return The bracket state of this argument
      */
-    char getSeparator();
+    @Nonnull
+    TriState bracketsForced();
 
     /**
      * Gets an argument by its name
@@ -32,8 +55,13 @@ public interface ArgsArgument extends ArgumentType<ParsedArgs> {
     Argument getArg(String name);
 
     /**
-     * Gets all argument names
-     * @return The argument names
+     * Gets all argument labels.
+     * <p>
+     * This method will return a set that also
+     * contains every alias of every argument
+     * in this args instance.
+     *
+     * @return The argument labels
      */
     Set<String> getKeys();
 
@@ -49,6 +77,17 @@ public interface ArgsArgument extends ArgumentType<ParsedArgs> {
      * {@link ArgsArgument} builder
      */
     interface Builder {
+        /**
+         * Sets if this args argument allows brackets before and after
+         * the arguments.
+         *
+         * @param state True if required, false for forbidden, null if it
+         *              doesn't matter
+         * @return This builder
+         * @see ArgsArgument#bracketsForced()
+         */
+        Builder bracketsForced(@Nullable TriState state);
+
         /**
          * Adds a required argument
          * @param argument The argument to add
@@ -77,20 +116,6 @@ public interface ArgsArgument extends ArgumentType<ParsedArgs> {
          * @return This builder
          */
         <T> Builder add(Argument<T> argument, boolean required);
-
-        /**
-         * Sets the key-value separator to use
-         * @param separator The separator to use
-         * @return This builder
-         */
-        Builder setSeparator(char separator);
-
-        /**
-         * Gets the char used to separate
-         * labels from values
-         * @return The separator char
-         */
-        char getSeparator();
 
         /**
          * Builds the args argument type

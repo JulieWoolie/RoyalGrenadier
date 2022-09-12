@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public interface EntitySelector {
-
     /**
      * Gets the player in the selector
      * @param source The source executing the command

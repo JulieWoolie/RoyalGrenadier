@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
+import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
 import net.forthecrown.grenadier.types.pos.*;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.arguments.coordinates.*;
@@ -17,50 +18,85 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PositionArgumentImpl implements PositionArgument, VanillaMappedArgument {
-    public static final PositionArgumentImpl VECTOR_INSTANCE = new PositionArgumentImpl(false, false);
-    public static final PositionArgumentImpl VECTOR_2D_INSTANCE = new PositionArgumentImpl(false, true);
+import static net.forthecrown.grenadier.types.pos.CoordinateSuggestion.*;
 
-    public static final PositionArgumentImpl BLOCK_INSTANCE = new PositionArgumentImpl(true, false);
-    public static final PositionArgumentImpl BLOCK_2D_INSTANCE = new PositionArgumentImpl(true, true);
+public class PositionArgumentImpl implements PositionArgument, VanillaMappedArgument {
+    static final byte
+        FLAG_BLOCKPOS = 0x1,
+        FLAG_2D = 0x2,
+
+        X = 0,
+        Y = 1,
+        Z = 2,
+
+        LENGTH = 3;
+
+    public static final TranslatableExceptionType
+        ERROR_MIXED = new TranslatableExceptionType("argument.pos.mixed"),
+        ERROR_NOT_COMPLETED = new TranslatableExceptionType("argument.pos3d.incomplete");
+
+    public static final PositionArgumentImpl VECTOR_INSTANCE = new PositionArgumentImpl(0);
+    public static final PositionArgumentImpl BLOCK_INSTANCE = new PositionArgumentImpl(FLAG_BLOCKPOS);
+
+    public static final PositionArgumentImpl VECTOR_2D_INSTANCE = new PositionArgumentImpl(FLAG_2D);
+    public static final PositionArgumentImpl BLOCK_2D_INSTANCE = new PositionArgumentImpl(FLAG_2D | FLAG_BLOCKPOS);
 
     private final ArgumentType<Coordinates> handle;
-    private final boolean blockPos;
-    private final boolean is2D;
+    private final byte flags;
 
-    protected PositionArgumentImpl(boolean isBlockPos, boolean is2D){
-        blockPos = isBlockPos;
-        this.is2D = is2D;
+    protected PositionArgumentImpl(int flags) {
+        this.flags = (byte) flags;
 
-        if(is2D) this.handle = blockPos ? ColumnPosArgument.columnPos() : Vec2Argument.vec2();
-        else this.handle = blockPos ? BlockPosArgument.blockPos() : Vec3Argument.vec3();
+        this.handle = switch (flags) {
+            case FLAG_BLOCKPOS -> BlockPosArgument.blockPos();
+            case FLAG_2D -> Vec2Argument.vec2();
+            case FLAG_2D | FLAG_BLOCKPOS -> ColumnPosArgument.columnPos();
+            default -> Vec3Argument.vec3();
+        };
     }
 
     @Override
     public Position parse(StringReader reader) throws CommandSyntaxException {
-        CoordinateParser parser = new CoordinateParser(reader, !blockPos);
+        PositionParser parser = new PositionParser(flags, reader);
+        parser.parse();
 
-        return is2D ? parser.parse2D() : parser.parse3D();
+        return parser.get();
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if(context.getSource() instanceof CommandSource) {
-            CommandSource source = (CommandSource) context.getSource();
+        if (context.getSource() instanceof CommandSource source) {
             List<CoordinateSuggestion> suggestions = new ArrayList<>();
 
-            //Add cords for the block they're looking at, if there's a block to add cords for
+            boolean is2D = (flags & FLAG_2D) != 0;
+            boolean vector = (flags & FLAG_BLOCKPOS) == 0;
+
+            // Add cords for the block they're looking at,
+            // if there's a block to add cords for
             CoordinateSuggestion sourceSuggestion = is2D ? source.getRelevant2DCords() : source.getRelevant3DCords();
-            if(sourceSuggestion != null) suggestions.add(sourceSuggestion);
 
-            //Add default cords.
-            suggestions.add(is2D ? Vec2Suggestion.DEFAULT : Vec3Suggestion.DEFAULT);
+            if (sourceSuggestion != null) {
+                suggestions.add(sourceSuggestion);
+            }
 
-            //Suggest the cords
-            return CompletionProvider.suggestCords(builder, !blockPos, suggestions);
+            boolean local = builder.getRemainingLowerCase().contains("^");
+
+            // Add default cords
+            suggestions.add(getDefault(is2D, local));
+
+            // Suggest the cords
+            return CompletionProvider.suggestCords(builder, vector, suggestions);
         }
 
         return Suggestions.empty();
+    }
+
+    private static CoordinateSuggestion getDefault(boolean is2D, boolean local) {
+        if (local) {
+            return is2D ? DEFAULT_LOCAL_VEC2 : DEFAULT_LOCAL_VEC3;
+        } else {
+            return is2D ? DEFAULT_WORLD_VEC2 : DEFAULT_WORLD_VEC3;
+        }
     }
 
     @Override

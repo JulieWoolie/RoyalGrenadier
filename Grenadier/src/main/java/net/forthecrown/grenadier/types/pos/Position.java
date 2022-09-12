@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 public interface Position {
-
     /**
      * Gets the location specified, requires Sender for any relative coordinates
      * <p>Note: if the position is a 2D position, the Y will always be 0</p>
@@ -18,6 +17,9 @@ public interface Position {
 
     /**
      * Applies this position's data to the given location
+     * <p>
+     * Note: The base location will NOT be cloned, but will
+     * instead be modified and then returned
      * @param base The base location to modify
      * @return The transformed location with this position's data applied
      */
@@ -47,9 +49,37 @@ public interface Position {
      * @param source The sender that used this command
      * @return The block at the parsed location
      */
-     default Block getBlock(CommandSource source) {
+    default Block getBlock(CommandSource source) {
          return getLocation(source).getBlock();
-     }
+    }
+
+    /**
+     * Tests if this position is 2 dimensional,
+     * meaning only an x and z coordinate have been
+     * parsed.
+     * <p>
+     * This isn't determined during parsing, but rather
+     * by the type of {@link PositionArgument} used.
+     *
+     * @return True, if only an x and z were parsed, false
+     *         if all 3 x, y and z were parsed.
+     */
+    boolean is2Dimensional();
+
+    /**
+     * Tests if this position is a 'local' position.
+     * <p>
+     * A local position is one which was parsed with '^'
+     * coordinates, meaning the relative offset of all
+     * the coordinates is aligned with the direction a
+     * given base location is facing.
+     * <p>
+     * If this returns false, it means this position is
+     * a world relative position meaning all of this
+     * position's coordinates are relative to the world.
+     * @return True, if this is a local position, false otherwise
+     */
+    boolean isLocalPosition();
 
     /**
      * Returns whether the x cord is relative

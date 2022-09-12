@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Objective;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +28,13 @@ public class ObjectiveArgumentImpl implements ObjectiveArgument, VanillaMappedAr
         String name = reader.readUnquotedString();
 
         Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().getObjective(name);
-        if(objective == null) throw UNKNOWN_OBJECTIVE.createWithContext(GrenadierUtils.correctReader(reader, cursor), Component.text(name));
+        if (objective == null) {
+            throw UNKNOWN_OBJECTIVE
+                    .createWithContext(
+                            GrenadierUtils.correctReader(reader, cursor),
+                            Component.text(name)
+                    );
+        }
 
         return objective;
     }
@@ -39,7 +46,7 @@ public class ObjectiveArgumentImpl implements ObjectiveArgument, VanillaMappedAr
 
     @Override
     public Collection<String> getExamples() {
-        return GrenadierUtils.convertList(Bukkit.getScoreboardManager().getMainScoreboard().getObjectives(), Objective::getName);
+        return Arrays.asList("foo", "*", "012");
     }
 
     public net.minecraft.commands.arguments.ObjectiveArgument getVanillaArgumentType() {

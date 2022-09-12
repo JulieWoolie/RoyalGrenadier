@@ -2,143 +2,126 @@ package net.forthecrown.royalgrenadier;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.forthecrown.grenadier.CmdUtil;
+import lombok.Getter;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.royalgrenadier.command.CommandWrapper;
 import net.forthecrown.royalgrenadier.command.GrenadierBukkitWrapper;
-import net.forthecrown.royalgrenadier.command.WrapperConverter;
+import net.forthecrown.royalgrenadier.command.WrapperTranslator;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 public class RoyalGrenadier {
+    /**
+     * The dispatcher that handles all grenadier commands
+     */
+    @Getter
     private static CommandDispatcher<CommandSource> dispatcher;
-    private static CommandDispatcher<CommandSourceStack> serverDispatcher;
-    private static Commands serverCommands;
+
+    /**
+     * The initialization state of grenadier, used to
+     * prevent accidental double initialization
+     */
+    @Getter
     private static boolean initialized = false;
 
+    /**
+     * The logger Grenadier uses for errors
+     */
+    @Getter
     private static Logger logger;
+
+    /**
+     * The plugin that initialized grenadier
+     */
+    @Getter
     private static Plugin plugin;
 
     /**
-     * Gets the dispatcher for the RoyalGrenadier
-     * @return The dispatcher for the RoyalGrenadier
+     * Initializes the RoyalGrenadier.
+     * <p>
+     * If grenadier has already been initialized,
+     * this method does nothing.
+     * <p>
+     * This will create the {@link CommandDispatcher}
+     * object grenadier uses and create and register
+     * an Event Listener: {@link GrenadierListener}.
+     * It ensures that argument nodes the server has
+     * and the argument nodes that grenadier has are
+     * synced up.
+     * <p>
+     * To read more on grenadier -> vanilla command
+     * translation, visit {@link WrapperTranslator}.
+     * <p>
+     * The logger object Grenadier may use will also
+     * be the given plugin's logger
+     *
+     * @param plugin The plugin initializing Grenadier
      */
-    public static CommandDispatcher<CommandSource> getDispatcher() {
-        return dispatcher;
-    }
-
-    public static Logger getLogger() {
-        return logger;
-    }
-
-    public static Plugin getPlugin() {
-        return plugin;
-    }
-
-    /**
-     * Registers the given AbstractCommand, making it useable. Not needed in most cases, as {@link AbstractCommand#register()} calls this.
-     * @param builder The command
-     */
-    public static LiteralCommandNode<CommandSource> register(AbstractCommand builder) {
-        String fallBack = builder.getPlugin().getName().toLowerCase();
-
-        CommandWrapper wrapper = new CommandWrapper(builder);
-
-        // There might be a command with this name already
-        // registered, so remove it lol. Last come, first served
-        dispatcher.getRoot().removeCommand(builder.getName());
-        serverDispatcher.getRoot().removeCommand(builder.getName());
-
-        LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
-        LiteralArgumentBuilder<CommandSourceStack> wrapped = new WrapperConverter(wrapper, builder, built).finish();
-        LiteralCommandNode<CommandSourceStack> builtNms = serverCommands.getDispatcher().register(wrapped);
-
-        // Apply builder's parameters to bukkitWrapper, so aliases, permissions, description,
-        // all that
-        GrenadierBukkitWrapper bukkitWrapper = new GrenadierBukkitWrapper(builder, wrapper, built, builtNms);
-
-        SimpleCommandMap map = (SimpleCommandMap) Bukkit.getCommandMap();
-        Map<String, Command> cmds = map.getKnownCommands();
-
-        Set<String> allLabels = new HashSet<>(bukkitWrapper.getAliases());
-        allLabels.add(builder.getName());
-
-        for (String s: allLabels) {
-            String label = s.toLowerCase(Locale.ROOT);
-
-            boolean alias = !label.equalsIgnoreCase(builder.getName());
-
-            registerLabel(fallBack + ':' + label, cmds, bukkitWrapper, alias, built, builtNms);
-            registerLabel(label, cmds, bukkitWrapper, alias, built, builtNms);
-        }
-
-        bukkitWrapper.register(map);
-        return built;
-    }
-
-    static void registerLabel(String l,
-                                       Map<String, Command> map,
-                                       GrenadierBukkitWrapper wrapper,
-                                       boolean alias,
-                                       LiteralCommandNode<CommandSource> built,
-                                       LiteralCommandNode<CommandSourceStack> builtNms
-     ) {
-         map.put(l, wrapper);
-
-         if(!alias) return;
-
-         dispatcher.getRoot().removeCommand(l);
-         LiteralArgumentBuilder<CommandSource> node = CmdUtil.literal(l)
-                 .requires(built.getRequirement())
-                 .executes(built.getCommand());
-
-         for (CommandNode n: built.getChildren()) {
-             node.then(n);
-         }
-
-         dispatcher.register(node);
-
-         serverDispatcher.getRoot().removeCommand(l);
-         serverDispatcher.register(
-                 Commands.literal(l)
-                         .requires(builtNms.getRequirement())
-                         .redirect(builtNms)
-         );
-     }
-
-    public static boolean isInitialized() {
-        return initialized;
-    }
-
     @SuppressWarnings("deprecation") // Log4j smh
     public static void initialize(Plugin plugin) {
-        if(isInitialized()) return;
+        if (isInitialized()) {
+            return;
+        }
 
         RoyalGrenadier.plugin = plugin;
         logger = plugin.getLog4JLogger();
+
+        // Create dispatcher
         dispatcher = new CommandDispatcher<>();
-        serverCommands = ((CraftServer) Bukkit.getServer()).getServer().vanillaCommandDispatcher;
-        serverDispatcher = serverCommands.getDispatcher();
+        dispatcher.setConsumer((context, b, i) -> {
+            context.getSource().onCommandComplete(context, b, i);
+        });
 
-        dispatcher.setConsumer((context, b, i) -> context.getSource().onCommandComplete(context, b, i));
 
-        plugin.getServer().getPluginManager()
+        plugin.getServer()
+                .getPluginManager()
                 .registerEvents(new GrenadierListener(), plugin);
 
         initialized = true;
+    }
+
+    /**
+     * Registers the given AbstractCommand, making it usable.
+     * <p>
+     * Not needed in most cases, as {@link AbstractCommand#register()} calls this.
+     *
+     * @param builder The command
+     * @return The registered node.
+     */
+    public static LiteralCommandNode<CommandSource> register(AbstractCommand builder) {
+        String fallBack = builder.getPlugin().getName().toLowerCase();
+        CommandWrapper wrapper = new CommandWrapper(builder);
+
+        LiteralCommandNode<CommandSource> built = dispatcher.register(builder.getCommand());
+        LiteralArgumentBuilder<CommandSourceStack> wrapped = new WrapperTranslator(wrapper, builder, built).translate();
+        LiteralCommandNode<CommandSourceStack> builtNms = wrapped.build();
+
+        // Register aliases
+        registerAliases(builder.getAliases(), built, dispatcher);
+
+        GrenadierBukkitWrapper bukkitWrapper = new GrenadierBukkitWrapper(builder, wrapper, built, builtNms);
+
+        var map = Bukkit.getCommandMap();
+        map.register(fallBack, bukkitWrapper);
+        return built;
+    }
+
+    static <S> void registerAliases(String[] aliases, LiteralCommandNode<S> node, CommandDispatcher<S> dispatcher) {
+        if (aliases == null || aliases.length < 1) {
+            return;
+        }
+
+        for (var s: aliases) {
+            dispatcher.register(
+                    LiteralArgumentBuilder.<S>literal(s)
+                            .requires(node.getRequirement())
+                            .executes(node.getCommand())
+                            .redirect(node)
+            );
+        }
     }
 }

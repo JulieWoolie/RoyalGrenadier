@@ -4,9 +4,9 @@ import com.google.common.base.Joiner;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import lombok.Getter;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Getter
 public class GrenadierBukkitWrapper extends Command implements PluginIdentifiableCommand {
     private final AbstractCommand command;
     private final CommandWrapper wrapper;
@@ -42,22 +43,6 @@ public class GrenadierBukkitWrapper extends Command implements PluginIdentifiabl
         this.vanillaNode = vanillaNode;
     }
 
-    public LiteralCommandNode<CommandSource> getGrenadierNode() {
-        return grenadierNode;
-    }
-
-    public LiteralCommandNode<CommandSourceStack> getVanillaNode() {
-        return vanillaNode;
-    }
-
-    public AbstractCommand getCommand() {
-        return command;
-    }
-
-    public CommandWrapper getWrapper() {
-        return wrapper;
-    }
-
     @Override
     public @Nullable String getPermission() {
         return command.getPerm();
@@ -75,7 +60,10 @@ public class GrenadierBukkitWrapper extends Command implements PluginIdentifiabl
 
     @Override
     public @NotNull List<String> getAliases() {
-        if (command.getAliases() == null) return Collections.EMPTY_LIST;
+        if (command.getAliases() == null || command.getAliases().length <= 0) {
+            return Collections.EMPTY_LIST;
+        }
+
         List<String> aliases = new ArrayList<>(Arrays.asList(command.getAliases()));
         aliases.remove(getName());
 
@@ -116,13 +104,13 @@ public class GrenadierBukkitWrapper extends Command implements PluginIdentifiabl
 
     @Override
     public boolean testPermissionSilent(@NotNull CommandSender target) {
-        return command.test(GrenadierUtils.wrap(target, command));
+        return command.test(CommandSource.of(target, command));
     }
 
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-        CommandSource source = GrenadierUtils.wrap(sender, command);
-        String input = input(alias, args);
+        CommandSource source = CommandSource.of(sender, command);
+        String input = input(command.getName(), args);
 
         CommandDispatcher<CommandSource> dispatcher = RoyalGrenadier.getDispatcher();
         ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(input, source);
@@ -136,7 +124,11 @@ public class GrenadierBukkitWrapper extends Command implements PluginIdentifiabl
     }
 
     public String input(String label, String[] args) {
-        return (label + " " + Joiner.on(' ').join(args)).trim();
+        if (args == null || args.length < 1) {
+            return label;
+        }
+
+        return label + " " + Joiner.on(' ').join(args);
     }
 
     @Override

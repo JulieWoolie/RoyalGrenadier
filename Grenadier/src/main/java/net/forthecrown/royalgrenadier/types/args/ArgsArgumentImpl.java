@@ -1,6 +1,7 @@
 package net.forthecrown.royalgrenadier.types.args;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -12,129 +13,84 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.forthecrown.grenadier.CompletionProvider;
-import net.forthecrown.grenadier.types.args.Argument;
+import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.args.ArgsArgument;
+import net.forthecrown.grenadier.types.args.Argument;
 import net.forthecrown.grenadier.types.args.ParsedArgs;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
+import net.kyori.adventure.util.TriState;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
 public class ArgsArgumentImpl implements ArgsArgument, VanillaMappedArgument {
     public static final SimpleCommandExceptionType
-            EMPTY_LABEL = new SimpleCommandExceptionType(() -> "Empty label!"),
-            INPUT_REQUIRED = new SimpleCommandExceptionType(() -> "Argument requires input");
+            EMPTY_LABEL         = new SimpleCommandExceptionType(() -> "Empty label!"),
+            INPUT_REQUIRED      = new SimpleCommandExceptionType(() -> "Argument requires input"),
+            EXPECTED_SEPARATOR  = new SimpleCommandExceptionType(() -> "Expected separator ':' or '='"),
+            EXPECTED_BORDER     = new SimpleCommandExceptionType(() -> "Expected bracket '[' or '{'");
 
     public static final DynamicCommandExceptionType
-            UNKNOWN_ARG = new DynamicCommandExceptionType(o -> () -> "Unknown arg: '" + o + "'"),
-            MISSING_ARG = new DynamicCommandExceptionType(o -> () -> "Missing arg: '" + o + "'"),
-            ALREADY_USED = new DynamicCommandExceptionType(o -> () -> "Arg already set: '" + o + "'");
+            UNKNOWN_ARG         = new DynamicCommandExceptionType(o -> () -> "Unknown arg: '" + o + "'"),
+            MISSING_ARG         = new DynamicCommandExceptionType(o -> () -> "Missing arg: '" + o + "'"),
+            DUPLICATE_ARG       = new DynamicCommandExceptionType(o -> () -> "Duplicate arg: '" + o + "'");
 
     @Getter
-    private final Map<String, ArgEntry> args;
+    final ImmutableMap<String, ArgEntry> args;
+    final ImmutableSet<ArgEntry> entries;
+    final TriState brackets;
 
-    @Getter
-    private final char separator;
+    public ArgsArgumentImpl(BuilderImpl builder) {
+        this.brackets = builder.brackets;
+        this.args = builder.args.build();
+        this.entries = builder.entries.build();
+    }
 
     @Override
     public ParsedArgs parse(StringReader reader) throws CommandSyntaxException {
-        var builder = new ParsedArgsImpl.Builder();
+        var parser = new ArgumentsParser(reader, this);
+        parser.parse();
 
-        while (reader.canRead()) {
-            reader.skipWhitespace();
-
-            int start = reader.getCursor();
-            String label = readLabel(reader);
-            reader.skip();
-
-            if (label.isBlank()) {
-                throw EMPTY_LABEL.createWithContext(reader);
-            }
-
-            Argument argument = getArg(label);
-
-            if (argument == null) {
-                throw UNKNOWN_ARG.createWithContext(
-                        GrenadierUtils.correctReader(reader, start),
-                        label
-                );
-            }
-
-            if (builder.has(argument)) {
-                throw ALREADY_USED.createWithContext(
-                        GrenadierUtils.correctReader(reader, start),
-                        label
-                );
-            }
-
-            if (!reader.canRead()) {
-                throw INPUT_REQUIRED.create();
-            }
-
-            reader.skipWhitespace();
-
-            Object value = argument.getParser().parse(reader);
-            builder.add(argument, value);
-        }
+        var parsedArgs = parser.builder.build();
 
         for (var e: args.entrySet()) {
-            if (e.getValue().required && !builder.has(e.getValue().argument)) {
+            if (e.getValue().required && !parsedArgs.has(e.getValue().argument)) {
                 throw MISSING_ARG.create(e.getKey());
             }
         }
 
-        return builder.build();
+        return parsedArgs;
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        builder = builder.createOffset(builder.getStart() + builder.getRemainingLowerCase().lastIndexOf(' ') + 1);
-        var remaining = builder.getRemainingLowerCase();
-
-        if (remaining.contains(separator + "")) {
-            var reader = new StringReader(builder.getInput());
-            reader.setCursor(builder.getStart());
-
-            var label = readLabel(reader);
-            var arg = args.get(label);
-
-            if (arg != null) {
-                if (!reader.canRead()) {
-                    builder.suggest(separator + "");
-                    return builder.buildFuture();
-                }
-
-                reader.skip();
-                reader.skipWhitespace();
-
-                builder = builder.createOffset(reader.getCursor());
-                return arg.argument.getParser().listSuggestions(context, builder);
-            }
+        if (!(context.getSource() instanceof CommandSource)) {
+            return Suggestions.empty();
         }
 
-        return CompletionProvider.suggestMatching(builder, getKeys());
+        var reader = new StringReader(builder.getInput());
+        reader.setCursor(builder.getStart());
+
+        ArgumentsParser parser = new ArgumentsParser(reader, this);
+
+        try {
+            parser.parse();
+        } catch (CommandSyntaxException ignored) {}
+
+        return parser.getSuggestions((CommandContext<CommandSource>) context, builder);
     }
 
-    private String readLabel(StringReader reader) {
-        int start = reader.getCursor();
-
-        while (reader.canRead() && reader.peek() != separator) {
-            reader.skip();
-        }
-
-        int end = reader.getCursor();
-
-        return reader.getString().substring(start, end).trim();
+    @Nonnull
+    @Override
+    public TriState bracketsForced() {
+        return brackets;
     }
 
     @Override
     public Argument getArg(String name) {
-        var argEntry = args.get(name);
+        var argEntry = args.get(name.toLowerCase());
         return argEntry == null ? null : argEntry.argument;
     }
 
@@ -149,35 +105,40 @@ public class ArgsArgumentImpl implements ArgsArgument, VanillaMappedArgument {
     }
 
     public static class BuilderImpl implements Builder {
-        private final Map<String, ArgEntry> entries = new HashMap<>();
-
-        @Getter
-        private char separator = COLON_SEPARATOR;
+        private final ImmutableSet.Builder<ArgEntry> entries = ImmutableSet.builder();
+        private final ImmutableMap.Builder<String, ArgEntry> args = ImmutableMap.builder();
+        private TriState brackets = TriState.FALSE;
 
         @Override
-        public <T> Builder add(Argument<T> argument, boolean required) {
-            entries.put(argument.getName(), new ArgEntry(argument, required));
+        public Builder bracketsForced(@Nullable TriState state) {
+            brackets = state;
             return this;
         }
 
         @Override
-        public Builder setSeparator(char separator) {
-            this.separator = separator;
+        public <T> Builder add(Argument<T> argument, boolean required) {
+            var entry = new ArgEntry(argument, required);
+            entries.add(entry);
+
+            args.put(argument.getName(), entry);
+
+            for (var s: argument.getAliases()) {
+                args.put(s, entry);
+            }
+
             return this;
         }
 
         @Override
         public ArgsArgument build() {
-            return new ArgsArgumentImpl(
-                    ImmutableMap.copyOf(entries),
-                    separator
-            );
+            return new ArgsArgumentImpl(this);
         }
     }
 
     @RequiredArgsConstructor
     public static class ArgEntry {
-        private final Argument argument;
-        private final boolean required;
+        final Argument argument;
+        final boolean required;
     }
+
 }

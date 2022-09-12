@@ -48,7 +48,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param name The name and label of the command
      * @param plugin The plugin creating the command
      */
-    protected AbstractCommand(@NotNull String name, @NotNull Plugin plugin){
+    protected AbstractCommand(@NotNull String name, @NotNull Plugin plugin) {
         this.name = name.toLowerCase();
         this.root = new BrigadierCommand(this.name, this);
         this.plugin = plugin;
@@ -58,13 +58,20 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
         this(name, RoyalGrenadier.getPlugin());
     }
 
+    /**
+     * Creates the command node tree.
+     * @param command The command to create
+     */
     protected abstract void createCommand(BrigadierCommand command);
 
     /**
      * Registers the command and makes it usable ingame
      */
-    public final void register(){
-        if(registered) return;
+    public final void register() {
+        if (registered) {
+            return;
+        }
+
         root.requires(this);
         createCommand(root);
 
@@ -76,7 +83,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * Gets whether the command has been registered
      * @return If the command is registered or not
      */
-    public final boolean isRegistered(){
+    public final boolean isRegistered() {
         return registered;
     }
 
@@ -85,7 +92,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param strings The string to suggest
      * @return The suggestion provider of the inputted strings
      */
-    protected SuggestionProvider<CommandSource> suggestMatching(String... strings){
+    protected SuggestionProvider<CommandSource> suggestMatching(String... strings) {
         return suggestMatching(Arrays.asList(strings));
     }
 
@@ -94,7 +101,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param strings The strings to suggest
      * @return The SuggestionProvider of the inputted string collection
      */
-    protected SuggestionProvider<CommandSource> suggestMatching(Collection<String> strings){
+    protected SuggestionProvider<CommandSource> suggestMatching(Collection<String> strings) {
         return (c, b) -> CompletionProvider.suggestMatching(b, strings);
     }
 
@@ -103,7 +110,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param suggestions The map of suggestions
      * @return The suggestion provider for the inputted map
      */
-    protected SuggestionProvider<CommandSource> suggestMatching(Map<String, String> suggestions){
+    protected SuggestionProvider<CommandSource> suggestMatching(Map<String, String> suggestions) {
         return (c, b) -> CompletionProvider.suggestMatching(b, suggestions);
     }
 
@@ -123,8 +130,11 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param source The sender to check
      * @return Whether they have permission for this command
      */
-    public boolean testPermissionSilent(CommandSender source){
-        if(getPermission() == null) return true;
+    public boolean testPermissionSilent(CommandSender source) {
+        if (getPermission() == null) {
+            return true;
+        }
+
         return source.hasPermission(getPermission());
     }
 
@@ -149,11 +159,14 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param newAliases Aliases
      */
     public void setAliases(String... newAliases) {
-        if(registered) return;
+        if (registered) {
+            return;
+        }
+
         this.aliases = newAliases;
 
         // Ensure all given aliases are lower case
-        if(aliases != null && aliases.length > 0) {
+        if (aliases != null && aliases.length > 0) {
             for (int i = 0; i < aliases.length; i++) {
                 aliases[i] = Validate.notNull(aliases[i]).toLowerCase();
             }
@@ -172,7 +185,7 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * Gets the permission needed to use this command
      * @return The command's permission
      */
-    public Permission getPermission(){
+    public Permission getPermission() {
         return permission;
     }
 
@@ -181,16 +194,22 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param permission Permission needed to use the command
      */
     public void setPermission(String permission) {
-        if(registered) return;
+        if (registered) {
+            return;
+        }
 
-        if(permission == null || permission.isBlank()){
+        if (permission == null || permission.isBlank()) {
             this.permission = null;
             return;
         }
 
         PluginManager pm = Bukkit.getPluginManager();
-        if(pm.getPermission(permission) == null) pm.addPermission(this.permission = new Permission(permission));
-        else this.permission = pm.getPermission(permission);
+
+        if (pm.getPermission(permission) == null) {
+            pm.addPermission(this.permission = new Permission(permission));
+        } else {
+            this.permission = pm.getPermission(permission);
+        }
     }
 
     /**
@@ -198,7 +217,10 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param permission Permission needed to use the command
      */
     public void setPermission(Permission permission) {
-        if(registered) return;
+        if (registered) {
+            return;
+        }
+
         this.permission = permission;
     }
 
@@ -208,7 +230,10 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @return The permission message
      */
     public @Nullable String getPermissionMessage() {
-        if(permissionMessage == null) return null;
+        if (permissionMessage == null) {
+            return null;
+        }
+
         return LegacyComponentSerializer.legacySection().serialize(permissionMessage);
     }
 
@@ -217,8 +242,14 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param permissionMessage The permission message
      */
     public void setPermissionMessage(String permissionMessage) {
-        if(registered) return;
-        if(permissionMessage == null || permissionMessage.isBlank()) this.permissionMessage = null;
+        if (registered) {
+            return;
+        }
+
+        if (permissionMessage == null || permissionMessage.isBlank()) {
+            this.permissionMessage = null;
+        }
+
         else this.permissionMessage = LegacyComponentSerializer.legacySection().deserialize(permissionMessage);
     }
 
@@ -260,7 +291,10 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
      * @param description The command's new description
      */
     public void setDescription(String description) {
-        if(registered) return;
+        if (registered) {
+            return;
+        }
+
         this.description = description;
     }
 

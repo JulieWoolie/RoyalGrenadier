@@ -1,6 +1,7 @@
 package net.forthecrown.royalgrenadier.types.item;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import lombok.Getter;
 import net.forthecrown.grenadier.types.item.ParsedItemStack;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.nbt.CompoundTag;
@@ -9,9 +10,14 @@ import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Objects;
+
 public class ParsedItemImpl implements ParsedItemStack {
 
+    @Getter
     private final ItemInput nms;
+
+    @Getter
     private final CompoundTag tag;
 
     public ParsedItemImpl(ItemInput nms, CompoundTag tag) {
@@ -24,10 +30,6 @@ public class ParsedItemImpl implements ParsedItemStack {
         return CraftItemStack.asBukkitCopy(nms.createItemStack(amount, nbt));
     }
 
-    public ItemInput getNms() {
-        return nms;
-    }
-
     @Override
     public boolean test(ItemStack itemStack) {
         net.minecraft.world.item.ItemStack i = CraftItemStack.asNMSCopy(itemStack);
@@ -36,11 +38,7 @@ public class ParsedItemImpl implements ParsedItemStack {
 
     @Override
     public String getTags() {
-        return tag.toString();
-    }
-
-    public CompoundTag getTag() {
-        return tag;
+        return Objects.toString(tag, null);
     }
 
     @Override

@@ -1,134 +1,161 @@
 package net.forthecrown.royalgrenadier;
 
 import com.mojang.brigadier.ImmutableStringReader;
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.adventure.AdventureComponent;
-import io.papermc.paper.adventure.PaperAdventure;
-import net.forthecrown.grenadier.CommandSource;
-import net.forthecrown.grenadier.CompletionProvider;
-import net.forthecrown.grenadier.command.AbstractCommand;
+import io.papermc.paper.brigadier.PaperBrigadier;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_19_R1.command.VanillaCommandWrapper;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+
+import static net.forthecrown.grenadier.exceptions.RoyalCommandException.*;
 
 public class GrenadierUtils {
-
-    public static CommandSourceStack sourceToNms(CommandSource source){
-        return ((CommandSourceImpl) source).getHandle();
-    }
-
-    public static CommandSourceImpl wrap(CommandSourceStack stack, AbstractCommand command) {
-        if(stack.source == net.minecraft.commands.CommandSource.NULL) {
-            stack = MinecraftServer.getServer().createCommandSourceStack();
-        }
-
-        return new CommandSourceImpl(stack, command);
-    }
-
-    public static CommandSource wrap(CommandSender sender, AbstractCommand command) {
-        return wrap(senderToWrapper(sender), command);
-    }
-
-    // Thank god for paperMC fixing this method
-    public static CommandSourceStack senderToWrapper(CommandSender sender) {
-        return VanillaCommandWrapper.getListener(sender);
-    }
-
-    //Converts a list from one type to another using the given function
-    public static <T, F> List<T> convertList(Iterable<F> from, Function<F, T> function){
-        List<T> res = new ArrayList<>();
-        for (F f: from) res.add(function.apply(f));
-
-        return res;
-    }
-
-    //Does the same thing as the above method but with an array
-    public static <T, F> List<T> convertArray(F[] from, Function<F, T> function){
-        return convertList(Arrays.asList(from), function);
-    }
-
-    //Returns a reader with the cursor at the correct position
-    //Normally reading and then throwing exceptions causes the cursor to be placed at the wrong position
-    //So we must correct it, but also do so with a new reader so the reader in the parse method moves forward
-    public static ImmutableStringReader correctReader(ImmutableStringReader reader, int cursor){
+    /**
+     * Creates a reader with the same input as the given
+     * reader, but moves its cursor to the given cursor
+     * position.
+     *
+     * @param reader The reader to copy
+     * @param cursor The position to move the result's cursor to
+     * @return The cloned reader with a shifted cursor
+     */
+    public static StringReader correctReader(ImmutableStringReader reader, int cursor) {
         StringReader reader1 = new StringReader(reader.getString());
         reader1.setCursor(cursor);
+
         return reader1;
     }
 
+    /**
+     * Turns the given adventure component into a vanilla
+     * chat component.
+     * <p>
+     * If the givne input is null, the return value of this
+     * method is also null.
+     * <p>
+     * If the given component is, or contains, translatable
+     * components, they will be rendered into {@link Locale#ENGLISH}.
+     *
+     * @param component The component to convert
+     * @return The vanilla equivalent of the given input
+     */
     public static net.minecraft.network.chat.Component toVanilla(Component component) {
-        if(component instanceof TranslatableComponent) {
-            component = GlobalTranslator.render(component, Locale.ROOT);
+        if (component == null) {
+            return null;
         }
 
+        component = GlobalTranslator.render(component, Locale.ENGLISH);
         return new AdventureComponent(component);
     }
 
-    //Suggests a specific MinecraftKey collection
+    /**
+     * Suggests a vanilla resource location iterable.
+     * <p>
+     * Not in {@link net.forthecrown.grenadier.CompletionProvider}
+     * because I don't want to directly put vanilla code in that.
+     *
+     * @param resources The resource keys to suggest
+     * @param builder The builder to suggest to
+     * @return The built suggestions
+     */
     public static CompletableFuture<Suggestions> suggestResource(Iterable<ResourceLocation> resources, SuggestionsBuilder builder) {
         return SharedSuggestionProvider.suggestResource(resources, builder);
     }
 
+    /**
+     * Formats a command exception into a single formatted text.
+     * <p>
+     * Uses {@link RoyalCommandException#ERROR_MESSAGE_STYLE} as
+     * the style for the error message.
+     * <p>
+     * If the given exception has a context, it calls
+     * {@link #formatExceptionContext(CommandSyntaxException)} to
+     * format it and appends it onto the result on a second line.
+     *
+     * @param exception The exception to format
+     * @return The formatted exception
+     * @see #formatExceptionContext(CommandSyntaxException)
+     */
     public static Component formatCommandException(CommandSyntaxException exception) {
-        Component initialMessage = exception.getRawMessage() instanceof net.minecraft.network.chat.Component ?
-                PaperAdventure.asAdventure((net.minecraft.network.chat.Component) exception.getRawMessage()) :
-                Component.text(exception.getRawMessage().getString());
+        Component initialMessage = PaperBrigadier.componentFromMessage(exception.getRawMessage())
+                .style(RoyalCommandException.ERROR_MESSAGE_STYLE);
 
-        initialMessage = initialMessage.style(RoyalCommandException.ERROR_MESSAGE_STYLE);
+        if (exception.getInput() == null || exception.getCursor() < 0) {
+            return initialMessage;
+        }
 
-        if(exception.getInput() == null || exception.getCursor() < 0) return initialMessage;
-
-        TextComponent.Builder builder = Component.text()
+        return Component.text()
                 .append(initialMessage)
                 .append(Component.newline())
-                .append(formatExceptionContext(exception));
-
-        return builder.build();
+                .append(formatExceptionContext(exception))
+                .build();
     }
 
-    public static Component formatExceptionContext(CommandSyntaxException e) {
-        if (e.getInput() == null || e.getCursor() < 1) return null;
+    /**
+     * Formats a command syntax exception's context
+     * into a single text.
+     * <p>
+     * If the given exception's context is null or cursor
+     * at -1, then null is returned.
+     * <p>
+     * The returned text uses text styles contained in the
+     * {@link RoyalCommandException} class, these styles are
+     * free for anyone to edit or remove.
+     *
+     * @param e The exception to format the context of
+     * @return The formatted context, or null, if there was no
+     *         context to format
+     */
+    public static @Nullable Component formatExceptionContext(CommandSyntaxException e) {
+        if (e.getInput() == null || e.getCursor() < 0) {
+            return null;
+        }
 
         final TextComponent.Builder builder = Component.text();
         final int cursor = Math.min(e.getInput().length(), e.getCursor());
         final int start = Math.max(0, cursor - CommandSyntaxException.CONTEXT_AMOUNT); //Either start of input or cursor - 10
 
         //Context too long, add dots
-        if (start != 0) builder.append(Component.text("...").style(RoyalCommandException.GRAY_CONTEXT_STYLE));
+        if (start != 0) {
+            builder.append(Component.text("...").style(GRAY_CONTEXT_STYLE));
+        }
 
         String grayContext = e.getInput().substring(start, cursor);
         String redContext = e.getInput().substring(cursor);
 
         builder.append(
                 Component.text()
-                        .clickEvent(ClickEvent.suggestCommand("/" + e.getInput())) //Clicking on the exception will put the input in chat
+                        //Clicking on the exception will put the input in chat
+                        .clickEvent(ClickEvent.suggestCommand("/" + e.getInput()))
 
-                        .append(Component.text(grayContext).style(RoyalCommandException.GRAY_CONTEXT_STYLE))
-                        .append(Component.text(redContext).style(RoyalCommandException.RED_CONTEXT_STYLE))
+                        // Show command in hover event
+                        .hoverEvent(
+                                Component.text()
+                                        .append(
+                                                Component.text("/" + e.getInput().substring(0, cursor), GRAY_CONTEXT_STYLE)
+                                        )
+                                        .append(
+                                                Component.text(e.getInput().substring(cursor), RED_CONTEXT_STYLE)
+                                        )
+                                        .build()
+                        )
 
-                        .append(Component.translatable("command.context.here").style(RoyalCommandException.HERE_POINTER_STYLE)) //Tell them were they went wrong in life, answer is here, writing some useless ass comment for an API no one will use while failing school
+                        .append(Component.text(grayContext).style(GRAY_CONTEXT_STYLE))
+                        .append(Component.text(redContext).style(RED_CONTEXT_STYLE))
+
+                        .append(Component.translatable("command.context.here").style(HERE_POINTER_STYLE))
 
                         .build()
         );
@@ -136,89 +163,81 @@ public class GrenadierUtils {
         return builder.build();
     }
 
-    //Removes the decimal point from a string, if needed
-    public static String decimal(String check, boolean allowDecimals){
-        if(allowDecimals) return check;
-
-        int index = check.indexOf('.');
-        return index == -1 ? check : check.substring(0, index);
-    }
-
-    public static void suggestMatches(SuggestionsBuilder builder, String toSuggest, Message tooltip) {
-        String token = builder.getRemainingLowerCase();
-
-        if(CompletionProvider.startsWith(token, toSuggest)) builder.suggest(toSuggest, tooltip);
-    }
-
-    public static Message componentToMessage(@Nullable Component component) {
-        if(component == null) return null;
-        return PaperAdventure.asVanilla(component);
-    }
-
-    public static Component messageToComponent(@Nullable Message message) {
-        if(message == null) return null;
-
-        if(message instanceof net.minecraft.network.chat.Component) return PaperAdventure.asAdventure((net.minecraft.network.chat.Component) message);
-        return Component.text(message.getString());
-    }
-
+    /**
+     * Sometimes the input given to a command execution
+     * contains the plugin's name as a namespace, for example:
+     * "bukkit:reload".
+     * <p>
+     * There might also be the scenario that
+     * we're given an input from a /execute command in which
+     * case we need to make sure we're not trying to parse the
+     * execute command's input, so we skip to the 'run' argument
+     * and get to our own input.
+     *
+     * @param input The input to filter
+     * @return The reader with the cursor at the start
+     *         of the relevant input.
+     */
     public static StringReader filterCommandInput(String input) {
-        // Sometimes we get given input with a plugin's namespace, like
-        // 'bukkit:reload' or something to that effect, to use that input,
-        // we must remove the namespace
-        int spaceIndex = input.indexOf(' ');
-        if(spaceIndex == -1) spaceIndex = input.length();
+        StringReader reader = new StringReader(input);
 
-        String subStr = input.substring(0, spaceIndex);
-        int seperatorIndex = subStr.indexOf(':');
-        if(seperatorIndex != -1) {
-            subStr = subStr.substring(seperatorIndex+1);
+        if (reader.peek() == '/') {
+            reader.skip();
         }
 
-        String filtered = subStr + input.substring(spaceIndex);
+        if (reader.getRemaining().startsWith("execute")) {
+            var runIndex = reader.getString().indexOf("run");
 
-        StringReader reader = new StringReader(filtered);
-        if(reader.canRead() && reader.peek() == '/') reader.skip();
+            // execute as @e facing ~ ~ ~ run /grenadier arg1 arg2
+            // ^ starts with execute     ^ run index
+            //                            +4 ^ corrected start index
+            // That's a weird way to explain my thought process
+            // but yeah
 
-        // we've been passed the 'execute' command input, gotta find the 'run' argument
-        if(reader.getRemaining().startsWith("execute")) {
-            String remaining = reader.getRemaining();
-            int runIndex = remaining.indexOf("run");
+            if (runIndex != -1) {
+                reader.setCursor(runIndex + 4);
 
-            if(runIndex != -1) {
-                reader = new StringReader(remaining.substring(runIndex + 3).trim());
+                if (reader.canRead() && reader.peek() == '/') {
+                    reader.skip();
+                }
             }
+        }
+
+        // If arguments in input:
+        // /plugin:command arg1 arg2
+        //                ^ Isolate from here, there
+        //                  might be ':' in input
+        //
+        // If no arguments in input:
+        // /plugin:command
+        // - No space index, no need to isolate
+        //
+        // Isolation result:
+        // /plugin:command
+        //        ^ ':' index, namespace found, move cursor
+        //              to compensate
+        //
+        // The reason the above shown isolation is done is
+        // that it's not guarenteed that the input has/doesn't
+        // have a namespace, so we need to test if it does
+
+        int cursor = reader.getCursor();
+        int spaceIndex = reader.getRemaining().indexOf(' ');
+
+        if (spaceIndex == -1) {
+            spaceIndex = reader.getRemainingLength();
+        }
+
+        var subStr = reader.getRemaining().substring(0, spaceIndex);
+
+        if (subStr.contains(":")) {
+            while (reader.canRead() && reader.peek() != ':') {
+                reader.skip();
+            }
+
+            reader.skip();
         }
 
         return reader;
-    }
-
-    public static boolean isSilent(CommandSourceStack stack) {
-        Field silent = null;
-
-        // the 'silent' field is the only boolean field in CommandSourceStack
-        // at least currently, so any boolean fields we find must be the
-        // silent field.
-        // Why not just put the field name here directly? Obfuscation mappings
-        for (Field f: stack.getClass().getDeclaredFields()) {
-            if(f.getType().equals(Boolean.TYPE)) {
-                silent = f;
-                break;
-            }
-        }
-
-        if(silent == null) {
-            // This should not happen
-            return false;
-        }
-
-        silent.setAccessible(true);
-
-        try {
-            return (boolean) silent.get(stack);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 }
