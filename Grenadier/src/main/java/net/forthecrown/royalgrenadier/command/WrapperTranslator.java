@@ -13,7 +13,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import it.unimi.dsi.fastutil.Pair;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.forthecrown.royalgrenadier.CommandSourceImpl;
+import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -72,14 +72,14 @@ public class WrapperTranslator {
 
     /**
      * Converts the given node's predicate to a vanilla predicate by
-     * taking a given vanilla source, creating a {@link CommandSourceImpl}
+     * taking a given vanilla source, creating a {@link WrappedCommandSource}
      * and then calling the original, given, node's predicate
      *
      * @param test The node to translate the requirement of
      * @return The translated requirement
      */
     Predicate<CommandSourceStack> translateTest(Predicate<CommandSource> test) {
-        return lis -> test.test(CommandSourceImpl.of(lis, abstractCommand, null));
+        return lis -> test.test(WrappedCommandSource.of(lis, abstractCommand, null));
     }
 
     /**
@@ -127,7 +127,7 @@ public class WrapperTranslator {
                     .requires(target.getRequirement())
                     .executes(wrapper)
                     .suggests((context, builder) -> {
-                        var wrappedSource = CommandSourceImpl.of(context.getSource(), abstractCommand, null);
+                        var wrappedSource = WrappedCommandSource.of(context.getSource(), abstractCommand, null);
                         return wrapper.suggest(wrappedSource, context.getInput());
                     });
         } else if (!children.isEmpty()) {

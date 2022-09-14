@@ -14,7 +14,7 @@ import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.ImmutableCommandExceptionType;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
-import net.forthecrown.royalgrenadier.CommandSourceImpl;
+import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
 import net.kyori.adventure.text.Component;
@@ -53,7 +53,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
     public int run(CommandSourceStack stack, String input) {
         //Takes the vanilla command source and turns it's input into
         //Grenadier's sender and executes command with it
-        CommandSource source = CommandSourceImpl.of(stack, builder, null);
+        CommandSource source = WrappedCommandSource.of(stack, builder, null);
         StringReader reader = GrenadierUtils.filterCommandInput(input);
 
         boolean parsing = true;
@@ -136,7 +136,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         try {
             StringReader reader = GrenadierUtils.filterCommandInput(builder.getInput());
 
-            CommandSource source = CommandSourceImpl.of(context.getSource(), this.builder, null);
+            CommandSource source = WrappedCommandSource.of(context.getSource(), this.builder, null);
             ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(reader, source);
 
             return node.listSuggestions(results.getContext().build(builder.getInput()), builder);
@@ -161,6 +161,6 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
 
     @Override
     public boolean test(CommandSourceStack wrapper) {
-        return builder.test(CommandSourceImpl.of(wrapper, this.builder, null));
+        return builder.test(WrappedCommandSource.of(wrapper, this.builder, null));
     }
 }

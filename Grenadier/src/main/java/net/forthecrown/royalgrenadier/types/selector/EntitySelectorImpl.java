@@ -4,7 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.types.selectors.EntitySelector;
-import net.forthecrown.royalgrenadier.CommandSourceImpl;
+import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -23,17 +23,17 @@ public class EntitySelectorImpl implements EntitySelector {
 
     @Override
     public Player getPlayer(CommandSource source) throws CommandSyntaxException {
-        return nms.findSinglePlayer(CommandSourceImpl.getStack(source)).getBukkitEntity();
+        return nms.findSinglePlayer(WrappedCommandSource.getStack(source)).getBukkitEntity();
     }
 
     @Override
     public Entity getEntity(CommandSource source) throws CommandSyntaxException {
-        return nms.findSingleEntity(CommandSourceImpl.getStack(source)).getBukkitEntity();
+        return nms.findSingleEntity(WrappedCommandSource.getStack(source)).getBukkitEntity();
     }
 
     @Override
     public List<Entity> getEntities(CommandSource source) throws CommandSyntaxException {
-        List<? extends net.minecraft.world.entity.Entity> nmsList = nms.findEntities(CommandSourceImpl.getStack(source));
+        List<? extends net.minecraft.world.entity.Entity> nmsList = nms.findEntities(WrappedCommandSource.getStack(source));
 
         return nmsList
                 .stream()
@@ -43,7 +43,7 @@ public class EntitySelectorImpl implements EntitySelector {
 
     @Override
     public List<Player> getPlayers(CommandSource source) throws CommandSyntaxException {
-        List<ServerPlayer> nmsList = nms.findPlayers(CommandSourceImpl.getStack(source));
+        List<ServerPlayer> nmsList = nms.findPlayers(WrappedCommandSource.getStack(source));
 
         return nmsList
                 .stream()

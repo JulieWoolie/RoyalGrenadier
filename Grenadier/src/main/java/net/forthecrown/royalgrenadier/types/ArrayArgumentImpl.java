@@ -61,7 +61,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        builder = builder.createOffset(builder.getStart() + builder.getRemainingLowerCase().indexOf(',') + 1);
+        builder = builder.createOffset(builder.getStart() + builder.getRemainingLowerCase().lastIndexOf(',') + 1);
         return type.listSuggestions(context, builder);
     }
 }

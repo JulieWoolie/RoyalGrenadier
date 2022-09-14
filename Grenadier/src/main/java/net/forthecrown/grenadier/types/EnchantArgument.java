@@ -10,11 +10,11 @@ import org.bukkit.enchantments.Enchantment;
  * Represents an argument type which will be parsed into an {@link Enchantment}
  */
 public interface EnchantArgument extends ArgumentType<Enchantment> {
-    static EnchantArgument enchantment(){
+    static EnchantArgument enchantment() {
         return EnchantArgumentImpl.INSTANCE;
     }
 
-    static Enchantment getEnchantment(CommandContext<CommandSource> c, String argument){
+    static Enchantment getEnchantment(CommandContext<CommandSource> c, String argument) {
         return c.getArgument(argument, Enchantment.class);
     }
 }

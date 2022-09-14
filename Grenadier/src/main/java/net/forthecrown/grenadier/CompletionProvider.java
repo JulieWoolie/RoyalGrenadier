@@ -195,7 +195,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestSounds(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.SOUND_EVENT.keySet(), builder);
+        return suggestRegistry(builder, org.bukkit.Registry.SOUNDS);
     }
 
     /**
@@ -213,7 +213,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestEnchantments(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.ENCHANTMENT.keySet(), builder);
+        return suggestRegistry(builder, org.bukkit.Registry.ENCHANTMENT);
     }
 
     /**
@@ -222,7 +222,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestEntities(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.ENTITY_TYPE.keySet(), builder);
+        return suggestRegistry(builder, org.bukkit.Registry.ENTITY_TYPE);
     }
 
     /**
@@ -309,15 +309,6 @@ public interface CompletionProvider {
                         })
                         .map(Player::getName)
         );
-    }
-
-    /**
-     * Suggests entity types, eg: minecraft:cow
-     * @param builder The builder to suggest to
-     * @return The built suggestions
-     */
-    static CompletableFuture<Suggestions> suggestEntityTypes(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.ENTITY_TYPE.keySet(), builder);
     }
 
     /**

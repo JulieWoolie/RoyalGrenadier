@@ -7,7 +7,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.entity.LookAnchor;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
-import net.forthecrown.royalgrenadier.CommandSourceImpl;
+import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
@@ -46,8 +46,8 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * @return The created source
      */
     static CommandSource of(CommandSender sender, AbstractCommand command, ResultConsumer<CommandSource> callback) {
-        return CommandSourceImpl.of(
-                CommandSourceImpl.getStack(sender),
+        return WrappedCommandSource.of(
+                WrappedCommandSource.getStack(sender),
                 command, callback
         );
     }

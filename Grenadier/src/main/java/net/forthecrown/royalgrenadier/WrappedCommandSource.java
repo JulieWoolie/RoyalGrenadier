@@ -46,7 +46,7 @@ import java.util.Optional;
  * a backing handle.
  */
 @AllArgsConstructor(staticName = "of")
-public class CommandSourceImpl implements CommandSource {
+public class WrappedCommandSource implements CommandSource {
 
     public static final LegacyComponentSerializer lSerializer = LegacyComponentSerializer.builder()
             .extractUrls()
@@ -69,12 +69,12 @@ public class CommandSourceImpl implements CommandSource {
         return VanillaCommandWrapper.getListener(sender);
     }
 
-    private CommandSourceImpl cloneWith(CommandSourceStack stack) {
-        return new CommandSourceImpl(stack, currentCommand, callback);
+    private WrappedCommandSource cloneWith(CommandSourceStack stack) {
+        return new WrappedCommandSource(stack, currentCommand, callback);
     }
 
     public static CommandSourceStack getStack(CommandSource source) {
-        return ((CommandSourceImpl) source).getHandle();
+        return ((WrappedCommandSource) source).getHandle();
     }
 
     public CommandSourceStack getHandle() {
