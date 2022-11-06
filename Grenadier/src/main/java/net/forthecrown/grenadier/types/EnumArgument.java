@@ -24,7 +24,13 @@ public interface EnumArgument<E extends Enum<E>> extends ArgumentType<E> {
         return new EnumArgumentImpl<>(clazz);
     }
 
+    default <S> E get(CommandContext<S> context, String argumentName) {
+        return context.getArgument(argumentName, getEnumType());
+    }
+
     Class<E> getEnumType();
 
-    <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder, boolean lowerCase);
+    <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context,
+                                                       SuggestionsBuilder builder,
+                                                       boolean lowerCase);
 }

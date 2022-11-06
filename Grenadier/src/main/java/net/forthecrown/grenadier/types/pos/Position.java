@@ -5,6 +5,10 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 public interface Position {
+
+    /** A position which always returns the given base location. */
+    Position SELF = new EmptyPosition();
+
     /**
      * Gets the location specified, requires Sender for any relative coordinates
      * <p>Note: if the position is a 2D position, the Y will always be 0</p>

@@ -65,30 +65,30 @@ public class PositionArgumentImpl implements PositionArgument, VanillaMappedArgu
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSource source) {
-            List<CoordinateSuggestion> suggestions = new ArrayList<>();
-
-            boolean is2D = (flags & FLAG_2D) != 0;
-            boolean vector = (flags & FLAG_BLOCKPOS) == 0;
-
-            // Add cords for the block they're looking at,
-            // if there's a block to add cords for
-            CoordinateSuggestion sourceSuggestion = is2D ? source.getRelevant2DCords() : source.getRelevant3DCords();
-
-            if (sourceSuggestion != null) {
-                suggestions.add(sourceSuggestion);
-            }
-
-            boolean local = builder.getRemainingLowerCase().contains("^");
-
-            // Add default cords
-            suggestions.add(getDefault(is2D, local));
-
-            // Suggest the cords
-            return CompletionProvider.suggestCords(builder, vector, suggestions);
+        if (!(context.getSource() instanceof CommandSource source)) {
+            return Suggestions.empty();
         }
 
-        return Suggestions.empty();
+        List<CoordinateSuggestion> suggestions = new ArrayList<>();
+
+        boolean is2D = (flags & FLAG_2D) != 0;
+        boolean vector = (flags & FLAG_BLOCKPOS) == 0;
+
+        // Add cords for the block they're looking at,
+        // if there's a block to add cords for
+        CoordinateSuggestion sourceSuggestion = is2D ? source.getRelevant2DCords() : source.getRelevant3DCords();
+
+        if (sourceSuggestion != null) {
+            suggestions.add(sourceSuggestion);
+        }
+
+        boolean local = builder.getRemainingLowerCase().contains("^");
+
+        // Add default cords
+        suggestions.add(getDefault(is2D, local));
+
+        // Suggest the cords
+        return CompletionProvider.suggestCords(builder, vector, suggestions);
     }
 
     private static CoordinateSuggestion getDefault(boolean is2D, boolean local) {

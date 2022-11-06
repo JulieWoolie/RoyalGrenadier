@@ -8,7 +8,7 @@ plugins {
 // to do that.
 
 group 'net.forthecrown'
-version '1.5.2'
+version '1.5.3'
 
 tasks.register("buildGrenadier") {
     Project grenadier = project('Grenadier')

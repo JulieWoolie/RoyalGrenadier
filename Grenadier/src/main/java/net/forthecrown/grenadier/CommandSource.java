@@ -2,8 +2,6 @@ package net.forthecrown.grenadier;
 
 import com.mojang.brigadier.ResultConsumer;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.entity.LookAnchor;
 import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
@@ -11,6 +9,7 @@ import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -26,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import java.util.Optional;
 
 /**
  * The source of command execution.
@@ -82,22 +81,30 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
     }
 
     /**
+     * Gets the normal Bukkit CommandSender
+     * @return the CommandSender of this source
+     */
+    CommandSender asBukkit();
+
+    /**
      * Checks if the sender is of the type
-     * <p></p>
+     * <p>
      * For example, to use this to check if the sender is a player you'd use
-     * {@code boolean isPlayer = is(Player.class); }
+     * <code>boolean isPlayer = is(Player.class);</code>
      *
      * @param clazz The class of the type to check
      * @param <T>
      * @return Whether the sender is of the type
      */
-    <T extends CommandSender> boolean is(Class<T> clazz);
+    default  <T extends CommandSender> boolean is(Class<T> clazz) {
+        return clazz.isInstance(asBukkit());
+    }
 
     /**
      * Gets the sender as the specified type
-     * <p></p>
+     * <p>
      * To use this to get the sender as, for example, a slime, you'd do:
-     * {@code Slime slime = as(Slime.class); }
+     * <code>Slime slime = as(Slime.class);</code>
      *
      * @param clazz The class of the type, must extend {@link CommandSender}
      * @param <T> The type
@@ -114,13 +121,24 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * @param <T> The type
      * @return The sender as the given type, or null if sender isn't of the given type
      */
-    @Nullable <T extends CommandSender> T asOrNull(Class<T> clazz);
+    default @Nullable <T extends CommandSender> T asOrNull(Class<T> clazz) {
+        return castOptional(clazz).orElse(null);
+    }
 
     /**
-     * Gets the normal Bukkit CommandSender
-     * @return the CommandSender of this source
+     * Creates an optional that's empty if this source's
+     * backing {@link CommandSender} is not of the given type,
+     * if the sender is of the given type, then the optional
+     * will contain the sender casted to the given type
+     * @param clazz The type to get the sender as
+     * @param <T> The type
+     * @return The created optional, empty if sender isn't an
+     *         instance of the given class, otherwise, contains
+     *         the sender cast to that type.
      */
-    CommandSender asBukkit();
+    default @NotNull <T extends CommandSender> Optional<T> castOptional(Class<T> clazz) {
+        return is(clazz) ? Optional.of(clazz.cast(asBukkit())) : Optional.empty();
+    }
 
     /**
      * Checks if the source is a player
@@ -269,13 +287,17 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * Sends a message to the sender
      * @param s The message to send
      */
-    void sendMessage(String s);
+    default void sendMessage(String s) {
+        sendMessage(
+                LegacyComponentSerializer.legacySection().deserialize(s)
+        );
+    }
 
     /**
      * Sends several messages to the sender lol
      * @param s The messages to send
      */
-    default void sendMessage(String... s){
+    default void sendMessage(String... s) {
         for (String ss: s){
             sendMessage(ss);
         }
@@ -309,7 +331,12 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
      * @param s The message
      * @param sendToSelf Whether the sender should also receive the message
      */
-    void sendAdmin(String s, boolean sendToSelf);
+    default void sendAdmin(String s, boolean sendToSelf) {
+        sendAdmin(
+                LegacyComponentSerializer.legacySection().deserialize(s),
+                sendToSelf
+        );
+    }
 
     /**
      * Broadcasts the message to other admins
@@ -417,18 +444,6 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
         if (broadcast && !isSilent() && shouldInformAdmins()) {
             broadcastAdmin(msg);
         }
-    }
-
-    /**
-     * Suggest matching strings for the specified SuggestionsBuilder
-     * @deprecated Use {@link CompletionProvider#suggestMatching(SuggestionsBuilder, Iterable)}
-     * @param b The builder
-     * @param suggestions The suggestions to suggest
-     * @return The suggestions of the given strings
-     */
-    @Deprecated
-    static CompletableFuture<Suggestions> suggestMatching(SuggestionsBuilder b, Iterable<String> suggestions){
-        return CompletionProvider.suggestMatching(b, suggestions);
     }
 
     @Override
@@ -570,7 +585,9 @@ public interface CommandSource extends ResultConsumer<CommandSource>, ServerOper
 
     /**
      * Creates a command source with the given callback added
-     * to it.
+     * to it. This callback is called when the source's command
+     * execution is finished.
+     *
      * @param consumer The consumer to use
      * @return A command source with the given consumer added to it.
      */

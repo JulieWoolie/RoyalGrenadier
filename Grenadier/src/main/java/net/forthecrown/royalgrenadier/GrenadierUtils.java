@@ -20,6 +20,8 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import static net.forthecrown.grenadier.exceptions.RoyalCommandException.*;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 public class GrenadierUtils {
     /**
@@ -96,7 +98,7 @@ public class GrenadierUtils {
             return initialMessage;
         }
 
-        return Component.text()
+        return text()
                 .append(initialMessage)
                 .append(Component.newline())
                 .append(formatExceptionContext(exception))
@@ -123,39 +125,41 @@ public class GrenadierUtils {
             return null;
         }
 
-        final TextComponent.Builder builder = Component.text();
+        final TextComponent.Builder builder = text();
         final int cursor = Math.min(e.getInput().length(), e.getCursor());
-        final int start = Math.max(0, cursor - CommandSyntaxException.CONTEXT_AMOUNT); //Either start of input or cursor - 10
+
+        //Either start of input or cursor - 10
+        final int start = Math.max(0, cursor - CommandSyntaxException.CONTEXT_AMOUNT);
 
         //Context too long, add dots
         if (start != 0) {
-            builder.append(Component.text("...").style(GRAY_CONTEXT_STYLE));
+            builder.append(text("...", GRAY_CONTEXT_STYLE));
         }
 
         String grayContext = e.getInput().substring(start, cursor);
         String redContext = e.getInput().substring(cursor);
 
         builder.append(
-                Component.text()
+                text()
                         //Clicking on the exception will put the input in chat
                         .clickEvent(ClickEvent.suggestCommand("/" + e.getInput()))
 
                         // Show command in hover event
                         .hoverEvent(
-                                Component.text()
+                                text()
                                         .append(
-                                                Component.text("/" + e.getInput().substring(0, cursor), GRAY_CONTEXT_STYLE)
-                                        )
-                                        .append(
-                                                Component.text(e.getInput().substring(cursor), RED_CONTEXT_STYLE)
+                                                text("/" + e.getInput().substring(0, cursor), GRAY_CONTEXT_STYLE),
+                                                text(redContext, RED_CONTEXT_STYLE)
                                         )
                                         .build()
                         )
 
-                        .append(Component.text(grayContext).style(GRAY_CONTEXT_STYLE))
-                        .append(Component.text(redContext).style(RED_CONTEXT_STYLE))
+                        .append(
+                                text(grayContext, GRAY_CONTEXT_STYLE),
+                                text(redContext, RED_CONTEXT_STYLE)
+                        )
 
-                        .append(Component.translatable("command.context.here").style(HERE_POINTER_STYLE))
+                        .append(translatable("command.context.here", HERE_POINTER_STYLE))
 
                         .build()
         );
@@ -221,7 +225,6 @@ public class GrenadierUtils {
         // that it's not guarenteed that the input has/doesn't
         // have a namespace, so we need to test if it does
 
-        int cursor = reader.getCursor();
         int spaceIndex = reader.getRemaining().indexOf(' ');
 
         if (spaceIndex == -1) {
@@ -229,14 +232,7 @@ public class GrenadierUtils {
         }
 
         var subStr = reader.getRemaining().substring(0, spaceIndex);
-
-        if (subStr.contains(":")) {
-            while (reader.canRead() && reader.peek() != ':') {
-                reader.skip();
-            }
-
-            reader.skip();
-        }
+        reader.setCursor(reader.getCursor() + subStr.indexOf(':') + 1);
 
         return reader;
     }

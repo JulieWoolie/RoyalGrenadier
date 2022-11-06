@@ -14,14 +14,13 @@ import net.forthecrown.grenadier.command.AbstractCommand;
 import net.forthecrown.grenadier.exceptions.ImmutableCommandExceptionType;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
 import net.forthecrown.grenadier.exceptions.TranslatableExceptionType;
-import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.RoyalGrenadier;
+import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.commands.CommandSourceStack;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
@@ -104,13 +103,7 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
 
             return -1;
         } catch (Throwable e) {
-            LOGGER.error(
-                    new ParameterizedMessage(
-                            "Error while executing command '{}'",
-                            new Object[]{builder.getName()},
-                            e
-                    )
-            );
+            LOGGER.error("Error executing command '{}'", builder.getName(), e);
 
             TextComponent.Builder builder = Component.text()
                     .append(Component.text(e.getClass().getName() + ": " + e.getMessage()));
@@ -139,19 +132,122 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
             CommandSource source = WrappedCommandSource.of(context.getSource(), this.builder, null);
             ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(reader, source);
 
-            return node.listSuggestions(results.getContext().build(builder.getInput()), builder);
+            var builtContext = results.getContext()
+                    .build(builder.getInput())
+                    .getLastChild();
+
+            return node.listSuggestions(builtContext, builder);
         } catch (Throwable e) {
-            LOGGER.error(
-                    new ParameterizedMessage(
-                            "Error while attempting to get suggestions for command '{}'",
-                            new Object[] { this.builder.getName()},
-                            e
-                    )
+            LOGGER.error("Error attempting to get suggestions for command '{}'",
+                    this.builder.getName(), e
             );
 
             return Suggestions.empty();
         }
     }
+
+    // Debug thing I commented out because it shouldn't be in non-debug builds:
+    //
+    /*private static String resultsToString(ParseResults<CommandSource> results) {
+        StringBuffer buffer = new StringBuffer()
+                .append("--- PARSE RESULTS ---");
+
+        buffer.append("Reader:{")
+                .append("cursor:")
+                .append(results.getReader().getCursor())
+                .append(",read:'")
+                .append(results.getReader().getRead())
+                .append("',remaining='")
+                .append(results.getReader().getRemaining())
+                .append("'")
+                .append('}');
+
+        if (!results.getExceptions().isEmpty()) {
+            buffer.append("\nExceptions:{");
+
+            for (var e: results.getExceptions().entrySet()) {
+                var node = e.getKey();
+                var path = RoyalGrenadier.getDispatcher().getPath(node);
+
+                buffer
+                        .append("\n ")
+                        .append(Joiner.on('.').join(path))
+                        .append(":'")
+                        .append(e.getValue().getMessage())
+                        .append("'")
+                        .append(",");
+            }
+
+            buffer.delete(buffer.length() - 1, buffer.length())
+                    .append("\n}");
+        }
+
+        buffer.append("\nContexts:[\n");
+        printContext(results.getContext(), buffer, results.getReader());
+        buffer.append("]");
+
+        buffer.append("\n--- RESULTS END ---");
+
+        return buffer.toString();
+    }
+
+    private static void printContext(CommandContextBuilder<CommandSource> context, StringBuffer buffer, ImmutableStringReader input) {
+        buffer.append(" Context:{\n")
+                .append("  Source:'")
+                .append(context.getSource().textName())
+                .append("'\n")
+                .append("  Range:")
+                .append(context.getRange())
+                .append(",input:'")
+                .append(context.getRange().get(input));
+
+        if (!context.getArguments().isEmpty()) {
+            buffer.append("\n  Arguments:[");
+
+            for (var e: context.getArguments().entrySet()) {
+                buffer
+                        .append("\n   ")
+                        .append(e.getKey())
+                        .append(",");
+
+                buffer.append("range:")
+                        .append(e.getValue().getRange());
+
+                buffer.append("input:'")
+                        .append(e.getValue().getRange().get(input))
+                        .append("'")
+                        .append(",");
+            }
+
+            buffer.delete(buffer.length() - 1, buffer.length());
+            buffer.append("\n  ]");
+        }
+
+        if (!context.getNodes().isEmpty()) {
+            buffer.append("\n  Nodes:[");
+
+            for (var node: context.getNodes()) {
+                buffer.append("\n   node:'")
+                        .append(node.getNode().getUsageText())
+                        .append("',range:")
+                        .append(node.getRange())
+                        .append(",input:'")
+                        .append(node.getRange().get(input))
+                        .append("'")
+                        .append(",");
+            }
+
+            buffer.delete(buffer.length() - 1, buffer.length())
+                    .append("  \n]\n");
+        }
+
+        buffer.append(" }");
+
+        if (context.getChild() != null) {
+            buffer.append(",\n");
+            printContext(context.getChild(), buffer, input);
+        }
+    }*/
 
     public CompletableFuture<Suggestions> suggest(CommandSource source, String input) {
         StringReader reader = GrenadierUtils.filterCommandInput(input);

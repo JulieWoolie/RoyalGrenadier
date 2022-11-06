@@ -7,6 +7,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Class that {@link net.forthecrown.grenadier.command.AbstractCommand} extends for
@@ -39,7 +41,7 @@ public class CmdUtil {
      * @return The tooltip message
      * @see GrenadierUtils#toVanilla(Component) 
      */
-    public static Message toTooltip(Component component) {
+    public static @Nullable Message toTooltip(@Nullable Component component) {
         return GrenadierUtils.toVanilla(component);
     }
 
@@ -49,7 +51,7 @@ public class CmdUtil {
      * @param message The string message to use
      * @return The created string message
      */
-    public static Message toTooltip(String message) {
+    public static @NotNull Message toTooltip(@NotNull String message) {
         return new LiteralMessage(message);
     }
 }

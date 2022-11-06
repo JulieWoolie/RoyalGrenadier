@@ -13,11 +13,11 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import it.unimi.dsi.fastutil.Pair;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.command.AbstractCommand;
-import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
+import net.forthecrown.royalgrenadier.WrappedCommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import org.apache.commons.lang3.Validate;
 
@@ -123,6 +123,10 @@ public class WrapperTranslator {
         var children = source.getChildren();
 
         if (source.getRedirect() != null) {
+            // I don't know how to currently translate redirects correctly
+            // thus, if a redirect is ever found in a node, it just becomes
+            // a greedy string to prevent the vanilla command engine from
+            // stopping valid input from being parsed
             return required(source.getName(), StringArgumentType.greedyString())
                     .requires(target.getRequirement())
                     .executes(wrapper)
@@ -130,7 +134,8 @@ public class WrapperTranslator {
                         var wrappedSource = WrappedCommandSource.of(context.getSource(), abstractCommand, null);
                         return wrapper.suggest(wrappedSource, context.getInput());
                     });
-        } else if (!children.isEmpty()) {
+        }
+        else if (!children.isEmpty()) {
             // Translate children over to vanilla
             for (CommandNode<CommandSource> n: children) {
                 target.then(translateNode(n));
@@ -223,7 +228,7 @@ public class WrapperTranslator {
      * argument type.
      * <p>
      * If the given node is already registered in the vanilla registry,
-     * like in the case of the built in argument types, this will
+     * like in the case of the built-in argument types, this will
      * simply return the parameter itself.
      * <p>
      * If the given type is a {@link VanillaMappedArgument} then
@@ -233,7 +238,7 @@ public class WrapperTranslator {
      * returns a non-vanilla argument, then this will throw an exception.
      * <p>
      * If the given type is neither a {@link VanillaMappedArgument} or
-     * a vanilla argument already, then {@link ScoreHolderArgument#scoreHolder()}
+     * a vanilla argument already, then {@link GameProfileArgument#gameProfile()}
      * is returned instead. This is because I believe that argument
      * casts the widest possible net for what it accepts in it's parsing
      * before automatically turning the chat red and showing an
@@ -266,6 +271,6 @@ public class WrapperTranslator {
 
         // This seems to be a works-for-all kind of thing for the most part
         // It's good enough, but still limiting
-        return Pair.of(false, ScoreHolderArgument.scoreHolder());
+        return Pair.of(false, GameProfileArgument.gameProfile());
     }
 }

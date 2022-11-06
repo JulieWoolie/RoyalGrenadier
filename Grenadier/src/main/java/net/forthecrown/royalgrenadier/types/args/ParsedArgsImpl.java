@@ -42,7 +42,7 @@ public class ParsedArgsImpl implements ParsedArgs {
     public <T> T getOrDefault(String name, Class<T> type, T def) {
         var pair = namedValues.get(name);
 
-        if (!type.isInstance(pair.value())) {
+        if (pair == null || !type.isInstance(pair.value())) {
             return def;
         }
 

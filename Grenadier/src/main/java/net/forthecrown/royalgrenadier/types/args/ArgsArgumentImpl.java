@@ -120,10 +120,10 @@ public class ArgsArgumentImpl implements ArgsArgument, VanillaMappedArgument {
             var entry = new ArgEntry(argument, required);
             entries.add(entry);
 
-            args.put(argument.getName(), entry);
+            args.put(argument.getName().toLowerCase(), entry);
 
             for (var s: argument.getAliases()) {
-                args.put(s, entry);
+                args.put(s.toLowerCase(), entry);
             }
 
             return this;

@@ -26,8 +26,8 @@ public class ParsedItemImpl implements ParsedItemStack {
     }
 
     @Override
-    public ItemStack create(int amount, boolean nbt) throws CommandSyntaxException {
-        return CraftItemStack.asBukkitCopy(nms.createItemStack(amount, nbt));
+    public ItemStack create(int amount, boolean checkOverstack) throws CommandSyntaxException {
+        return CraftItemStack.asBukkitCopy(nms.createItemStack(amount, checkOverstack));
     }
 
     @Override

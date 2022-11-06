@@ -26,12 +26,6 @@ public class RegistryArgumentImpl<T extends Keyed> implements RegistryArgument<T
     private final Registry<T> registry;
     private final DynamicCommandExceptionType exceptionType;
 
-    public RegistryArgumentImpl(Registry<T> registry, String registryName) {
-        this(registry,
-                new DynamicCommandExceptionType(o -> () -> String.format("Unknown %s: '%s'", registryName, o))
-        );
-    }
-
     @Override
     public T parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();

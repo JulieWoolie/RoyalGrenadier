@@ -37,7 +37,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Implementation of {@link CommandSource}.
@@ -82,18 +81,13 @@ public class WrappedCommandSource implements CommandSource {
     }
 
     @Override
-    public <T extends CommandSender> boolean is(Class<T> clazz) {
-        return clazz.isAssignableFrom(asBukkit().getClass());
-    }
-
-    @Override
     public CommandSender asBukkit() {
         return source.getBukkitSender();
     }
 
     @Override
     public <T extends CommandSender> T as(Class<T> clazz) throws CommandSyntaxException {
-        return senderOptional(clazz).orElseThrow(() -> {
+        return castOptional(clazz).orElseThrow(() -> {
             // Throw vanilla exceptions here because
             // they are translatable
             if (clazz == Player.class) {
@@ -106,16 +100,6 @@ public class WrappedCommandSource implements CommandSource {
 
             return INVALID_SENDER_TYPE.create(clazz.getSimpleName());
         });
-    }
-
-    @Override
-    @Nullable
-    public <T extends CommandSender> T asOrNull(Class<T> clazz) {
-        return senderOptional(clazz).orElse(null);
-    }
-
-    private <T extends CommandSender> Optional<T> senderOptional(Class<T> clazz) {
-        return is(clazz) ? Optional.of((T) asBukkit()) : Optional.empty();
     }
 
     @Override
@@ -183,16 +167,6 @@ public class WrappedCommandSource implements CommandSource {
     }
 
     @Override
-    public void sendMessage(String s) {
-        if (isSilent()) {
-            return;
-        }
-
-        source.getBukkitSender().sendMessage(s);
-    }
-
-
-    @Override
     public void sendAdmin(Component component, boolean sendToSelf) {
         if (sendToSelf) {
             sendMessage(component);
@@ -203,11 +177,6 @@ public class WrappedCommandSource implements CommandSource {
         }
 
         broadcastAdmin(component);
-    }
-
-    @Override
-    public void sendAdmin(String s, boolean sendToSelf) {
-        sendAdmin(lSerializer.deserialize(s), sendToSelf);
     }
 
     @Override
@@ -300,16 +269,6 @@ public class WrappedCommandSource implements CommandSource {
         return isSilent(source);
     }
 
-    @Override
-    public boolean acceptsSuccessMessage() {
-        return source.source.acceptsSuccess();
-    }
-
-    @Override
-    public boolean acceptsFailureMessage() {
-        return source.source.acceptsFailure();
-    }
-
     public static boolean isSilent(CommandSourceStack stack) {
         Field silent = null;
 
@@ -337,6 +296,16 @@ public class WrappedCommandSource implements CommandSource {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public boolean acceptsSuccessMessage() {
+        return source.source.acceptsSuccess();
+    }
+
+    @Override
+    public boolean acceptsFailureMessage() {
+        return source.source.acceptsFailure();
     }
 
     @Override

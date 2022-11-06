@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import lombok.RequiredArgsConstructor;
 import net.forthecrown.grenadier.CommandSource;
 import net.forthecrown.grenadier.CompletionProvider;
+import net.forthecrown.grenadier.Suggester;
 import net.forthecrown.grenadier.types.args.ArgsArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.util.TriState;
@@ -33,7 +34,7 @@ public class ArgumentsParser implements SuggestionProvider<CommandSource> {
 
     public int borderType = -1;
 
-    private ArgsSuggestions suggestions = null;
+    private Suggester<CommandSource> suggestions = null;
 
     public void parse() throws CommandSyntaxException {
         suggestStart(reader.getCursor());
@@ -263,10 +264,5 @@ public class ArgumentsParser implements SuggestionProvider<CommandSource> {
 
             return builder1.buildFuture();
         };
-    }
-
-    private interface ArgsSuggestions extends SuggestionProvider<CommandSource> {
-        @Override
-        CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSource> context, SuggestionsBuilder builder);
     }
 }

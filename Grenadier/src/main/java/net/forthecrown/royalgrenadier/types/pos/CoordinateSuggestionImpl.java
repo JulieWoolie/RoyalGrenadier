@@ -45,6 +45,8 @@ public class CoordinateSuggestionImpl implements CoordinateSuggestion {
                 joiner.add(s);
                 builder.suggest(joiner.toString(), CmdUtil.toTooltip(tooltip));
             }
+
+            return;
         }
 
         // Not blank, run through each coordinate
@@ -56,7 +58,7 @@ public class CoordinateSuggestionImpl implements CoordinateSuggestion {
         for (int i = 0; i < suggestions.length; i++) {
             String suggestion = suggestions[i];
 
-            if (split.length < i) {
+            if (split.length <= i) {
                 break;
             }
 
