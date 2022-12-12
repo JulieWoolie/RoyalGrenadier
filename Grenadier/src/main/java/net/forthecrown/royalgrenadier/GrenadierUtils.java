@@ -12,8 +12,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.translation.GlobalTranslator;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.world.flag.FeatureFlags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -235,5 +241,17 @@ public class GrenadierUtils {
         reader.setCursor(reader.getCursor() + subStr.indexOf(':') + 1);
 
         return reader;
+    }
+
+    public static CommandBuildContext createBuildContext() {
+        return CommandBuildContext.configurable(
+                DedicatedServer.getServer().registryAccess(),
+                FeatureFlags.DEFAULT_FLAGS
+        );
+    }
+
+    public static <T> HolderLookup<T> createLookup(ResourceKey<? extends Registry<? extends T>> key) {
+        return DedicatedServer.getServer().registryAccess()
+                .lookupOrThrow(key);
     }
 }

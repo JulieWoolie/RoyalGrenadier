@@ -67,4 +67,7 @@ public class RoyalCommandException extends CommandSyntaxException {
     public Component getComponentMessage() {
         return message;
     }
+    public Component componentMessage() {
+        return message;
+    }
 }

@@ -7,10 +7,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.types.ParticleArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 import net.minecraft.core.particles.ParticleOptions;
 import org.bukkit.Particle;
-import org.bukkit.craftbukkit.v1_19_R1.CraftParticle;
+import org.bukkit.craftbukkit.v1_19_R2.CraftParticle;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -18,7 +19,9 @@ import java.util.concurrent.CompletableFuture;
 public class ParticleArgumentImpl implements ParticleArgument, VanillaMappedArgument {
     protected ParticleArgumentImpl() {}
     public static final ParticleArgumentImpl INSTANCE = new ParticleArgumentImpl();
-    private final net.minecraft.commands.arguments.ParticleArgument particleArg = net.minecraft.commands.arguments.ParticleArgument.particle();
+
+    private final net.minecraft.commands.arguments.ParticleArgument particleArg
+            = net.minecraft.commands.arguments.ParticleArgument.particle(GrenadierUtils.createBuildContext());
 
     @Override
     public Particle parse(StringReader reader) throws CommandSyntaxException {

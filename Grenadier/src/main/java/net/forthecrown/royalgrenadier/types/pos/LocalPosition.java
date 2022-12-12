@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftVector;
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftVector;
 
 import static net.forthecrown.royalgrenadier.types.pos.PositionArgumentImpl.*;
 

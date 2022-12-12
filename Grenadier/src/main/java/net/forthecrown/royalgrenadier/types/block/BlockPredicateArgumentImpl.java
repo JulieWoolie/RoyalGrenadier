@@ -7,11 +7,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.block.BlockPredicateArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -22,7 +21,7 @@ public class BlockPredicateArgumentImpl implements BlockPredicateArgument, Vanil
 
     public BlockPredicateArgumentImpl() {
         this.handle = new net.minecraft.commands.arguments.blocks.BlockPredicateArgument(
-                new CommandBuildContext(DedicatedServer.getServer().registryHolder)
+                GrenadierUtils.createBuildContext()
         );
     }
 

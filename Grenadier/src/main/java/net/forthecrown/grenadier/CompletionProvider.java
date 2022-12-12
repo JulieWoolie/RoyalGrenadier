@@ -5,7 +5,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.pos.CoordinateSuggestion;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.key.Key;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.loot.LootTables;
 import org.bukkit.Bukkit;
@@ -204,7 +204,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestParticles(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.PARTICLE_TYPE.keySet(), builder);
+        return GrenadierUtils.suggestResource(BuiltInRegistries.PARTICLE_TYPE.keySet(), builder);
     }
 
     /**
@@ -261,7 +261,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestBlocks(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.BLOCK.keySet(), builder);
+        return GrenadierUtils.suggestResource(BuiltInRegistries.BLOCK.keySet(), builder);
     }
 
     /**
@@ -270,7 +270,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestPotionEffects(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.POTION.keySet(), builder);
+        return GrenadierUtils.suggestResource(BuiltInRegistries.POTION.keySet(), builder);
     }
 
     /**
@@ -279,7 +279,7 @@ public interface CompletionProvider {
      * @return The built suggestions
      */
     static CompletableFuture<Suggestions> suggestEffects(SuggestionsBuilder builder) {
-        return GrenadierUtils.suggestResource(Registry.MOB_EFFECT.keySet(), builder);
+        return GrenadierUtils.suggestResource(BuiltInRegistries.MOB_EFFECT.keySet(), builder);
     }
 
     /**

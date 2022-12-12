@@ -1,15 +1,17 @@
 package net.forthecrown.royalgrenadier.types;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.PotionEffectArgument;
 import net.forthecrown.grenadier.types.RegistryArgument;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
-import net.minecraft.commands.arguments.MobEffectArgument;
+import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.core.registries.Registries;
 import org.bukkit.Registry;
 import org.bukkit.potion.PotionEffectType;
 
@@ -19,13 +21,15 @@ public class PotionEffectArgumentImpl implements PotionEffectArgument, VanillaMa
     protected PotionEffectArgumentImpl() {}
 
     public static final PotionEffectArgumentImpl INSTANCE = new PotionEffectArgumentImpl();
-    private static final DynamicCommandExceptionType UNKNOWN = MobEffectArgument.ERROR_UNKNOWN_EFFECT;
 
     private static final RegistryArgument<PotionEffectType> ARGUMENT = RegistryArgument.registry(
-            Registry.POTION_EFFECT_TYPE, UNKNOWN
+            Registry.POTION_EFFECT_TYPE, "Effect"
     );
 
-    private final MobEffectArgument handle = MobEffectArgument.effect();
+    private final ArgumentType<?> handle = ResourceArgument.resource(
+            GrenadierUtils.createBuildContext(),
+            Registries.MOB_EFFECT
+    );
 
     @Override
     public PotionEffectType parse(StringReader reader) throws CommandSyntaxException {
@@ -37,7 +41,7 @@ public class PotionEffectArgumentImpl implements PotionEffectArgument, VanillaMa
         return ARGUMENT.listSuggestions(context, builder);
     }
 
-    public MobEffectArgument getVanillaArgumentType() {
+    public ArgumentType<?> getVanillaArgumentType() {
         return handle;
     }
 

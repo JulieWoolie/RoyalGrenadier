@@ -7,13 +7,12 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.forthecrown.grenadier.types.item.ItemArgument;
 import net.forthecrown.grenadier.types.item.ParsedItemStack;
+import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.world.item.Item;
@@ -25,12 +24,16 @@ public class ItemArgumentImpl implements ItemArgument, VanillaMappedArgument {
     protected ItemArgumentImpl() {}
     public static final ItemArgumentImpl INSTANCE = new ItemArgumentImpl();
     private final net.minecraft.commands.arguments.item.ItemArgument handle = net.minecraft.commands.arguments.item.ItemArgument.item(
-            new CommandBuildContext(DedicatedServer.getServer().registryHolder)
+            GrenadierUtils.createBuildContext()
     );
 
     @Override
     public ParsedItemStack parse(StringReader reader, boolean allowNBT) throws CommandSyntaxException {
-        ItemParser.ItemResult parser = ItemParser.parseForItem(HolderLookup.forRegistry(Registry.ITEM), reader);
+        ItemParser.ItemResult parser = ItemParser.parseForItem(
+                DedicatedServer.getServer().registryAccess().lookupOrThrow(Registries.ITEM),
+                reader
+        );
+
         Holder<Item> item = parser.item();
         CompoundTag tag = parser.nbt();
 
