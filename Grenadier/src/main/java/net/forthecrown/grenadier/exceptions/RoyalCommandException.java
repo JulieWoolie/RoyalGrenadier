@@ -3,6 +3,7 @@ package net.forthecrown.grenadier.exceptions;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.papermc.paper.brigadier.PaperBrigadier;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -44,10 +45,12 @@ public class RoyalCommandException extends CommandSyntaxException {
 
     public RoyalCommandException(CommandExceptionType type, Message message) {
         super(type, message);
+        this.message = PaperBrigadier.componentFromMessage(message);
     }
 
     public RoyalCommandException(CommandExceptionType type, Message message, String input, int cursor) {
         super(type, message, input, cursor);
+        this.message = PaperBrigadier.componentFromMessage(message);
     }
 
     public RoyalCommandException(CommandExceptionType type, Component message1) {

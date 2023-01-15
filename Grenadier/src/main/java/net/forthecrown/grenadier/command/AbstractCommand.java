@@ -54,6 +54,12 @@ public abstract class AbstractCommand extends CmdUtil implements Predicate<Comma
         this.plugin = plugin;
     }
 
+    /**
+     * Creates a command with the set label. Uses
+     * {@link RoyalGrenadier#getPlugin()} for the command's plugin.
+     *
+     * @param name The command's name
+     */
     protected AbstractCommand(@NotNull String name) {
         this(name, RoyalGrenadier.getPlugin());
     }

@@ -9,18 +9,17 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.Suggester;
 import net.forthecrown.grenadier.types.ArrayArgument;
 import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgument {
 
@@ -39,7 +38,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgu
 
     @Override
     public List<V> parse(StringReader reader) throws CommandSyntaxException {
-        ArrayParser<?> parser = new ArrayParser(reader);
+        ArrayParser<?> parser = new ArrayParser<>(reader);
         parser.parse();
 
         return parser.list;
@@ -85,6 +84,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgu
 
                 var parsed = getType().parse(reader);
 
+                reader.skipWhitespace();
                 suggestSeparator(reader.getCursor());
 
                 if (list.contains(parsed)) {

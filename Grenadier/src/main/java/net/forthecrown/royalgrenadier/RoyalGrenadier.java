@@ -13,6 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class RoyalGrenadier {
     /**
@@ -40,6 +41,11 @@ public class RoyalGrenadier {
     @Getter
     private static Plugin plugin;
 
+    // Initialize based off of loader
+    static {
+        initializeFromLoader();
+    }
+
     /**
      * Initializes the RoyalGrenadier.
      * <p>
@@ -59,9 +65,12 @@ public class RoyalGrenadier {
      * The logger object Grenadier may use will also
      * be the given plugin's logger
      *
+     * @deprecated No longer needs to be manually called.
+     *
      * @param plugin The plugin initializing Grenadier
      */
     @SuppressWarnings("deprecation") // Log4j smh
+    @Deprecated
     public static void initialize(Plugin plugin) {
         if (isInitialized()) {
             return;
@@ -82,6 +91,11 @@ public class RoyalGrenadier {
                 .registerEvents(new GrenadierListener(), plugin);
 
         initialized = true;
+    }
+
+    /** Initializes Grenadier with the plugin that loaded this class */
+    private static void initializeFromLoader() {
+        initialize(JavaPlugin.getProvidingPlugin(RoyalGrenadier.class));
     }
 
     /**

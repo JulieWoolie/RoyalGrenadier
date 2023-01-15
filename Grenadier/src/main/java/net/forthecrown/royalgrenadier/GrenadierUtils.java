@@ -1,5 +1,11 @@
 package net.forthecrown.royalgrenadier;
 
+import static net.forthecrown.grenadier.exceptions.RoyalCommandException.GRAY_CONTEXT_STYLE;
+import static net.forthecrown.grenadier.exceptions.RoyalCommandException.HERE_POINTER_STYLE;
+import static net.forthecrown.grenadier.exceptions.RoyalCommandException.RED_CONTEXT_STYLE;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -7,6 +13,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.adventure.AdventureComponent;
 import io.papermc.paper.brigadier.PaperBrigadier;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import net.forthecrown.grenadier.exceptions.RoyalCommandException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -21,13 +29,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.world.flag.FeatureFlags;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-
-import static net.forthecrown.grenadier.exceptions.RoyalCommandException.*;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
 
 public class GrenadierUtils {
     /**
@@ -229,7 +230,9 @@ public class GrenadierUtils {
         //
         // The reason the above shown isolation is done is
         // that it's not guarenteed that the input has/doesn't
-        // have a namespace, so we need to test if it does
+        // have a namespace, so we need to test if it does,
+        // not to mention, a ':' might appear in the arguments
+        //
 
         int spaceIndex = reader.getRemaining().indexOf(' ');
 
