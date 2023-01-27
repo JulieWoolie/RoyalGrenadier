@@ -22,12 +22,13 @@ import java.util.concurrent.CompletableFuture;
 public class TimeArgumentImpl implements TimeArgument, VanillaMappedArgument {
     public static final TimeArgumentImpl INSTANCE = new TimeArgumentImpl();
 
-    public static final TranslatableExceptionType INVALID_UNIT = new TranslatableExceptionType("argument.time.invalid_unit");
+    public static final TranslatableExceptionType INVALID_UNIT
+        = new TranslatableExceptionType("argument.time.invalid_unit");
 
     @Override
     public Long parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        long initialTime = reader.readLong();
+        double initialTime = reader.readDouble();
 
         if (initialTime < 1) {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS
@@ -38,8 +39,8 @@ public class TimeArgumentImpl implements TimeArgument, VanillaMappedArgument {
                     );
         }
 
-        if (!reader.canRead()) {
-            return initialTime;
+        if (!reader.canRead() || Character.isWhitespace(reader.peek())) {
+            return (long) initialTime;
         }
 
         cursor = reader.getCursor();
@@ -52,14 +53,20 @@ public class TimeArgumentImpl implements TimeArgument, VanillaMappedArgument {
             );
         }
 
-        return suffix.getMultiplier() * initialTime;
+        return (long) (suffix.getMultiplier() * initialTime);
     }
 
-    private static final List<String> EXAMPLES = Arrays.asList("10s", "10m", "10h", "10d", "10w", "10mo", "10yr");
-    private static final List<String> SUGGESTIONS = Arrays.asList("t", "s", "m", "h", "d", "w", "mo", "yr");
+    private static final List<String> EXAMPLES
+        = Arrays.asList("10s", "10m", "10h", "10d", "10w", "10mo", "10yr");
+
+    private static final List<String> SUGGESTIONS
+        = Arrays.asList("t", "s", "m", "h", "d", "w", "mo", "yr");
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+    public <S> CompletableFuture<Suggestions> listSuggestions(
+        CommandContext<S> context,
+        SuggestionsBuilder builder
+    ) {
         String before = builder.getRemaining().toLowerCase();
         String after = before.replaceAll("[^\\d.]", "");
 
