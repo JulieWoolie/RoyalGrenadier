@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.Suggester;
@@ -21,15 +22,11 @@ import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 
 public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgument {
 
+    @Getter
     private final ArgumentType<V> type;
 
     public ArrayArgumentImpl(ArgumentType<V> type){
         this.type = type;
-    }
-
-    @Override
-    public ArgumentType<V> getType() {
-        return type;
     }
 
     @Override
@@ -85,6 +82,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgu
 
                 list.add(parsed);
 
+                final int beforeSkip = reader.getCursor();
                 reader.skipWhitespace();
 
                 if (!reader.canRead()) {
@@ -94,6 +92,7 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgu
                 if (reader.peek() == ',') {
                     reader.skip();
                 } else {
+                    reader.setCursor(beforeSkip);
                     break;
                 }
             }
