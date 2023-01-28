@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.ArrayList;
@@ -18,14 +17,11 @@ import lombok.RequiredArgsConstructor;
 import net.forthecrown.grenadier.CompletionProvider;
 import net.forthecrown.grenadier.Suggester;
 import net.forthecrown.grenadier.types.ArrayArgument;
-import net.forthecrown.royalgrenadier.GrenadierUtils;
 import net.forthecrown.royalgrenadier.VanillaMappedArgument;
 
 public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgument {
 
     private final ArgumentType<V> type;
-    public static final DynamicCommandExceptionType PARSING_ERROR = new DynamicCommandExceptionType(o -> () -> "Error parsing array: " + o);
-    public static final DynamicCommandExceptionType ELEMENT_ALREADY_USED = new DynamicCommandExceptionType(o -> () -> "Duplicate value: '" + o + "'");
 
     public ArrayArgumentImpl(ArgumentType<V> type){
         this.type = type;
@@ -87,21 +83,19 @@ public class ArrayArgumentImpl<V> implements ArrayArgument<V>, VanillaMappedArgu
                 reader.skipWhitespace();
                 suggestSeparator(reader.getCursor());
 
-                if (list.contains(parsed)) {
-                    ELEMENT_ALREADY_USED.createWithContext(
-                            GrenadierUtils.correctReader(reader, cursor),
-                            parsed
-                    );
-                }
-
                 list.add(parsed);
 
-                if (!reader.canRead() || Character.isWhitespace(reader.peek())) {
+                reader.skipWhitespace();
+
+                if (!reader.canRead()) {
                     break;
                 }
 
-                reader.expect(',');
-                reader.skipWhitespace();
+                if (reader.peek() == ',') {
+                    reader.skip();
+                } else {
+                    break;
+                }
             }
         }
 

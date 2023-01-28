@@ -125,18 +125,25 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         }
     }
 
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, ArgumentCommandNode<CommandSource, ?> node) throws CommandSyntaxException {
+    public CompletableFuture<Suggestions> getSuggestions(
+        CommandContext<CommandSourceStack> context,
+        SuggestionsBuilder builder,
+        ArgumentCommandNode<CommandSource, ?> node
+    ) throws CommandSyntaxException {
         try {
             StringReader reader = GrenadierUtils.filterCommandInput(builder.getInput());
 
             CommandSource source = WrappedCommandSource.of(context.getSource(), this.builder, null);
-            ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher().parse(reader, source);
+            ParseResults<CommandSource> results = RoyalGrenadier.getDispatcher()
+                    .parse(reader, source);
 
             var builtContext = results.getContext()
                     .build(builder.getInput())
                     .getLastChild();
 
             return node.listSuggestions(builtContext, builder);
+        } catch (CommandSyntaxException syntaxException) {
+            throw syntaxException;
         } catch (Throwable e) {
             LOGGER.error("Error attempting to get suggestions for command '{}'",
                     this.builder.getName(), e
