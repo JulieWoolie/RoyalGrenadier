@@ -145,9 +145,16 @@ public class CommandWrapper implements Command<CommandSourceStack>, Predicate<Co
         } catch (CommandSyntaxException syntaxException) {
             throw syntaxException;
         } catch (Throwable e) {
-            LOGGER.error("Error attempting to get suggestions for command '{}'",
+            if (e instanceof IllegalArgumentException
+                && e.getMessage().startsWith("No such argument '")
+            ) {
+                LOGGER.debug(e.getMessage(), e);
+            } else {
+                LOGGER.error(
+                    "Error attempting to get suggestions for command '{}'",
                     this.builder.getName(), e
-            );
+                );
+            }
 
             return Suggestions.empty();
         }
